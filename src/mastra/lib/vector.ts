@@ -40,14 +40,6 @@ export function getVectorStore(): PgVector {
 }
 
 /**
- * @deprecated Use getVectorStore() instead for connection pooling.
- * Creates a new vector store instance (kept for backward compatibility).
- */
-export function createVectorStore() {
-  return getVectorStore();
-}
-
-/**
  * Index configuration for inspection documents.
  * Using OpenAI's text-embedding-3-small which outputs 1536 dimensions.
  */

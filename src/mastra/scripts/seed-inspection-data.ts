@@ -14,7 +14,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { embedMany } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { createVectorStore, INSPECTION_INDEX_CONFIG } from '../lib/vector';
+import { getVectorStore, INSPECTION_INDEX_CONFIG } from '../lib/vector';
 import type {
   VehicleData,
   MaintenanceSection,
@@ -416,7 +416,7 @@ async function seedInspectionData() {
 
     // Initialize vector store and create index
     console.log('Initializing vector store...');
-    const vectorStore = createVectorStore();
+    const vectorStore = getVectorStore();
 
     console.log(`  Creating index: ${INSPECTION_INDEX_CONFIG.indexName}`);
     await vectorStore.createIndex({
