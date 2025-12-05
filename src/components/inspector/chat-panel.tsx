@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { DefaultChatTransport } from "ai";
 import { useChat } from "@ai-sdk/react";
-import { MessageCircle, Trash2 } from "lucide-react";
+import { MessageCircle, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Conversation,
@@ -113,45 +113,63 @@ export function ChatPanel({ className, selectedPart, onPartHandled }: ChatPanelP
               description={`Ask questions about the ${selectedVehicle.name} inspection`}
             />
           ) : (
-            messages.map((message: any) => (
-              <div key={message.id}>
-                {message.parts?.map((part: any, i: number) => {
-                  if (part.type === "text") {
-                    return (
-                      <Message key={`${message.id}-${i}`} from={message.role}>
-                        <MessageContent>
-                          {message.role === "user" ? (
-                            part.text
-                          ) : (
-                            <MessageResponse>{part.text}</MessageResponse>
-                          )}
-                        </MessageContent>
-                      </Message>
-                    );
-                  }
-                  // Handle tool parts (type starts with "tool-" or is "dynamic-tool")
-                  if (part.type?.startsWith("tool-") || part.type === "dynamic-tool") {
-                    return (
-                      <Tool key={`${message.id}-${i}`} className="my-2">
-                        <ToolHeader
-                          title={part.toolName}
-                          type={part.type}
-                          state={part.state}
-                        />
-                        <ToolContent>
-                          <ToolInput input={part.input} />
-                          <ToolOutput
-                            output={part.output}
-                            errorText={part.errorText}
+            <>
+              {messages.map((message: any) => (
+                <div key={message.id}>
+                  {message.parts?.map((part: any, i: number) => {
+                    if (part.type === "text") {
+                      return (
+                        <Message key={`${message.id}-${i}`} from={message.role}>
+                          <MessageContent>
+                            {message.role === "user" ? (
+                              part.text
+                            ) : (
+                              <MessageResponse>{part.text}</MessageResponse>
+                            )}
+                          </MessageContent>
+                        </Message>
+                      );
+                    }
+                    // Handle tool parts (type starts with "tool-" or is "dynamic-tool")
+                    if (part.type?.startsWith("tool-") || part.type === "dynamic-tool") {
+                      return (
+                        <Tool key={`${message.id}-${i}`} className="my-2">
+                          <ToolHeader
+                            title={part.toolName}
+                            type={part.type}
+                            state={part.state}
                           />
-                        </ToolContent>
-                      </Tool>
-                    );
-                  }
-                  return null;
-                })}
-              </div>
-            ))
+                          <ToolContent>
+                            <ToolInput input={part.input} />
+                            <ToolOutput
+                              output={part.output}
+                              errorText={part.errorText}
+                            />
+                          </ToolContent>
+                        </Tool>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+              ))}
+              {/* Thinking indicator - shows while agent is processing */}
+              {(status === "submitted" || (status === "streaming" && (() => {
+                const lastMessage = messages[messages.length - 1];
+                const hasAssistantText = lastMessage?.role === "assistant" &&
+                  lastMessage?.parts?.some((p: any) => p.type === "text" && p.text?.length > 0);
+                return !hasAssistantText;
+              })())) && (
+                <Message from="assistant">
+                  <MessageContent>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm">Thinking...</span>
+                    </div>
+                  </MessageContent>
+                </Message>
+              )}
+            </>
           )}
         </ConversationContent>
         <ConversationScrollButton />
