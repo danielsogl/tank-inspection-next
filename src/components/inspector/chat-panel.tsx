@@ -44,7 +44,7 @@ export function ChatPanel({ className, selectedPart, onPartHandled }: ChatPanelP
 
   const { messages, setMessages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
-      api: "/api/chat",
+      api: "/api/inspection",
     }),
   });
 

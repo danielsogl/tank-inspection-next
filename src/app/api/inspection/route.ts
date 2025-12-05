@@ -4,14 +4,14 @@ import { toAISdkStream } from "@mastra/ai-sdk";
 import { convertMessages } from "@mastra/core/agent";
 import { createUIMessageStreamResponse } from "ai";
 
-const weatherAgent = mastra.getAgent("weatherAgent");
+const inspectionAgent = mastra.getAgent("inspectionAgent");
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
 
-  const stream = await weatherAgent.stream(messages, {
+  const stream = await inspectionAgent.stream(messages, {
     memory: {
-      thread: "weather-chat",
+      thread: "inspection-chat",
       resource: "example-user-id",
     },
   });
@@ -22,11 +22,10 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-  const memory = await weatherAgent.getMemory();
-  
-  // Retrieve messages from the thread using recall()
+  const memory = await inspectionAgent.getMemory();
+
   const { messages } = await memory!.recall({
-    threadId: "weather-chat",
+    threadId: "inspection-chat",
     resourceId: "example-user-id",
   });
 
