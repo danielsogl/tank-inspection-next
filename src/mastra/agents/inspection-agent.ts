@@ -2,11 +2,27 @@ import { Agent } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
 import { LibSQLStore } from '@mastra/libsql';
 import { tankAgent } from './tank-agent';
+import { VEHICLES, getVehicleById, DEFAULT_VEHICLE_ID, type VehicleConfig } from '@/lib/vehicles';
+
+// Vehicle-specific agent registry mapping vehicleId to their specialized agent
+const vehicleAgentRegistry: Record<string, Agent> = {
+  'leopard2': tankAgent,
+  'm1-abrams': tankAgent, // Using same agent for now, can be replaced with M1-specific agent
+};
 
 export const inspectionAgent = new Agent({
   id: 'inspection-agent',
   name: 'Vehicle Inspection Agent',
-  instructions: `You are a professional vehicle inspection assistant. Your primary role is to help users inspect and understand military and industrial vehicles.
+  instructions: ({ requestContext }) => {
+    const vehicleId = (requestContext?.get('vehicleId') as string) || DEFAULT_VEHICLE_ID;
+    const vehicle = getVehicleById(vehicleId) || { name: 'Unknown Vehicle', type: 'vehicle', agentId: 'vehicleAgent', description: '' };
+
+    return `You are a professional vehicle inspection assistant. Your primary role is to help users inspect and understand the ${vehicle.name} (${vehicle.type}).
+
+## Current Vehicle Context
+
+You are currently assisting with the inspection of: **${vehicle.name}**
+Vehicle Type: ${vehicle.type}
 
 ## Your Role
 
@@ -20,16 +36,16 @@ You serve as the main point of contact for all vehicle inspection queries. You c
 
 When a user asks about specific vehicle types, you MUST delegate to the appropriate specialized agent:
 
-### Tank/Armored Vehicle Queries → Tank Agent
-Delegate to the Tank Agent for any questions about:
-- Leopard 2 tank specifications, components, or systems
-- Tank maintenance and inspection procedures
-- Armored vehicle technical details
+### ${vehicle.name} Queries → ${vehicle.agentId}
+Delegate to the specialized agent for any questions about:
+- ${vehicle.name} specifications, components, or systems
+- Maintenance and inspection procedures
+- Technical details specific to this vehicle
 - Gun systems, fire control, or ammunition
 - Powerpack, suspension, or mobility systems
 - Crew compartments and turret operations
 
-To delegate, use the Tank Agent when you recognize the query is about tanks or armored vehicles.
+To delegate, use the ${vehicle.agentId} when you recognize the query is about ${vehicle.name}.
 
 ## Response Guidelines
 
@@ -52,9 +68,21 @@ To delegate, use the Tank Agent when you recognize the query is about tanks or a
 - Professional but approachable
 - Technically accurate
 - Helpful and patient
-- Clear and concise`,
+- Clear and concise`;
+  },
   model: 'openai/gpt-4o-mini',
-  agents: { tankAgent },
+  agents: ({ requestContext }) => {
+    const vehicleId = (requestContext?.get('vehicleId') as string) || DEFAULT_VEHICLE_ID;
+    const vehicleAgent = vehicleAgentRegistry[vehicleId];
+    const vehicle = getVehicleById(vehicleId);
+
+    if (vehicleAgent && vehicle) {
+      return { [vehicle.agentId]: vehicleAgent };
+    }
+
+    // Fallback to tankAgent if no specific agent found
+    return { tankAgent };
+  },
   memory: new Memory({
     storage: new LibSQLStore({
       id: 'inspection-memory',

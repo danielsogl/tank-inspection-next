@@ -1,8 +1,7 @@
-# agent-chat Specification
+# agent-chat Specification Delta
 
-## Purpose
-TBD - created by archiving change add-vehicle-inspection-agents. Update Purpose after archive.
-## Requirements
+## MODIFIED Requirements
+
 ### Requirement: General Inspection Agent
 
 The application MUST provide a general inspection agent that handles user chat interactions and delegates vehicle-specific queries to specialized sub-agents based on the selected vehicle.
@@ -27,19 +26,6 @@ The application MUST provide a general inspection agent that handles user chat i
 - **WHEN** the general inspection agent receives a request with vehicle context
 - **THEN** it MUST resolve the appropriate sub-agent dynamically based on the vehicle ID
 - **AND** the sub-agents MUST be configured via a function that receives `requestContext`
-
-### Requirement: Tank Inspection Agent
-
-The application MUST provide a tank-specific agent that handles queries related to tank vehicles (e.g., Leopard2).
-
-#### Scenario: Tank-specific query response
-- **WHEN** the tank agent receives a query about tank components, maintenance, or specifications
-- **THEN** it MUST provide accurate, domain-specific information
-- **AND** the response MUST reflect knowledge of the Leopard2 tank
-
-#### Scenario: Tank agent model configuration
-- **WHEN** the tank agent is initialized
-- **THEN** it MUST use the `openai/gpt-5-mini` model
 
 ### Requirement: Inspection API Route
 
@@ -70,19 +56,7 @@ The application MUST maintain conversation history isolated by vehicle selection
 - **THEN** the new vehicle's conversation thread MUST be independent
 - **AND** previous vehicle conversations MUST remain accessible in their respective threads
 
-### Requirement: Agent System Prompts
-
-Each agent MUST be configured with a system prompt that defines its behavior and domain expertise.
-
-#### Scenario: General agent system prompt
-- **WHEN** the general inspection agent is created
-- **THEN** its instructions MUST define its role as a vehicle inspection assistant
-- **AND** instructions MUST specify delegation behavior for vehicle-specific queries
-
-#### Scenario: Tank agent system prompt
-- **WHEN** the tank agent is created
-- **THEN** its instructions MUST define expertise in tank/armored vehicle inspection
-- **AND** instructions MUST include knowledge of Leopard2 components and specifications
+## ADDED Requirements
 
 ### Requirement: Chat Clearing on Vehicle Switch
 
@@ -106,4 +80,3 @@ The chat panel MUST include vehicle context in all API requests.
 - **WHEN** a user sends a message from the chat panel
 - **THEN** the API request MUST include the currently selected vehicleId
 - **AND** the vehicleId MUST be obtained from the vehicle context
-

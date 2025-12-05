@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DefaultChatTransport } from "ai";
 import { useChat } from "@ai-sdk/react";
 import { MessageCircle, Trash2 } from "lucide-react";
@@ -24,6 +24,7 @@ import {
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
 import { cn } from "@/lib/utils";
+import { useVehicle } from "@/contexts/vehicle-context";
 
 interface ChatPanelProps {
   className?: string;
@@ -33,20 +34,31 @@ interface ChatPanelProps {
 
 export function ChatPanel({ className, selectedPart, onPartHandled }: ChatPanelProps) {
   const [input, setInput] = useState<string>("");
+  const { selectedVehicle } = useVehicle();
+  const previousVehicleIdRef = useRef(selectedVehicle.id);
 
   // When a part is selected, pre-fill the input with a question about it
   useEffect(() => {
     if (selectedPart) {
-      setInput(`Tell me about the "${selectedPart}" part of the tank.`);
+      setInput(`Tell me about the "${selectedPart}" part of the ${selectedVehicle.name}.`);
       onPartHandled?.();
     }
-  }, [selectedPart, onPartHandled]);
+  }, [selectedPart, onPartHandled, selectedVehicle.name]);
 
   const { messages, setMessages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/inspection",
+      body: { vehicleId: selectedVehicle.id },
     }),
   });
+
+  // Clear chat when vehicle changes
+  useEffect(() => {
+    if (previousVehicleIdRef.current !== selectedVehicle.id) {
+      setMessages([]);
+      previousVehicleIdRef.current = selectedVehicle.id;
+    }
+  }, [selectedVehicle.id, setMessages]);
 
   const handleClearChat = () => {
     setMessages([]);
@@ -91,7 +103,7 @@ export function ChatPanel({ className, selectedPart, onPartHandled }: ChatPanelP
             <ConversationEmptyState
               icon={<MessageCircle className="h-12 w-12" />}
               title="Start a conversation"
-              description="Ask questions about the tank inspection"
+              description={`Ask questions about the ${selectedVehicle.name} inspection`}
             />
           ) : (
             messages.map((message: any) => (
@@ -128,7 +140,7 @@ export function ChatPanel({ className, selectedPart, onPartHandled }: ChatPanelP
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setInput(e.target.value)
               }
-              placeholder="Ask about the tank inspection..."
+              placeholder={`Ask about the ${selectedVehicle.name} inspection...`}
               className="min-h-12 bg-secondary"
               disabled={status !== "ready"}
             />

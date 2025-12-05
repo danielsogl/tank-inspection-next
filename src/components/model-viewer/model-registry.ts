@@ -1,25 +1,43 @@
-export interface VehicleModel {
+import {
+  VEHICLES,
+  getVehicleById,
+  getDefaultVehicle,
+  type VehicleConfig,
+} from "@/lib/vehicles";
+
+// Re-export VehicleConfig as VehicleModel for backwards compatibility
+export type VehicleModel = VehicleConfig;
+
+// Map VehicleConfig to the format expected by ModelViewer
+export interface VehicleModelView {
   id: string;
   name: string;
   rootUrl: string;
   sceneFilename: string;
   description?: string;
+  agentId: string;
 }
 
-export const vehicleModels: VehicleModel[] = [
-  {
-    id: "leopard2",
-    name: "Leopard 2",
-    rootUrl: "/models/",
-    sceneFilename: "leopard2.obj",
-    description: "German main battle tank",
-  },
-];
-
-export function getVehicleModel(id: string): VehicleModel | undefined {
-  return vehicleModels.find((model) => model.id === id);
+function toVehicleModelView(config: VehicleConfig): VehicleModelView {
+  return {
+    id: config.id,
+    name: config.name,
+    rootUrl: config.model.rootUrl,
+    sceneFilename: config.model.sceneFilename,
+    description: config.description,
+    agentId: config.agentId,
+  };
 }
 
-export function getDefaultVehicleModel(): VehicleModel {
-  return vehicleModels[0];
+export function getVehicleModel(id: string): VehicleModelView | undefined {
+  const config = getVehicleById(id);
+  return config ? toVehicleModelView(config) : undefined;
+}
+
+export function getDefaultVehicleModel(): VehicleModelView {
+  return toVehicleModelView(getDefaultVehicle());
+}
+
+export function getAllVehicles(): VehicleModelView[] {
+  return VEHICLES.map(toVehicleModelView);
 }

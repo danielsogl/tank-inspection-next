@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { Box } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { VehicleSelector } from "./vehicle-selector";
 
 interface TopBarProps {
   title?: string;
   className?: string;
 }
 
-export function TopBar({ title = "Tank Inspection", className }: TopBarProps) {
+export function TopBar({ title = "Vehicle Inspection", className }: TopBarProps) {
   const [currentTime, setCurrentTime] = useState<string>("");
 
   useEffect(() => {
@@ -46,8 +47,9 @@ export function TopBar({ title = "Tank Inspection", className }: TopBarProps) {
         <span className="text-xl font-semibold">{title}</span>
       </div>
 
-      {/* Right side - Clock */}
+      {/* Right side - Vehicle Selector and Clock */}
       <div className="flex items-center gap-4">
+        <VehicleSelector />
         <span className="text-sm tabular-nums text-muted-foreground">
           {currentTime}
         </span>

@@ -14,7 +14,8 @@ import {
 import "@babylonjs/loaders/OBJ";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getDefaultVehicleModel, type VehicleModel } from "./model-registry";
+import { useVehicle } from "@/contexts/vehicle-context";
+import { getVehicleModel, getDefaultVehicleModel, type VehicleModelView } from "./model-registry";
 import {
   useModelInteraction,
   type UseModelInteractionOptions,
@@ -41,7 +42,7 @@ function LoadingFallback() {
 
 // Tank model component that loads and sets up the OBJ model
 interface TankModelProps {
-  model: VehicleModel;
+  model: VehicleModelView;
   onMeshPointerOver: (mesh: AbstractMesh, scene: BabylonScene) => void;
   onMeshPointerOut: (mesh: AbstractMesh, scene: BabylonScene) => void;
   onMeshClick: (mesh: AbstractMesh, scene: BabylonScene) => void;
@@ -118,7 +119,7 @@ function TankModel({
 
 // Scene content component that sets up camera, lights, and model
 interface SceneContentProps {
-  model: VehicleModel;
+  model: VehicleModelView;
   interactionOptions: UseModelInteractionOptions;
   onSceneReady?: (scene: BabylonScene) => void;
 }
@@ -200,11 +201,19 @@ export function ModelViewer({
   const containerRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { selectedVehicle } = useVehicle();
 
-  // Get the vehicle model
-  const model = vehicleId
-    ? (getDefaultVehicleModel() as VehicleModel)
-    : getDefaultVehicleModel();
+  // Get the vehicle model from context or prop, converting VehicleConfig to VehicleModelView
+  const model: VehicleModelView = vehicleId
+    ? (getVehicleModel(vehicleId) ?? getDefaultVehicleModel())
+    : {
+        id: selectedVehicle.id,
+        name: selectedVehicle.name,
+        rootUrl: selectedVehicle.model.rootUrl,
+        sceneFilename: selectedVehicle.model.sceneFilename,
+        description: selectedVehicle.description,
+        agentId: selectedVehicle.agentId,
+      };
 
   const interactionOptions: UseModelInteractionOptions = {
     onMeshClick,
