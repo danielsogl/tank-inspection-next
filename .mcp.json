@@ -17,6 +17,10 @@
         "@modelcontextprotocol/server-postgres",
         "postgresql://postgres:postgres@127.0.0.1:55322/postgres"
       ]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
     }
   }
 }
