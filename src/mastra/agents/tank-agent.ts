@@ -1,4 +1,6 @@
 import { Agent } from '@mastra/core/agent';
+import { Memory } from '@mastra/memory';
+import { LibSQLStore } from '@mastra/libsql';
 import {
   queryInspectionTool,
   getCheckpointTool,
@@ -29,4 +31,11 @@ export const tankAgent = new Agent({
     getComponentDetailsTool,
     getMaintenanceIntervalTool,
   },
+  // Use in-memory storage for faster access (no disk I/O overhead)
+  memory: new Memory({
+    storage: new LibSQLStore({
+      id: 'tank-agent-memory',
+      url: ':memory:', // In-memory for speed, no disk I/O
+    }),
+  }),
 });

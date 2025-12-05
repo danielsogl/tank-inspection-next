@@ -9,7 +9,20 @@ import { PgVector } from '@mastra/pg';
  * Example for Supabase:
  * postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
  */
-export function createVectorStore() {
+
+// Singleton vector store instance - reused across all tool calls
+let vectorStoreInstance: PgVector | null = null;
+
+/**
+ * Get the singleton vector store instance.
+ * Creates it on first call and reuses for all subsequent calls.
+ * This eliminates connection overhead per tool invocation.
+ */
+export function getVectorStore(): PgVector {
+  if (vectorStoreInstance) {
+    return vectorStoreInstance;
+  }
+
   const connectionString = process.env.SUPABASE_DB_URL;
 
   if (!connectionString) {
@@ -18,10 +31,20 @@ export function createVectorStore() {
     );
   }
 
-  return new PgVector({
+  vectorStoreInstance = new PgVector({
     id: 'inspection-vectors',
     connectionString,
   });
+
+  return vectorStoreInstance;
+}
+
+/**
+ * @deprecated Use getVectorStore() instead for connection pooling.
+ * Creates a new vector store instance (kept for backward compatibility).
+ */
+export function createVectorStore() {
+  return getVectorStore();
 }
 
 /**

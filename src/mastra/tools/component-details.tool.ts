@@ -1,12 +1,11 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { embed } from 'ai';
-import { openai } from '@ai-sdk/openai';
 import {
-  createVectorStore,
+  getVectorStore,
   INSPECTION_INDEX_CONFIG,
   type InspectionChunkMetadata,
 } from '../lib/vector';
+import { getCachedEmbedding } from '../lib/cache';
 
 /**
  * Tool for querying component details from the RAG database.
@@ -110,146 +109,143 @@ Use this tool when the user asks about:
       includeCommonFailures,
     } = inputData;
 
-    const { embedding: queryEmbedding } = await embed({
-      model: openai.embedding('text-embedding-3-small'),
-      value: `component ${componentId} specifications maintenance monitoring`,
+    // Use cached embedding
+    const queryEmbedding = await getCachedEmbedding(
+      `component ${componentId} specifications maintenance monitoring`,
+    );
+
+    // Get singleton vector store
+    const vectorStore = getVectorStore();
+
+    const queryResults = await vectorStore.query({
+      indexName: INSPECTION_INDEX_CONFIG.indexName,
+      queryVector: queryEmbedding,
+      topK: 5,
+      filter: {
+        dataType: 'component',
+        componentId,
+      },
+      includeVector: false,
     });
 
-    const vectorStore = createVectorStore();
+    const componentMatch = queryResults.find((result) => {
+      const metadata = result.metadata as InspectionChunkMetadata;
+      return metadata.componentId === componentId && metadata.dataType === 'component';
+    });
 
-    try {
-      const queryResults = await vectorStore.query({
-        indexName: INSPECTION_INDEX_CONFIG.indexName,
-        queryVector: queryEmbedding,
-        topK: 5,
-        filter: {
-          dataType: 'component',
-          componentId,
-        },
-        includeVector: false,
-      });
-
-      const componentMatch = queryResults.find((result) => {
-        const metadata = result.metadata as InspectionChunkMetadata;
-        return metadata.componentId === componentId && metadata.dataType === 'component';
-      });
-
-      if (!componentMatch) {
-        return {
-          found: false,
-          component: undefined,
-        };
-      }
-
-      const metadata = componentMatch.metadata as InspectionChunkMetadata;
-
-      let parsedContent: Record<string, unknown> = {};
-      try {
-        parsedContent = JSON.parse(metadata.text);
-      } catch {
-        return {
-          found: true,
-          component: {
-            id: componentId,
-            name: componentId,
-            category: 'unknown',
-            content: metadata.text,
-          },
-        };
-      }
-
-      const response: {
-        id: string;
-        name: string;
-        category: string;
-        content: string;
-        specs?: Record<string, unknown>;
-        maintenanceSchedule?: Array<{
-          intervalHours: number;
-          description: string;
-          tasks: string[];
-        }>;
-        monitoringPoints?: Array<{
-          name: string;
-          unit: string;
-          normalRange: { min?: number; max?: number };
-          criticalThreshold: { min?: number; max?: number };
-        }>;
-        commonFailures?: Array<{
-          id: string;
-          name: string;
-          mtbfHours: number;
-          symptoms: string[];
-          cause: string;
-        }>;
-      } = {
-        id: (parsedContent.id as string) || componentId,
-        name: (parsedContent.name as string) || componentId,
-        category: (parsedContent.category as string) || 'unknown',
-        content: metadata.text,
-        specs: parsedContent.specs as Record<string, unknown>,
+    if (!componentMatch) {
+      return {
+        found: false,
+        component: undefined,
       };
+    }
 
-      if (includeMaintenanceSchedule && parsedContent.maintenance_schedule) {
-        response.maintenanceSchedule = (
-          parsedContent.maintenance_schedule as Array<{
-            interval_hours: number;
-            description: string;
-            tasks: string[];
-          }>
-        ).map((schedule) => ({
-          intervalHours: schedule.interval_hours,
-          description: schedule.description,
-          tasks: schedule.tasks,
-        }));
-      }
+    const metadata = componentMatch.metadata as InspectionChunkMetadata;
 
-      if (includeMonitoringPoints && parsedContent.monitoring_points) {
-        response.monitoringPoints = (
-          parsedContent.monitoring_points as Array<{
-            name: string;
-            unit: string;
-            normal_range: { min?: number; max?: number };
-            critical_threshold: { min?: number; max?: number };
-          }>
-        ).map((point) => ({
-          name: point.name,
-          unit: point.unit,
-          normalRange: {
-            min: point.normal_range?.min,
-            max: point.normal_range?.max,
-          },
-          criticalThreshold: {
-            min: point.critical_threshold?.min,
-            max: point.critical_threshold?.max,
-          },
-        }));
-      }
-
-      if (includeCommonFailures && parsedContent.common_failures) {
-        response.commonFailures = (
-          parsedContent.common_failures as Array<{
-            id: string;
-            name: string;
-            mtbf_hours: number;
-            symptoms: string[];
-            cause: string;
-          }>
-        ).map((failure) => ({
-          id: failure.id,
-          name: failure.name,
-          mtbfHours: failure.mtbf_hours,
-          symptoms: failure.symptoms,
-          cause: failure.cause,
-        }));
-      }
-
+    let parsedContent: Record<string, unknown> = {};
+    try {
+      parsedContent = JSON.parse(metadata.text);
+    } catch {
       return {
         found: true,
-        component: response,
+        component: {
+          id: componentId,
+          name: componentId,
+          category: 'unknown',
+          content: metadata.text,
+        },
       };
-    } finally {
-      await vectorStore.disconnect?.();
     }
+
+    const response: {
+      id: string;
+      name: string;
+      category: string;
+      content: string;
+      specs?: Record<string, unknown>;
+      maintenanceSchedule?: Array<{
+        intervalHours: number;
+        description: string;
+        tasks: string[];
+      }>;
+      monitoringPoints?: Array<{
+        name: string;
+        unit: string;
+        normalRange: { min?: number; max?: number };
+        criticalThreshold: { min?: number; max?: number };
+      }>;
+      commonFailures?: Array<{
+        id: string;
+        name: string;
+        mtbfHours: number;
+        symptoms: string[];
+        cause: string;
+      }>;
+    } = {
+      id: (parsedContent.id as string) || componentId,
+      name: (parsedContent.name as string) || componentId,
+      category: (parsedContent.category as string) || 'unknown',
+      content: metadata.text,
+      specs: parsedContent.specs as Record<string, unknown>,
+    };
+
+    if (includeMaintenanceSchedule && parsedContent.maintenance_schedule) {
+      response.maintenanceSchedule = (
+        parsedContent.maintenance_schedule as Array<{
+          interval_hours: number;
+          description: string;
+          tasks: string[];
+        }>
+      ).map((schedule) => ({
+        intervalHours: schedule.interval_hours,
+        description: schedule.description,
+        tasks: schedule.tasks,
+      }));
+    }
+
+    if (includeMonitoringPoints && parsedContent.monitoring_points) {
+      response.monitoringPoints = (
+        parsedContent.monitoring_points as Array<{
+          name: string;
+          unit: string;
+          normal_range: { min?: number; max?: number };
+          critical_threshold: { min?: number; max?: number };
+        }>
+      ).map((point) => ({
+        name: point.name,
+        unit: point.unit,
+        normalRange: {
+          min: point.normal_range?.min,
+          max: point.normal_range?.max,
+        },
+        criticalThreshold: {
+          min: point.critical_threshold?.min,
+          max: point.critical_threshold?.max,
+        },
+      }));
+    }
+
+    if (includeCommonFailures && parsedContent.common_failures) {
+      response.commonFailures = (
+        parsedContent.common_failures as Array<{
+          id: string;
+          name: string;
+          mtbf_hours: number;
+          symptoms: string[];
+          cause: string;
+        }>
+      ).map((failure) => ({
+        id: failure.id,
+        name: failure.name,
+        mtbfHours: failure.mtbf_hours,
+        symptoms: failure.symptoms,
+        cause: failure.cause,
+      }));
+    }
+
+    return {
+      found: true,
+      component: response,
+    };
   },
 });

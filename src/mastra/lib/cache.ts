@@ -1,5 +1,8 @@
+import { embed } from 'ai';
+import { openai } from '@ai-sdk/openai';
+
 /**
- * Simple in-memory cache for RAG query results.
+ * Simple in-memory cache for RAG query results and embeddings.
  * Implements a TTL-based cache to reduce embedding API calls and improve latency.
  */
 
@@ -110,3 +113,37 @@ export const ragQueryCache = createQueryCache<{
   results: unknown[];
   totalFound: number;
 }>();
+
+// Global cache instance for embeddings (longer TTL since embeddings don't change)
+const embeddingCache = createQueryCache<number[]>(60 * 60 * 1000); // 1 hour TTL
+
+/**
+ * Get a cached embedding or generate a new one.
+ * This eliminates redundant OpenAI embedding API calls (~400ms each).
+ *
+ * @param query The text to embed
+ * @returns The embedding vector
+ */
+export async function getCachedEmbedding(query: string): Promise<number[]> {
+  const cacheKey = embeddingCache.generateKey(query);
+  const cached = embeddingCache.get(cacheKey);
+
+  if (cached) {
+    return cached;
+  }
+
+  const { embedding } = await embed({
+    model: openai.embedding('text-embedding-3-small'),
+    value: query,
+  });
+
+  embeddingCache.set(cacheKey, embedding);
+  return embedding;
+}
+
+/**
+ * Get embedding cache statistics for monitoring.
+ */
+export function getEmbeddingCacheStats() {
+  return embeddingCache.getStats();
+}

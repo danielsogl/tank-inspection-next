@@ -1,13 +1,11 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { embed } from 'ai';
-import { openai } from '@ai-sdk/openai';
 import {
-  createVectorStore,
+  getVectorStore,
   INSPECTION_INDEX_CONFIG,
   type InspectionChunkMetadata,
 } from '../lib/vector';
-import { ragQueryCache } from '../lib/cache';
+import { ragQueryCache, getCachedEmbedding } from '../lib/cache';
 
 /**
  * Tool for querying the inspection vector database.
@@ -147,58 +145,51 @@ The tool returns the most relevant information based on semantic similarity and 
       };
     }
 
-    // Generate embedding for the query
-    const { embedding: queryEmbedding } = await embed({
-      model: openai.embedding('text-embedding-3-small'),
-      value: query,
+    // Generate embedding for the query (cached)
+    const queryEmbedding = await getCachedEmbedding(query);
+
+    // Get singleton vector store (connection pooled)
+    const vectorStore = getVectorStore();
+
+    // Query the vector store
+    const queryResults = await vectorStore.query({
+      indexName: INSPECTION_INDEX_CONFIG.indexName,
+      queryVector: queryEmbedding,
+      topK,
+      filter: Object.keys(filter).length > 0 ? (filter as Record<string, string | number | boolean>) : undefined,
+      includeVector: false,
     });
 
-    // Initialize vector store
-    const vectorStore = createVectorStore();
-
-    try {
-      // Query the vector store
-      const queryResults = await vectorStore.query({
-        indexName: INSPECTION_INDEX_CONFIG.indexName,
-        queryVector: queryEmbedding,
-        topK,
-        filter: Object.keys(filter).length > 0 ? (filter as Record<string, string | number | boolean>) : undefined,
-        includeVector: false,
-      });
-
-      // Transform results
-      const results = queryResults.map((result) => {
-        const metadata = result.metadata as InspectionChunkMetadata;
-        return {
-          checkpointNumber: metadata.checkpointNumber,
-          checkpointName: metadata.checkpointName,
-          sectionName: metadata.sectionName,
-          sectionId: metadata.sectionId,
-          vehicleType: metadata.vehicleType,
-          vehicleVariant: metadata.vehicleVariant,
-          crewRole: metadata.crewRole,
-          maintenanceLevel: metadata.maintenanceLevel,
-          componentId: metadata.componentId,
-          priority: metadata.priority,
-          estimatedTimeMin: metadata.estimatedTimeMin,
-          dataType: metadata.dataType,
-          content: metadata.text,
-          score: result.score ?? 0,
-        };
-      });
-
-      const response = {
-        results,
-        totalFound: results.length,
+    // Transform results
+    const results = queryResults.map((result) => {
+      const metadata = result.metadata as InspectionChunkMetadata;
+      return {
+        checkpointNumber: metadata.checkpointNumber,
+        checkpointName: metadata.checkpointName,
+        sectionName: metadata.sectionName,
+        sectionId: metadata.sectionId,
+        vehicleType: metadata.vehicleType,
+        vehicleVariant: metadata.vehicleVariant,
+        crewRole: metadata.crewRole,
+        maintenanceLevel: metadata.maintenanceLevel,
+        componentId: metadata.componentId,
+        priority: metadata.priority,
+        estimatedTimeMin: metadata.estimatedTimeMin,
+        dataType: metadata.dataType,
+        content: metadata.text,
+        score: result.score ?? 0,
       };
+    });
 
-      // Cache the result
-      ragQueryCache.set(cacheKey, response);
+    const response = {
+      results,
+      totalFound: results.length,
+    };
 
-      return response;
-    } finally {
-      await vectorStore.disconnect?.();
-    }
+    // Cache the result
+    ragQueryCache.set(cacheKey, response);
+
+    return response;
   },
 });
 
@@ -236,54 +227,49 @@ Use this when you know the exact checkpoint number and vehicle type.`,
 
     const query = `checkpoint ${checkpointNumber} ${vehicleType}`;
 
-    const { embedding: queryEmbedding } = await embed({
-      model: openai.embedding('text-embedding-3-small'),
-      value: query,
+    // Use cached embedding
+    const queryEmbedding = await getCachedEmbedding(query);
+
+    // Get singleton vector store
+    const vectorStore = getVectorStore();
+
+    const queryResults = await vectorStore.query({
+      indexName: INSPECTION_INDEX_CONFIG.indexName,
+      queryVector: queryEmbedding,
+      topK: 5,
+      filter: {
+        vehicleType,
+        checkpointNumber,
+      },
+      includeVector: false,
     });
 
-    const vectorStore = createVectorStore();
+    const exactMatch = queryResults.find((result) => {
+      const metadata = result.metadata as InspectionChunkMetadata;
+      return (
+        metadata.checkpointNumber === checkpointNumber && metadata.vehicleType === vehicleType
+      );
+    });
 
-    try {
-      const queryResults = await vectorStore.query({
-        indexName: INSPECTION_INDEX_CONFIG.indexName,
-        queryVector: queryEmbedding,
-        topK: 5,
-        filter: {
-          vehicleType,
-          checkpointNumber,
-        },
-        includeVector: false,
-      });
-
-      const exactMatch = queryResults.find((result) => {
-        const metadata = result.metadata as InspectionChunkMetadata;
-        return (
-          metadata.checkpointNumber === checkpointNumber && metadata.vehicleType === vehicleType
-        );
-      });
-
-      if (exactMatch) {
-        const metadata = exactMatch.metadata as InspectionChunkMetadata;
-        return {
-          found: true,
-          checkpoint: {
-            checkpointNumber: metadata.checkpointNumber!,
-            sectionName: metadata.sectionName,
-            checkpointName: metadata.checkpointName,
-            sectionId: metadata.sectionId,
-            vehicleType: metadata.vehicleType,
-            role: metadata.crewRole,
-            content: metadata.text,
-          },
-        };
-      }
-
+    if (exactMatch) {
+      const metadata = exactMatch.metadata as InspectionChunkMetadata;
       return {
-        found: false,
-        checkpoint: undefined,
+        found: true,
+        checkpoint: {
+          checkpointNumber: metadata.checkpointNumber!,
+          sectionName: metadata.sectionName,
+          checkpointName: metadata.checkpointName,
+          sectionId: metadata.sectionId,
+          vehicleType: metadata.vehicleType,
+          role: metadata.crewRole,
+          content: metadata.text,
+        },
       };
-    } finally {
-      await vectorStore.disconnect?.();
     }
+
+    return {
+      found: false,
+      checkpoint: undefined,
+    };
   },
 });
