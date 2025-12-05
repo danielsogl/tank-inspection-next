@@ -12,7 +12,7 @@ The application MUST provide a tank-specific agent that handles queries related 
 
 #### Scenario: Tank agent model configuration
 - **WHEN** the tank agent is initialized
-- **THEN** it MUST use the `openai/gpt-4o-mini` model
+- **THEN** it MUST use the `openai/gpt-5-mini` model
 
 #### Scenario: Tank agent tool configuration
 - **WHEN** the tank agent is initialized

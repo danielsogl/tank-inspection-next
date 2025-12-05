@@ -70,7 +70,7 @@ To delegate, use the ${vehicle.agentId} when you recognize the query is about ${
 - Helpful and patient
 - Clear and concise`;
   },
-  model: 'openai/gpt-4o-mini',
+  model: 'openai/gpt-5-mini',
   agents: ({ requestContext }) => {
     const vehicleId = (requestContext?.get('vehicleId') as string) || DEFAULT_VEHICLE_ID;
     const vehicleAgent = vehicleAgentRegistry[vehicleId];

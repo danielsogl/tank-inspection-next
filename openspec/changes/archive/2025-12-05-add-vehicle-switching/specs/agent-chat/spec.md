@@ -19,7 +19,7 @@ The application MUST provide a general inspection agent that handles user chat i
 
 #### Scenario: Agent model configuration
 - **WHEN** the general inspection agent is initialized
-- **THEN** it MUST use the `openai/gpt-4o-mini` model
+- **THEN** it MUST use the `openai/gpt-5-mini` model
 - **AND** it MUST have memory configured for conversation persistence
 
 #### Scenario: Dynamic agent resolution

@@ -21,7 +21,7 @@ export const tankAgent = new Agent({
 - Structure complex information with bullet points or numbered lists
 - For voice interactions, provide concise summaries
 - When defects are reported, classify them and provide the escalation path`,
-  model: 'openai/gpt-4o-mini',
+  model: 'openai/gpt-5-mini',
   tools: {
     queryInspectionTool,
     getCheckpointTool,
