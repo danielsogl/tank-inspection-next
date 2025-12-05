@@ -37,20 +37,15 @@ export function Inspector({ className }: InspectorProps) {
   return (
     <div
       className={cn(
-        "relative flex h-full w-full overflow-hidden",
-        "flex-col lg:flex-row",
+        "relative h-full w-full overflow-hidden",
         className
       )}
     >
-      {/* Viewer Area - 3D Model Canvas */}
+      {/* Viewer Area - 3D Model Canvas - Always full size */}
       <div
         className={cn(
-          "relative min-w-0",
-          "bg-secondary rounded-lg border-2 border-border overflow-hidden",
-          // When chat is closed on mobile, take full height. When open, share height.
-          isChatOpen ? "flex-1 min-h-[40%]" : "flex-1",
-          // On large screens, always take remaining space
-          "lg:flex-1 lg:h-full"
+          "absolute inset-0",
+          "bg-secondary rounded-lg border-2 border-border overflow-hidden"
         )}
       >
         {/* 3D Model Viewer */}
@@ -67,11 +62,12 @@ export function Inspector({ className }: InspectorProps) {
                 variant="outline"
                 size="icon"
                 className={cn(
-                  "absolute z-10",
-                  "top-4 right-4",
+                  "absolute z-30",
+                  "top-4",
+                  isChatOpen ? "right-[396px]" : "right-4",
                   "h-12 w-12 rounded-full",
                   "border-2 border-border bg-card hover:bg-muted",
-                  "shadow-lg transition-all duration-200",
+                  "shadow-lg transition-all duration-300",
                   isChatOpen && "bg-primary hover:bg-primary/90 border-primary"
                 )}
                 onClick={() => setIsChatOpen(!isChatOpen)}
@@ -95,23 +91,22 @@ export function Inspector({ className }: InspectorProps) {
         <VoiceButton className="absolute bottom-4 right-4" />
       </div>
 
-      {/* Chat Sidebar - Collapsible */}
+      {/* Chat Sidebar - Overlay positioned */}
       <div
         className={cn(
-          "transition-all duration-300 ease-in-out overflow-hidden shrink-0",
-          "mt-4 lg:mt-0 lg:ml-4",
+          "absolute z-20 transition-all duration-300 ease-in-out",
+          "top-0 bottom-0 right-0",
+          "lg:w-[380px] w-full max-w-[380px]",
           isChatOpen
-            ? "w-full lg:w-[380px] flex-1 lg:flex-none h-auto lg:h-full opacity-100"
-            : "w-0 h-0 opacity-0 pointer-events-none"
+            ? "translate-x-0 opacity-100"
+            : "translate-x-full opacity-0 pointer-events-none"
         )}
       >
-        {isChatOpen && (
-          <ChatPanel
-            className="h-full"
-            selectedPart={selectedPart}
-            onPartHandled={() => setSelectedPart(null)}
-          />
-        )}
+        <ChatPanel
+          className="h-full"
+          selectedPart={selectedPart}
+          onPartHandled={() => setSelectedPart(null)}
+        />
       </div>
     </div>
   );
