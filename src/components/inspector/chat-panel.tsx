@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { DefaultChatTransport } from "ai";
 import { useChat } from "@ai-sdk/react";
-import { MessageCircle, Trash2, Loader2 } from "lucide-react";
+import { MessageCircle, Trash2, Loader2, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Conversation,
@@ -32,14 +32,33 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { cn } from "@/lib/utils";
 import { useVehicle } from "@/contexts/vehicle-context";
+import { type VoiceMessage } from "@/hooks/use-realtime-voice";
 
 interface ChatPanelProps {
   className?: string;
   selectedPart?: string | null;
   onPartHandled?: () => void;
+  voiceMessages?: VoiceMessage[];
+  onClearVoiceMessages?: () => void;
 }
 
-export function ChatPanel({ className, selectedPart, onPartHandled }: ChatPanelProps) {
+// Combined message type for unified display
+interface DisplayMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  isVoice: boolean;
+  timestamp: Date;
+  parts?: any[];
+}
+
+export function ChatPanel({
+  className,
+  selectedPart,
+  onPartHandled,
+  voiceMessages = [],
+  onClearVoiceMessages,
+}: ChatPanelProps) {
   const [input, setInput] = useState<string>("");
   const { selectedVehicle } = useVehicle();
   const previousVehicleIdRef = useRef(selectedVehicle.id);
@@ -63,12 +82,14 @@ export function ChatPanel({ className, selectedPart, onPartHandled }: ChatPanelP
   useEffect(() => {
     if (previousVehicleIdRef.current !== selectedVehicle.id) {
       setMessages([]);
+      onClearVoiceMessages?.();
       previousVehicleIdRef.current = selectedVehicle.id;
     }
-  }, [selectedVehicle.id, setMessages]);
+  }, [selectedVehicle.id, setMessages, onClearVoiceMessages]);
 
   const handleClearChat = () => {
     setMessages([]);
+    onClearVoiceMessages?.();
   };
 
   const handleSubmit = async () => {
@@ -76,6 +97,36 @@ export function ChatPanel({ className, selectedPart, onPartHandled }: ChatPanelP
     sendMessage({ text: input });
     setInput("");
   };
+
+  // Combine text chat messages and voice messages, sorted by timestamp
+  const allMessages = useMemo((): DisplayMessage[] => {
+    // Convert text chat messages to display format
+    const textMessages: DisplayMessage[] = messages.map((msg: any) => ({
+      id: msg.id,
+      role: msg.role,
+      content: msg.parts?.find((p: any) => p.type === "text")?.text || "",
+      isVoice: false,
+      timestamp: new Date(msg.createdAt || Date.now()),
+      parts: msg.parts,
+    }));
+
+    // Convert voice messages to display format
+    const voiceDisplayMessages: DisplayMessage[] = voiceMessages.map((msg) => ({
+      id: msg.id,
+      role: msg.role,
+      content: msg.content,
+      isVoice: true,
+      timestamp: msg.timestamp,
+      parts: [{ type: "text", text: msg.content }],
+    }));
+
+    // Combine and sort by timestamp
+    return [...textMessages, ...voiceDisplayMessages].sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+    );
+  }, [messages, voiceMessages]);
+
+  const hasMessages = allMessages.length > 0;
 
   return (
     <div
@@ -91,7 +142,7 @@ export function ChatPanel({ className, selectedPart, onPartHandled }: ChatPanelP
           <MessageCircle className="h-5 w-5 text-primary" />
           <h2 className="font-semibold">AI Assistant</h2>
         </div>
-        {messages.length > 0 && (
+        {hasMessages && (
           <Button
             variant="ghost"
             size="icon"
@@ -106,7 +157,7 @@ export function ChatPanel({ className, selectedPart, onPartHandled }: ChatPanelP
       {/* Messages */}
       <Conversation className="flex-1 min-h-0">
         <ConversationContent className="p-4">
-          {messages.length === 0 ? (
+          {!hasMessages ? (
             <ConversationEmptyState
               icon={<MessageCircle className="h-12 w-12" />}
               title="Start a conversation"
@@ -114,7 +165,7 @@ export function ChatPanel({ className, selectedPart, onPartHandled }: ChatPanelP
             />
           ) : (
             <>
-              {messages.map((message: any) => (
+              {allMessages.map((message) => (
                 <div key={message.id}>
                   {message.parts?.map((part: any, i: number) => {
                     if (part.type === "text") {
@@ -122,9 +173,19 @@ export function ChatPanel({ className, selectedPart, onPartHandled }: ChatPanelP
                         <Message key={`${message.id}-${i}`} from={message.role}>
                           <MessageContent>
                             {message.role === "user" ? (
-                              part.text
+                              <div className="flex items-start gap-2">
+                                {message.isVoice && (
+                                  <Mic className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                                )}
+                                <span>{part.text}</span>
+                              </div>
                             ) : (
-                              <MessageResponse>{part.text}</MessageResponse>
+                              <div className="flex items-start gap-2">
+                                {message.isVoice && (
+                                  <Mic className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                                )}
+                                <MessageResponse>{part.text}</MessageResponse>
+                              </div>
                             )}
                           </MessageContent>
                         </Message>

@@ -1,6 +1,7 @@
 import { Agent } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
 import { LibSQLStore } from '@mastra/libsql';
+import { OpenAIRealtimeVoice } from '@mastra/voice-openai-realtime';
 import {
   queryInspectionTool,
   getCheckpointTool,
@@ -8,6 +9,22 @@ import {
   getComponentDetailsTool,
   getMaintenanceIntervalTool,
 } from '../tools';
+
+// Voice provider configuration for real-time speech-to-speech
+const voiceProvider = new OpenAIRealtimeVoice({
+  model: 'gpt-realtime',
+  speaker: 'ballad',
+});
+
+// Configure voice activity detection
+voiceProvider.updateConfig({
+  turn_detection: {
+    type: 'server_vad',
+    threshold: 0.5,
+    prefix_padding_ms: 300,
+    silence_duration_ms: 500,
+  },
+});
 
 export const tankAgent = new Agent({
   id: 'tank-agent',
@@ -21,7 +38,7 @@ export const tankAgent = new Agent({
 - Provide metric measurements
 - Highlight safety considerations where relevant
 - Structure complex information with bullet points or numbered lists
-- For voice interactions, provide concise summaries
+- For voice interactions, provide concise summaries suitable for spoken responses
 - When defects are reported, classify them and provide the escalation path`,
   model: 'openai/gpt-5-mini',
   tools: {
@@ -38,4 +55,6 @@ export const tankAgent = new Agent({
       url: ':memory:', // In-memory for speed, no disk I/O
     }),
   }),
+  // Voice provider for real-time speech-to-speech capability
+  voice: voiceProvider,
 });

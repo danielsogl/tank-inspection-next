@@ -12,7 +12,9 @@ import {
 import { MessageCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChatPanel } from "./chat-panel";
-import { VoiceButton } from "./voice-button";
+import { VoiceButton, type VoiceMessage } from "./voice-button";
+import { useRealtimeVoice } from "@/hooks/use-realtime-voice";
+import { toast } from "sonner";
 
 // Dynamic import for ModelViewer to disable SSR (Babylon.js requires browser APIs)
 const ModelViewer = dynamic(
@@ -27,11 +29,31 @@ interface InspectorProps {
 export function Inspector({ className }: InspectorProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedPart, setSelectedPart] = useState<string | null>(null);
+  const [voiceMessages, setVoiceMessages] = useState<VoiceMessage[]>([]);
 
   const handleMeshClick = useCallback((meshName: string) => {
     setSelectedPart(meshName);
     // Open chat panel when a part is clicked
     setIsChatOpen(true);
+  }, []);
+
+  const handleVoiceMessage = useCallback((message: VoiceMessage) => {
+    setVoiceMessages((prev) => [...prev, message]);
+    // Open chat panel when voice messages are received
+    setIsChatOpen(true);
+  }, []);
+
+  const handleVoiceError = useCallback((error: string) => {
+    toast.error(error);
+  }, []);
+
+  const { state: voiceState, start, stop, interrupt } = useRealtimeVoice({
+    onMessage: handleVoiceMessage,
+    onError: handleVoiceError,
+  });
+
+  const clearVoiceMessages = useCallback(() => {
+    setVoiceMessages([]);
   }, []);
 
   return (
@@ -88,7 +110,13 @@ export function Inspector({ className }: InspectorProps) {
         </TooltipProvider>
 
         {/* Voice Button - Inside viewer area */}
-        <VoiceButton className="absolute bottom-4 right-4" />
+        <VoiceButton
+          className="absolute bottom-4 right-4"
+          state={voiceState}
+          onStart={start}
+          onStop={stop}
+          onInterrupt={interrupt}
+        />
       </div>
 
       {/* Chat Sidebar - Overlay positioned */}
@@ -106,6 +134,8 @@ export function Inspector({ className }: InspectorProps) {
           className="h-full"
           selectedPart={selectedPart}
           onPartHandled={() => setSelectedPart(null)}
+          voiceMessages={voiceMessages}
+          onClearVoiceMessages={clearVoiceMessages}
         />
       </div>
     </div>
