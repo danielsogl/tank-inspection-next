@@ -24,13 +24,12 @@ export async function POST(req: Request) {
 export async function GET() {
   const memory = await weatherAgent.getMemory();
   
-  // Query messages from the thread
-  // @ts-expect-error - Memory.query() exists in runtime but types are not yet updated in beta
-  const { uiMessages } = await memory!.query({
+  // Retrieve messages from the thread using recall()
+  const { messages } = await memory!.recall({
     threadId: "weather-chat",
     resourceId: "example-user-id",
   });
 
-  const convertedMessages = convertMessages(uiMessages).to("AIV5.UI");
+  const convertedMessages = convertMessages(messages).to("AIV5.UI");
   return NextResponse.json(convertedMessages);
 }
