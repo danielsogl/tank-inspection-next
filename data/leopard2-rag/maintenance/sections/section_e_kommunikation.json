@@ -1,0 +1,151 @@
+{
+  "id": "section_e",
+  "name": "Kommunikation und Führung",
+  "responsible_roles": ["commander"],
+  "subsystems": [
+    {
+      "id": "E01",
+      "number": 58,
+      "name": "Funkanlage Selbsttest",
+      "description": "Built-in Test der Funkgeräte durchführen",
+      "type": "functional_test",
+      "expected_value": "alle Tests bestanden, keine Fehler",
+      "tools_required": [],
+      "estimated_time_min": 5,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "commander"
+    },
+    {
+      "id": "E02",
+      "number": 59,
+      "name": "Funkverbindung testen",
+      "description": "Sende- und Empfangsqualität prüfen",
+      "type": "functional_test",
+      "expected_value": "klarer Empfang, verzerrungsfreies Senden, alle Kanäle funktionieren",
+      "tools_required": ["Zweites Funkgerät zum Testen"],
+      "estimated_time_min": 8,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "commander",
+      "common_defects": [
+        {
+          "id": "E02-D01",
+          "description": "Funkstörung",
+          "indicators": ["Rauschen", "Verbindungsabbrüche", "schwaches Signal"],
+          "priority": "high",
+          "action": "Antenne prüfen. Stecker kontrollieren. Gerät testen lassen."
+        }
+      ]
+    },
+    {
+      "id": "E03",
+      "number": 60,
+      "name": "Antenne auf Beschädigungen prüfen",
+      "description": "Außenantennen visuell inspizieren",
+      "type": "visual_check",
+      "expected_value": "Antennen intakt, keine Verbiegungen, Befestigung fest",
+      "tools_required": [],
+      "estimated_time_min": 3,
+      "photo_required": true,
+      "photo_points": ["Beschädigte Antennen"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "commander",
+      "common_defects": [
+        {
+          "id": "E03-D01",
+          "description": "Antenne beschädigt",
+          "indicators": ["verbogen", "abgebrochen", "lose"],
+          "priority": "medium",
+          "action": "Antenne ersetzen. Funkreichweite eingeschränkt."
+        }
+      ]
+    },
+    {
+      "id": "E04",
+      "number": 61,
+      "name": "Gegensprechanlage prüfen",
+      "description": "Interne Kommunikation zwischen Besatzung testen",
+      "type": "functional_test",
+      "expected_value": "alle Stationen hören sich gegenseitig klar",
+      "tools_required": [],
+      "estimated_time_min": 5,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "commander",
+      "common_defects": [
+        {
+          "id": "E04-D01",
+          "description": "Interkom defekt",
+          "indicators": ["eine Station nicht erreichbar", "starkes Rauschen", "nur einseitig"],
+          "priority": "high",
+          "action": "Kopfhörer und Stecker prüfen. Kabelverbindungen testen."
+        }
+      ]
+    },
+    {
+      "id": "E05",
+      "number": 62,
+      "name": "Kopfhörer und Mikrofone prüfen",
+      "description": "Alle Headsets auf Funktion testen",
+      "type": "functional_test",
+      "expected_value": "klarer Klang, Mikrofon funktioniert, keine Wackelkontakte",
+      "tools_required": [],
+      "estimated_time_min": 6,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "commander"
+    },
+    {
+      "id": "E06",
+      "number": 63,
+      "name": "Kommandanten-Periskop prüfen (PERI-R17)",
+      "description": "Rundblickperiskop auf Funktion testen",
+      "type": "functional_test",
+      "expected_value": "360° Drehung, alle Vergrößerungsstufen, klare Optik",
+      "tools_required": ["Reinigungstuch"],
+      "estimated_time_min": 6,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "commander",
+      "common_defects": [
+        {
+          "id": "E06-D01",
+          "description": "Periskop defekt",
+          "indicators": ["unscharfes Bild", "Drehung blockiert", "Optik beschlagen"],
+          "priority": "high",
+          "action": "Optik reinigen. Bei mechanischem Defekt: Wartung erforderlich."
+        }
+      ]
+    },
+    {
+      "id": "E07",
+      "number": 64,
+      "name": "GPS/Navigationssystem prüfen",
+      "description": "Positionsbestimmung testen",
+      "type": "functional_test",
+      "expected_value": "Position korrekt, Satellitenempfang >4, Genauigkeit <10m",
+      "tools_required": [],
+      "estimated_time_min": 5,
+      "photo_required": false,
+      "vehicle_variants": ["A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "commander",
+      "notes": "A4 hat kein GPS"
+    },
+    {
+      "id": "E08",
+      "number": 65,
+      "name": "Kampfführungssystem prüfen (A7/A7V)",
+      "description": "Digitales C4I System testen",
+      "type": "functional_test",
+      "expected_value": "Datenverbindung steht, Karte lädt, Freund-Feind-Symbole sichtbar",
+      "tools_required": [],
+      "estimated_time_min": 8,
+      "photo_required": false,
+      "vehicle_variants": ["A7", "A7V"],
+      "responsible_role": "commander",
+      "notes": "Nur für A7/A7V mit SVF/IFSV"
+    }
+  ]
+}
+

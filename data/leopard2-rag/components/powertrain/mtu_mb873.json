@@ -1,0 +1,206 @@
+{
+  "id": "mtu_mb873",
+  "name": "MTU MB 873 Ka-501",
+  "category": "powertrain",
+  "specs": {
+    "type": "V12 Diesel Engine",
+    "manufacturer": "MTU Friedrichshafen",
+    "displacement_l": 47.6,
+    "cylinders": 12,
+    "arrangement": "90° V",
+    "power_hp": 1500,
+    "power_kw": 1103,
+    "torque_nm": 4700,
+    "rated_speed_rpm": 2600,
+    "compression_ratio": "16.0:1",
+    "fuel_system": "Direct injection with mechanical governor",
+    "cooling": "Liquid-cooled with dual-circuit system",
+    "lubrication": "Pressure lubrication with full-flow filter",
+    "oil_capacity_l": 85,
+    "weight_kg": 2400
+  },
+  "maintenance_schedule": [
+    {
+      "interval_hours": 250,
+      "description": "L2 Maintenance - Oil and basic filters",
+      "tasks": [
+        "Engine oil change (85 liters)",
+        "Fuel filter inspection",
+        "Air filter cleaning",
+        "V-belt tension check",
+        "Coolant level check"
+      ]
+    },
+    {
+      "interval_hours": 500,
+      "description": "L2 Extended - Filters and inspection",
+      "tasks": [
+        "Oil filter replacement",
+        "Fuel filter replacement",
+        "Centrifugal oil filter cleaning",
+        "Crankcase ventilation check",
+        "Turbocharger inspection",
+        "Exhaust system check"
+      ]
+    },
+    {
+      "interval_hours": 1000,
+      "description": "L3 Maintenance - Valve adjustment",
+      "tasks": [
+        "Valve clearance adjustment",
+        "Fuel injection pump timing check",
+        "Governor adjustment",
+        "Compression test on all cylinders",
+        "Turbocharger bearing clearance check",
+        "Cooling system pressure test"
+      ]
+    },
+    {
+      "interval_hours": 6000,
+      "description": "L4 Major Overhaul",
+      "tasks": [
+        "Complete engine disassembly",
+        "Cylinder head overhaul",
+        "Piston and ring replacement",
+        "Main and connecting rod bearing replacement",
+        "Injector overhaul",
+        "Turbocharger rebuild",
+        "Combustion chamber inspection",
+        "Camshaft inspection"
+      ]
+    }
+  ],
+  "monitoring_points": [
+    {
+      "name": "Öltemperatur",
+      "unit": "°C",
+      "normal_range": {
+        "min": 80,
+        "max": 110
+      },
+      "critical_threshold": {
+        "max": 130
+      }
+    },
+    {
+      "name": "Ölstand",
+      "unit": "l",
+      "normal_range": {
+        "min": 75,
+        "max": 85
+      },
+      "critical_threshold": {
+        "min": 60
+      }
+    },
+    {
+      "name": "Kühlmitteltemperatur",
+      "unit": "°C",
+      "normal_range": {
+        "min": 80,
+        "max": 95
+      },
+      "critical_threshold": {
+        "max": 105
+      }
+    },
+    {
+      "name": "Öldruck",
+      "unit": "bar",
+      "normal_range": {
+        "min": 4.5,
+        "max": 6.0
+      },
+      "critical_threshold": {
+        "min": 3.0
+      }
+    },
+    {
+      "name": "Ladedruck",
+      "unit": "bar",
+      "normal_range": {
+        "min": 2.2,
+        "max": 2.8
+      },
+      "critical_threshold": {
+        "min": 1.5
+      }
+    },
+    {
+      "name": "Drehzahl",
+      "unit": "rpm",
+      "normal_range": {
+        "min": 700,
+        "max": 2600
+      },
+      "critical_threshold": {
+        "max": 2800
+      }
+    }
+  ],
+  "common_failures": [
+    {
+      "id": "MTU-F01",
+      "name": "Injector failure",
+      "mtbf_hours": 3000,
+      "symptoms": [
+        "Schwarzer Rauch aus Auspuff",
+        "Leistungsverlust",
+        "Unruhiger Motorlauf",
+        "Erhöhter Kraftstoffverbrauch"
+      ],
+      "cause": "Verschleiß der Düsennadel durch Verschmutzung oder Überhitzung"
+    },
+    {
+      "id": "MTU-F02",
+      "name": "Turbocharger bearing wear",
+      "mtbf_hours": 4500,
+      "symptoms": [
+        "Pfeifendes Geräusch bei Belastung",
+        "Leistungsabfall",
+        "Ölaustritt am Turbolader",
+        "Blauer Rauch aus Auspuff"
+      ],
+      "cause": "Lagerverschleiß durch hohe Drehzahlen und Hitze"
+    },
+    {
+      "id": "MTU-F03",
+      "name": "Cylinder head gasket failure",
+      "mtbf_hours": 8000,
+      "symptoms": [
+        "Weißer Rauch aus Auspuff",
+        "Kühlmittelverlust",
+        "Motoröl milchig verfärbt",
+        "Überhitzung"
+      ],
+      "cause": "Thermische Überlastung oder Überdrehzahl"
+    },
+    {
+      "id": "MTU-F04",
+      "name": "Fuel pump wear",
+      "mtbf_hours": 5000,
+      "symptoms": [
+        "Startschwierigkeiten",
+        "Ungleichmäßiger Leerlauf",
+        "Leistungsschwankungen",
+        "Motor stirbt ab"
+      ],
+      "cause": "Verschleiß der Pumpenelemente durch Schmutz im Kraftstoff"
+    }
+  ],
+  "diagnostics": {
+    "system": "Engine Control Unit (ECU)",
+    "interface": "OBD-II compatible diagnostic port",
+    "monitored_parameters": [
+      "Einspritzmenge",
+      "Zündzeitpunkt",
+      "Abgastemperatur",
+      "Ladedruck",
+      "Öldruck",
+      "Kühlmitteltemperatur",
+      "Drehzahl"
+    ]
+  },
+  "notes": "The MTU MB 873 Ka-501 is the standard powerplant for all Leopard 2 variants. This 4-stroke V12 diesel engine is known for its reliability and high power-to-weight ratio. Regular maintenance according to MTU maintenance concept is critical for longevity."
+}
+

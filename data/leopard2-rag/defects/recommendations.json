@@ -1,0 +1,125 @@
+{
+  "recommendations": [
+    {
+      "defect_type": "Feuerlöschanlage Druckverlust",
+      "priority": "critical",
+      "action": "Fahrzeug sofort außer Betrieb nehmen. Brandgefahr! System prüfen, Leckage finden, nachfüllen. Vor Inbetriebnahme Drucktest durchführen.",
+      "spare_parts": ["Feuerlöschmittel Halon 1301 oder FM-200", "Druckschläuche", "Ventildichtungen"],
+      "required_expertise": "Fachpersonal für Brandschutzsysteme",
+      "maintenance_level": "L3"
+    },
+    {
+      "defect_type": "Motorölstand kritisch niedrig",
+      "priority": "critical",
+      "action": "Motor nicht starten. Ölstand sofort nachfüllen. Leckage suchen. Vor Betrieb Ölstand prüfen und 5 Minuten Probelauf.",
+      "spare_parts": ["Motoröl MTU-Spezifikation", "Ölfiltereinsatz"],
+      "required_expertise": "Mechaniker",
+      "maintenance_level": "L2"
+    },
+    {
+      "defect_type": "Hydrauliköl-Leckage Turm",
+      "priority": "high",
+      "action": "Leckage lokalisieren. Schlauch oder Dichtung austauschen. Hydrauliköl nachfüllen. Drucktest durchführen.",
+      "spare_parts": ["Hydraulikschlauch entsprechender Länge", "O-Ringe", "Hydrauliköl HLP 46"],
+      "required_expertise": "Hydraulikspezialist",
+      "maintenance_level": "L2"
+    },
+    {
+      "defect_type": "Kette zu locker",
+      "priority": "high",
+      "action": "Kettenspannung mit Spannvorrichtung einstellen. Ziel: 30-50mm Durchhang. Kettenverschleiß messen. Bei >10% Längung: Kette ersetzen.",
+      "spare_parts": ["Kettenbolzen", "komplette Kette bei Bedarf"],
+      "required_expertise": "Fahrwerkspezialist",
+      "maintenance_level": "L2"
+    },
+    {
+      "defect_type": "Wärmebildgerät defekt",
+      "priority": "high",
+      "action": "Built-in Test durchführen. Fehlercode auslesen. Bei Gerätedefekt: zur Herstellerwartung. Zwischenlösung: Nachtzielgerät verwenden.",
+      "spare_parts": ["Wärmebildkamera-Modul"],
+      "required_expertise": "Elektronikfachkraft mit Feuerleit-Expertise",
+      "maintenance_level": "L4"
+    },
+    {
+      "defect_type": "Stoßdämpfer Ölaustritt",
+      "priority": "medium",
+      "action": "Dämpfer innerhalb 48h austauschen. Fahrzeug kann weiter betrieben werden, Komfort und Zielgenauigkeit reduziert.",
+      "spare_parts": ["Stoßdämpfereinsatz entsprechende Position"],
+      "required_expertise": "Fahrwerkmechaniker",
+      "maintenance_level": "L2"
+    },
+    {
+      "defect_type": "Batterie niedrige Spannung",
+      "priority": "medium",
+      "action": "Batterie laden (24-28V Sollspannung). Lichtmaschine prüfen. Bei Batteriealter >5 Jahre: vorsorglich ersetzen.",
+      "spare_parts": ["24V Batterie 180Ah", "Keilriemen Lichtmaschine"],
+      "required_expertise": "Elektriker",
+      "maintenance_level": "L2"
+    },
+    {
+      "defect_type": "Beleuchtung defekt",
+      "priority": "medium",
+      "action": "Leuchtmittel austauschen. Kabel und Stecker auf Korrosion prüfen. Bei mehreren Ausfällen: Sicherungen und Schalter testen.",
+      "spare_parts": ["Leuchtmittel 24V entsprechender Typ", "Lampenfassung", "Sicherungen"],
+      "required_expertise": "Elektriker",
+      "maintenance_level": "L1"
+    },
+    {
+      "defect_type": "Dichtungsring Turmdrehkranz gerissen",
+      "priority": "high",
+      "action": "Dichtung vor nächster Ausfahrt ersetzen. Verschmutzung des Lagers vermeiden. Turm intensiv schmieren nach Dichtungswechsel.",
+      "spare_parts": ["Dichtungsring Turmdrehkranz", "Fett TL 9150-0027"],
+      "required_expertise": "Turm-Mechaniker",
+      "maintenance_level": "L2"
+    },
+    {
+      "defect_type": "Keilriemen zu lose",
+      "priority": "medium",
+      "action": "Riemenspannung nachstellen. Riemen auf Risse prüfen. Bei Alter >3 Jahre oder sichtbaren Rissen: vorsorglich ersetzen.",
+      "spare_parts": ["Keilriemen MTU-Spezifikation"],
+      "required_expertise": "Mechaniker",
+      "maintenance_level": "L1"
+    },
+    {
+      "defect_type": "Verschluss schwergängig",
+      "priority": "high",
+      "action": "Verschluss zerlegen, reinigen, schmieren. Verschleißteile (Feder, Extraktor) prüfen. Bei Beschädigung: Teile austauschen.",
+      "spare_parts": ["Verschlussfeder", "Extraktor", "Waffenöl"],
+      "required_expertise": "Waffenmechaniker",
+      "maintenance_level": "L2"
+    },
+    {
+      "defect_type": "Laserentfernungsmesser ungenau",
+      "priority": "high",
+      "action": "Optik reinigen. Laser kalibrieren lassen. Referenzmessung auf bekannte Distanzen durchführen. Bei >10m Abweichung: Wartung.",
+      "spare_parts": [],
+      "required_expertise": "Feuerleit-Techniker mit Kalibrierausrüstung",
+      "maintenance_level": "L3"
+    },
+    {
+      "defect_type": "Antenne beschädigt",
+      "priority": "medium",
+      "action": "Antenne ersetzen. Kabel und Stecker auf Beschädigung prüfen. Nach Austausch Funktest durchführen.",
+      "spare_parts": ["Funkantenne entsprechender Typ", "Antennenkabel bei Bedarf"],
+      "required_expertise": "Funktechniker",
+      "maintenance_level": "L2"
+    },
+    {
+      "defect_type": "NBC-Anlage defekt",
+      "priority": "high",
+      "action": "Filter prüfen und ggf. ersetzen. Dichtungen an Luken kontrollieren. Überdruckpumpe testen. Drucktest durchführen.",
+      "spare_parts": ["NBC-Filter", "Dichtungen Luken", "Überdruckpumpe bei Bedarf"],
+      "required_expertise": "NBC-Spezialist",
+      "maintenance_level": "L2"
+    },
+    {
+      "defect_type": "Schürze lose",
+      "priority": "low",
+      "action": "Schürze befestigen oder ersetzen. Befestigungsbolzen nachziehen. Bei Bedarf: neue Bolzen einziehen.",
+      "spare_parts": ["Seitenschürze", "Befestigungsbolzen"],
+      "required_expertise": "Mechaniker",
+      "maintenance_level": "L1"
+    }
+  ]
+}
+

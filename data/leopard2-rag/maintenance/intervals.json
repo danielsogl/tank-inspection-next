@@ -1,0 +1,260 @@
+{
+  "intervals": [
+    {
+      "id": "L1-DAILY",
+      "level": "L1",
+      "name": "Tägliche Wartung (vor/nach Betrieb)",
+      "executor": "crew",
+      "trigger": {
+        "type": "event",
+        "value": "before_after_operation"
+      },
+      "duration": "30 Minuten",
+      "tasks": [
+        "Motorölstand prüfen",
+        "Kühlmittelstand prüfen",
+        "Kraftstoffstand prüfen",
+        "Ketten auf Spannung und Beschädigungen prüfen",
+        "Laufrollen Sichtprüfung",
+        "Beleuchtung funktionsfähig",
+        "Feuerlöschanlage Druck prüfen",
+        "Batteriezustand prüfen",
+        "Funktionstests durchführen"
+      ],
+      "sections": ["A", "B", "F"],
+      "notes": "Vor jeder Ausfahrt und nach Rückkehr durchzuführen. Basis für Einsatzbereitschaft."
+    },
+    {
+      "id": "L1-WEEKLY",
+      "level": "L1",
+      "name": "Wöchentliche Wartung",
+      "executor": "crew",
+      "trigger": {
+        "type": "calendar",
+        "value": 7,
+        "unit": "days"
+      },
+      "duration": "60 Minuten",
+      "tasks": [
+        "Alle Prüfpunkte der täglichen Wartung",
+        "Luftfilter Vorabscheider leeren",
+        "Kraftstofffilter Wasserabscheider prüfen",
+        "Getriebeölstand prüfen",
+        "Turmdrehkranz schmieren (12 Punkte)",
+        "Waffenreinigung",
+        "Munitionslagerung kontrollieren",
+        "Elektronik Selbsttests",
+        "NBC-Schutzanlage testen",
+        "Erste-Hilfe-Material prüfen"
+      ],
+      "sections": ["A", "B", "C", "D", "E", "F"],
+      "notes": "Erweiterte Prüfung aller Systeme. Besatzung arbeitet als Team."
+    },
+    {
+      "id": "L2-250H",
+      "level": "L2",
+      "name": "250-Stunden Wartung (Ölwechsel)",
+      "executor": "unit_technician",
+      "trigger": {
+        "type": "operating_hours",
+        "value": 250
+      },
+      "duration": "4 Stunden",
+      "tasks": [
+        "Motoröl wechseln (85 Liter)",
+        "Kraftstofffilter Inspektion",
+        "Luftfilter reinigen",
+        "Keilriemen Spannung prüfen und nachstellen",
+        "Kühlmittelsystem Druck prüfen",
+        "Getriebeöl prüfen",
+        "Hydraulikflüssigkeit nachfüllen bei Bedarf",
+        "Alle Schmierstellen abschmieren",
+        "Bremssystem prüfen",
+        "Funktionstest aller Systeme"
+      ],
+      "sections": ["A", "B"],
+      "notes": "MTU-Wartungskonzept Level 1. Entspricht NATO AJP-4 Level 2 (Intermediate)."
+    },
+    {
+      "id": "L2-500H",
+      "level": "L2",
+      "name": "500-Stunden Wartung (Filter)",
+      "executor": "unit_technician",
+      "trigger": {
+        "type": "operating_hours",
+        "value": 500
+      },
+      "duration": "8 Stunden",
+      "tasks": [
+        "Alle Aufgaben der 250h-Wartung",
+        "Kraftstofffilter austauschen",
+        "Ölfilter austauschen",
+        "Zentrifugalfilter reinigen",
+        "Kurbelgehäuseentlüftung prüfen",
+        "Getriebeöl prüfen (bei Bedarf wechseln)",
+        "Turbolader inspizieren",
+        "Abgasanlage auf Dichtheit prüfen",
+        "Kettenbolzen Verschleiß messen",
+        "Laufrollen Lager prüfen",
+        "Stoßdämpfer detailliert prüfen",
+        "Turmhydraulik Druck prüfen",
+        "Feuerleitanlage kalibrieren"
+      ],
+      "sections": ["A", "B", "C"],
+      "notes": "MTU-Wartungskonzept Level 2. Umfangreiche Filterarbeiten und Inspektionen."
+    },
+    {
+      "id": "L3-1000H",
+      "level": "L3",
+      "name": "1000-Stunden Wartung (Ventile)",
+      "executor": "mobile_repair_team",
+      "trigger": {
+        "type": "operating_hours",
+        "value": 1000
+      },
+      "duration": "2 Tage",
+      "tasks": [
+        "Alle Aufgaben der 500h-Wartung",
+        "Ventilspiel einstellen",
+        "Einspritzpumpe Zeitpunkt prüfen",
+        "Regler einstellen",
+        "Kompressionstest alle Zylinder",
+        "Turbolader Lagerspiel messen",
+        "Kühlsystem Drucktest",
+        "Getriebeöl wechseln (95 Liter)",
+        "Getriebefilter austauschen",
+        "Magnetstopfen prüfen",
+        "Kette Verschleißmessung (bei >5% Längung: austauschen)",
+        "Laufrollen detaillierte Inspektion",
+        "Antriebsräder Zahnkranz messen",
+        "Turmdrehkranz Lagerspiel messen",
+        "Waffenstabilisierung kalibrieren",
+        "Laserentfernungsmesser kalibrieren"
+      ],
+      "sections": ["A", "B", "C"],
+      "notes": "MTU-Wartungskonzept Level 3. Entspricht NATO AJP-4 Level 3 (Field Depot). Benötigt Spezialwerkzeug."
+    },
+    {
+      "id": "L4-6000H",
+      "level": "L4",
+      "name": "6000-Stunden Wartung (Hauptüberholung)",
+      "executor": "depot_manufacturer",
+      "trigger": {
+        "type": "operating_hours",
+        "value": 6000
+      },
+      "duration": "4 Wochen",
+      "tasks": [
+        "Komplette Motordemontage",
+        "Zylinderkopf überholen",
+        "Kolben und Ringe ersetzen",
+        "Haupt- und Pleuellager ersetzen",
+        "Einspritzdüsen überholen",
+        "Turbolader komplett überholen",
+        "Brennraum inspizieren",
+        "Nockenwelle inspizieren",
+        "Getriebe komplett zerlegen",
+        "Kupplungspakete ersetzen",
+        "Getriebe Zahnräder inspizieren",
+        "Lagerung messen und bei Bedarf ersetzen",
+        "Komplette Kette ersetzen",
+        "Laufrollen ersetzen",
+        "Antriebsräder bei Bedarf ersetzen",
+        "Turmdrehkranz komplett überholen",
+        "Hauptwaffe zur Herstellerwartung",
+        "Feuerleitanlage Komplett-Check",
+        "Alle Hydrauliksysteme revidieren",
+        "Komplette Fahrzeug-Diagnostik"
+      ],
+      "sections": ["A", "B", "C", "D", "E", "F"],
+      "notes": "MTU-Wartungskonzept Level 4. Entspricht NATO AJP-4 Level 4 (Base Depot). Nur Hersteller oder autorisierte Depots."
+    },
+    {
+      "id": "L1-PRE-DEPLOYMENT",
+      "level": "L1",
+      "name": "Einsatzvorbereitung",
+      "executor": "crew",
+      "trigger": {
+        "type": "event",
+        "value": "before_deployment"
+      },
+      "duration": "2 Stunden",
+      "tasks": [
+        "Komplette L1-Wöchentliche Wartung",
+        "Zusätzliche Munition laden und sichern",
+        "Ersatzteile-Set komplettieren",
+        "Verbandskasten erneuern",
+        "Wassertanks auffüllen",
+        "Notrationen verladen",
+        "Abschleppseile prüfen",
+        "Kommunikationssysteme testen",
+        "Verschlüsselungsgeräte laden",
+        "GPS kalibrieren",
+        "Kampfführungssystem aktualisieren",
+        "NBC-Schutzmasken für alle Besatzungsmitglieder",
+        "Feuerlöschanlage Volltest",
+        "Alle Sicherheitssysteme testen"
+      ],
+      "sections": ["A", "B", "C", "D", "E", "F"],
+      "notes": "Vor jedem Einsatz durchzuführen. Vollständige Einsatzbereitschaft herstellen."
+    },
+    {
+      "id": "L1-POST-DEPLOYMENT",
+      "level": "L1",
+      "name": "Einsatznachbereitung",
+      "executor": "crew",
+      "trigger": {
+        "type": "event",
+        "value": "after_deployment"
+      },
+      "duration": "3 Stunden",
+      "tasks": [
+        "Fahrzeug außen reinigen",
+        "Kampfraum reinigen",
+        "Waffen reinigen und konservieren",
+        "Munition sichern und zählen",
+        "Hülsen entsorgen",
+        "Alle Systeme auf Beschädigungen prüfen",
+        "Kettenverschleiß messen",
+        "Motorölstand prüfen und nachfüllen",
+        "Kraftstoff auffüllen",
+        "Alle Flüssigkeiten prüfen",
+        "Schäden dokumentieren",
+        "Mängelliste erstellen",
+        "Ersatzteile-Verbrauch melden",
+        "Betriebsstunden dokumentieren"
+      ],
+      "sections": ["A", "B", "C", "D", "E", "F"],
+      "notes": "Nach jedem Einsatz. Fahrzeug wieder in Bereitschaft versetzen und Schäden erfassen."
+    },
+    {
+      "id": "L2-ANNUAL",
+      "level": "L2",
+      "name": "Jährliche Inspektion",
+      "executor": "unit_technician",
+      "trigger": {
+        "type": "calendar",
+        "value": 365,
+        "unit": "days"
+      },
+      "duration": "1 Tag",
+      "tasks": [
+        "Komplette Fahrzeugdokumentation prüfen",
+        "Alle TÜV-relevanten Prüfungen",
+        "Feuerlöschanlage TÜV",
+        "Druckbehälter prüfen",
+        "Feuerlöscher erneuern",
+        "Batterie Zustand testen (Kapazitätstest)",
+        "Alle Dichtungen alterungsbedingt prüfen",
+        "Gummiteile auf Risse prüfen",
+        "Korrosionsschutz erneuern",
+        "Lackschäden ausbessern",
+        "Alle Schmierintervalle nachholen",
+        "Betriebsstundenzähler kalibrieren"
+      ],
+      "sections": ["A", "B", "C", "D", "E", "F"],
+      "notes": "Unabhängig von Betriebsstunden. Zeitabhängige Wartung und gesetzliche Prüfungen."
+    }
+  ]
+}
+

@@ -1,0 +1,79 @@
+{
+  "id": "leopard2_a5",
+  "name": "Leopard 2 A5",
+  "type": "Main Battle Tank",
+  "manufacturer": "Krauss-Maffei Wegmann",
+  "country": "Germany",
+  "in_service_since": 1995,
+  "variant": "A5",
+  "specs": {
+    "weight_tons": 59.5,
+    "dimensions": {
+      "length_m": 9.67,
+      "width_m": 3.70,
+      "height_m": 2.79
+    },
+    "crew": 4,
+    "engine": {
+      "model": "MTU MB 873 Ka-501",
+      "type": "V12 Diesel",
+      "power_hp": 1500,
+      "power_kw": 1103,
+      "displacement_l": 47.6,
+      "cylinders": 12,
+      "cooling": "Liquid-cooled"
+    },
+    "transmission": {
+      "model": "RENK HSWL 354",
+      "type": "Automatic",
+      "gears_forward": 4,
+      "gears_reverse": 2
+    },
+    "armament": {
+      "main_gun": {
+        "model": "Rheinmetall L/44",
+        "caliber_mm": 120,
+        "barrel_length": "L/44",
+        "ammunition_capacity": 42
+      },
+      "secondary_weapons": [
+        {
+          "type": "Coaxial Machine Gun",
+          "model": "MG3",
+          "caliber_mm": 7.62,
+          "ammunition_capacity": 4750
+        },
+        {
+          "type": "Loader's Machine Gun",
+          "model": "MG3",
+          "caliber_mm": 7.62,
+          "ammunition_capacity": 2000
+        }
+      ]
+    },
+    "fuel_capacity_l": 1200,
+    "max_speed_kmh": 72,
+    "range_km": 550,
+    "armor": {
+      "hull_front_mm": 620,
+      "turret_front_mm": 800,
+      "type": "Composite armor with additional spaced armor modules on turret front and sides"
+    }
+  },
+  "systems": [
+    "turm_hydraulik",
+    "feuerleitanlage_emes15",
+    "nbc_schutz",
+    "feuerloesch",
+    "funkanlage_sem80_90",
+    "kraftstoffsystem",
+    "kuehlsystem",
+    "bremssystem",
+    "zusatzpanzerung"
+  ],
+  "notes": "Major upgrade with wedge-shaped spaced armor on turret, improved commander's periscope (PERI-R17 A2), and digital ballistic computer. Weight increased to 59.5 tons.",
+  "source": "https://en.wikipedia.org/wiki/Leopard_2",
+  "source_type": "public",
+  "last_verified": "2024-11-01"
+}
+

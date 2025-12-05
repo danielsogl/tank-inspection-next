@@ -1,0 +1,311 @@
+{
+  "id": "section_b",
+  "name": "Fahrwerk und Laufwerk",
+  "responsible_roles": ["driver", "commander"],
+  "subsystems": [
+    {
+      "id": "B01",
+      "number": 16,
+      "name": "Ketten auf Spannung prüfen",
+      "description": "Kettendurchhang messen",
+      "type": "measurement",
+      "expected_value": {
+        "description": "Durchhang 30-50mm zwischen Laufrollen",
+        "min": 30,
+        "max": 50,
+        "unit": "mm"
+      },
+      "tools_required": ["Maßband"],
+      "estimated_time_min": 8,
+      "photo_required": true,
+      "photo_points": ["Kettendurchhang linke Seite", "Kettendurchhang rechte Seite"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "B01-D01",
+          "description": "Kette zu straff",
+          "indicators": ["Durchhang <20mm", "erhöhter Verschleiß Laufrollen"],
+          "priority": "medium",
+          "action": "Kettenspannung lockern. Überlastung der Laufrollen vermeiden."
+        },
+        {
+          "id": "B01-D02",
+          "description": "Kette zu locker",
+          "indicators": ["Durchhang >60mm", "Absprungrisiko"],
+          "priority": "high",
+          "action": "Kettenspannung nachstellen. Bei >80mm: Fahrzeug nicht bewegen."
+        }
+      ]
+    },
+    {
+      "id": "B02",
+      "number": 17,
+      "name": "Kettenbolzen auf Verschleiß prüfen",
+      "description": "Bolzen visuell auf Abnutzung kontrollieren",
+      "type": "visual_check",
+      "expected_value": "keine sichtbare Abnutzung, Bolzen ragen max. 2mm heraus",
+      "tools_required": ["Taschenlampe", "Schieblehre"],
+      "estimated_time_min": 12,
+      "photo_required": true,
+      "photo_points": ["Verschlissene Bolzen"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "B02-D01",
+          "description": "Bolzen stark verschlissen",
+          "indicators": ["Bolzen ragt >5mm heraus", "Kette läuft unruhig"],
+          "priority": "high",
+          "action": "Bolzen vor nächster Ausfahrt ersetzen. Kettenriss-Gefahr."
+        }
+      ]
+    },
+    {
+      "id": "B03",
+      "number": 18,
+      "name": "Laufrollen auf Beschädigungen prüfen",
+      "description": "Alle Laufrollen visuell und akustisch prüfen",
+      "type": "inspection_action",
+      "expected_value": "keine Risse, gleichmäßige Abrollung, kein Lagerspiel",
+      "tools_required": ["Taschenlampe", "Brechstange"],
+      "estimated_time_min": 15,
+      "photo_required": true,
+      "photo_points": ["Beschädigte Laufrollen"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "tasks": [
+        {
+          "step": 1,
+          "description": "Jede Laufrolle visuell auf Risse prüfen"
+        },
+        {
+          "step": 2,
+          "description": "Gummibandage auf Ablösung kontrollieren"
+        },
+        {
+          "step": 3,
+          "description": "Lagerspiel durch Hebeln mit Brechstange testen"
+        },
+        {
+          "step": 4,
+          "description": "Laufgeräusche bei Probefahrt beurteilen"
+        }
+      ],
+      "common_defects": [
+        {
+          "id": "B03-D01",
+          "description": "Lagerdefekt",
+          "indicators": ["Spiel >2mm", "Knackgeräusche", "erhitzte Nabe"],
+          "priority": "high",
+          "action": "Laufrolle austauschen vor nächster Ausfahrt. Totalausfall möglich."
+        }
+      ]
+    },
+    {
+      "id": "B04",
+      "number": 19,
+      "name": "Leiträder auf Verschleiß prüfen",
+      "description": "Vordere und hintere Leiträder inspizieren",
+      "type": "visual_check",
+      "expected_value": "symmetrisches Profil, keine Risse, Lager fest",
+      "tools_required": ["Taschenlampe"],
+      "estimated_time_min": 6,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver"
+    },
+    {
+      "id": "B05",
+      "number": 20,
+      "name": "Stoßdämpfer auf Undichtigkeiten prüfen",
+      "description": "Alle Stoßdämpfer auf Ölaustritt kontrollieren",
+      "type": "visual_check",
+      "expected_value": "keine Ölspuren am Dämpferrohr",
+      "tools_required": ["Taschenlampe", "Reinigungstuch"],
+      "estimated_time_min": 10,
+      "photo_required": true,
+      "photo_points": ["Undichte Dämpfer"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "B05-D01",
+          "description": "Stoßdämpfer defekt",
+          "indicators": ["Öl am Kolbenrohr", "Fahrzeug wippt nach", "ungleiche Einfederung"],
+          "priority": "medium",
+          "action": "Dämpfer innerhalb 48h austauschen. Fahrkomfort und Zielgenauigkeit beeinträchtigt."
+        }
+      ]
+    },
+    {
+      "id": "B06",
+      "number": 21,
+      "name": "Torsionsstäbe prüfen",
+      "description": "Federelemente auf Risse und korrekte Vorspannung prüfen",
+      "type": "visual_check",
+      "expected_value": "keine Risse, symmetrische Einfederung links/rechts",
+      "tools_required": ["Taschenlampe"],
+      "estimated_time_min": 8,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver"
+    },
+    {
+      "id": "B07",
+      "number": 22,
+      "name": "Antriebsräder auf Verschleiß prüfen",
+      "description": "Zahnkränze der Antriebsräder kontrollieren",
+      "type": "visual_check",
+      "expected_value": "gleichmäßiges Profil, keine abgebrochenen Zähne",
+      "tools_required": ["Taschenlampe"],
+      "estimated_time_min": 6,
+      "photo_required": true,
+      "photo_points": ["Verschlissene Zähne"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "B07-D01",
+          "description": "Zähne abgebrochen",
+          "indicators": ["fehlende Zähne", "Kette springt bei Belastung"],
+          "priority": "critical",
+          "action": "Fahrzeug nicht einsatzbereit. Antriebsrad austauschen."
+        }
+      ]
+    },
+    {
+      "id": "B08",
+      "number": 23,
+      "name": "Schürzen auf Befestigung prüfen",
+      "description": "Seitenschürzen und Befestigungen kontrollieren",
+      "type": "visual_check",
+      "expected_value": "alle Schürzen vorhanden und fest verschraubt",
+      "tools_required": [],
+      "estimated_time_min": 5,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "B08-D01",
+          "description": "Schürze lose oder fehlend",
+          "indicators": ["klappernde Geräusche", "Schürze hängt", "Befestigungsbolzen fehlt"],
+          "priority": "low",
+          "action": "Schürze befestigen oder ersetzen. Verringerte Schutzwirkung."
+        }
+      ]
+    },
+    {
+      "id": "B09",
+      "number": 24,
+      "name": "Lenkungshydraulik prüfen",
+      "description": "Hydraulikschläuche und Lenkeinheit kontrollieren",
+      "type": "visual_check",
+      "expected_value": "keine Leckagen, Schläuche unbeschädigt",
+      "tools_required": ["Taschenlampe", "Reinigungstuch"],
+      "estimated_time_min": 6,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "B09-D01",
+          "description": "Hydraulikleckage",
+          "indicators": ["Öl an Schläuchen", "schwergängige Lenkung", "Druckverlust"],
+          "priority": "critical",
+          "action": "Fahrzeug nicht einsatzbereit. Lenkung nicht voll funktionsfähig."
+        }
+      ]
+    },
+    {
+      "id": "B10",
+      "number": 25,
+      "name": "Bremsanlage prüfen",
+      "description": "Bremsscheiben, -beläge und Hydraulik kontrollieren",
+      "type": "inspection_action",
+      "expected_value": "Bremsflüssigkeit >MIN, keine Leckagen, Beläge >3mm",
+      "tools_required": ["Taschenlampe"],
+      "estimated_time_min": 10,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "tasks": [
+        {
+          "step": 1,
+          "description": "Bremsflüssigkeitsstand prüfen"
+        },
+        {
+          "step": 2,
+          "description": "Leitungen auf Leckagen prüfen"
+        },
+        {
+          "step": 3,
+          "description": "Belagstärke visuell schätzen"
+        },
+        {
+          "step": 4,
+          "description": "Bremswirkung bei Testfahrt prüfen"
+        }
+      ],
+      "common_defects": [
+        {
+          "id": "B10-D01",
+          "description": "Bremssystem defekt",
+          "indicators": ["schwammiges Pedal", "verlängerter Bremsweg", "Flüssigkeitsverlust"],
+          "priority": "critical",
+          "action": "Motor nicht starten. Fahrzeug nicht einsatzbereit. Sofortige Reparatur."
+        }
+      ]
+    },
+    {
+      "id": "B11",
+      "number": 26,
+      "name": "Kettenführungen prüfen",
+      "description": "Führungsschienen auf Verschleiß kontrollieren",
+      "type": "visual_check",
+      "expected_value": "gleichmäßige Abnutzung, keine Risse, fester Sitz",
+      "tools_required": ["Taschenlampe"],
+      "estimated_time_min": 6,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver"
+    },
+    {
+      "id": "B12",
+      "number": 27,
+      "name": "Fahrtest durchführen",
+      "description": "Fahrzeug auf Laufverhalten und Geräusche testen",
+      "type": "functional_test",
+      "expected_value": "gerader Lauf, keine ungewöhnlichen Geräusche, Lenkung leichtgängig",
+      "tools_required": [],
+      "estimated_time_min": 15,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "tasks": [
+        {
+          "step": 1,
+          "description": "Geradeauslauf testen (ohne Lenkkorrektur)"
+        },
+        {
+          "step": 2,
+          "description": "Lenkverhalten in beide Richtungen prüfen"
+        },
+        {
+          "step": 3,
+          "description": "Bremstest aus 30 km/h"
+        },
+        {
+          "step": 4,
+          "description": "Beschleunigung und Gangwechsel beurteilen"
+        },
+        {
+          "step": 5,
+          "description": "Ungewöhnliche Vibrationen oder Geräusche dokumentieren"
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,142 @@
+{
+  "id": "renk_hswl354",
+  "name": "RENK HSWL 354",
+  "category": "powertrain",
+  "specs": {
+    "type": "Automatic Transmission",
+    "manufacturer": "RENK AG",
+    "gears_forward": 4,
+    "gears_reverse": 2,
+    "torque_converter": "Hydrodynamic with lock-up clutch",
+    "oil_capacity_l": 95,
+    "weight_kg": 1500,
+    "max_torque_input_nm": 4700,
+    "gear_ratios": {
+      "1st": 4.11,
+      "2nd": 2.42,
+      "3rd": 1.48,
+      "4th": 1.00,
+      "reverse_1": 2.85,
+      "reverse_2": 4.66
+    }
+  },
+  "maintenance_schedule": [
+    {
+      "interval_hours": 500,
+      "description": "Transmission oil check and top-up",
+      "tasks": [
+        "Check oil level at operating temperature",
+        "Inspect for leaks",
+        "Check oil condition (color, smell, particles)"
+      ]
+    },
+    {
+      "interval_hours": 1000,
+      "description": "Transmission service",
+      "tasks": [
+        "Transmission oil change (95 liters)",
+        "Filter replacement",
+        "Magnetic plug inspection",
+        "Shift quality assessment",
+        "Torque converter function test"
+      ]
+    },
+    {
+      "interval_hours": 3000,
+      "description": "Major inspection",
+      "tasks": [
+        "Endoscopic inspection of gears",
+        "Bearing play measurement",
+        "Clutch pack wear check",
+        "Valve body inspection",
+        "Pressure tests on all circuits"
+      ]
+    }
+  ],
+  "monitoring_points": [
+    {
+      "name": "Getriebeöltemperatur",
+      "unit": "°C",
+      "normal_range": {
+        "min": 60,
+        "max": 100
+      },
+      "critical_threshold": {
+        "max": 120
+      }
+    },
+    {
+      "name": "Öldruck",
+      "unit": "bar",
+      "normal_range": {
+        "min": 12,
+        "max": 18
+      },
+      "critical_threshold": {
+        "min": 8
+      }
+    },
+    {
+      "name": "Ölstand",
+      "unit": "l",
+      "normal_range": {
+        "min": 90,
+        "max": 100
+      },
+      "critical_threshold": {
+        "min": 80
+      }
+    }
+  ],
+  "common_failures": [
+    {
+      "id": "RENK-F01",
+      "name": "Clutch pack wear",
+      "mtbf_hours": 4000,
+      "symptoms": [
+        "Schlupf beim Gangwechsel",
+        "Verzögertes Einlegen",
+        "Ruckartiges Schalten",
+        "Verbrannter Geruch"
+      ],
+      "cause": "Natürlicher Verschleiß durch Reibung und Hitze"
+    },
+    {
+      "id": "RENK-F02",
+      "name": "Oil cooler blockage",
+      "mtbf_hours": 6000,
+      "symptoms": [
+        "Getriebeöltemperatur erhöht",
+        "Leistungsverlust bei Hitze",
+        "Verzögertes Ansprechverhalten"
+      ],
+      "cause": "Ablagerungen und Verschmutzung im Ölkühler"
+    },
+    {
+      "id": "RENK-F03",
+      "name": "Torque converter failure",
+      "mtbf_hours": 10000,
+      "symptoms": [
+        "Hohe Motordrehzahl ohne Vortrieb",
+        "Vibrationen",
+        "Metallgeräusche",
+        "Kein Kraftschluss"
+      ],
+      "cause": "Lagerschaden oder defekte Turbinenschaufeln"
+    }
+  ],
+  "diagnostics": {
+    "system": "Transmission Diagnostic System (TDS-G)",
+    "interface": "CAN-Bus",
+    "monitored_parameters": [
+      "Gang-Status",
+      "Öldruck pro Gang",
+      "Schlupf Wandler",
+      "Temperatur",
+      "Schaltzeitpunkte"
+    ],
+    "calibration_interval": "Every 1000 hours"
+  },
+  "notes": "The RENK HSWL 354 is a robust automatic transmission with hydrodynamic torque converter. It allows the Leopard 2 to change gears without interrupting power delivery. The lock-up clutch in 4th gear provides fuel efficiency at cruising speed."
+}
+

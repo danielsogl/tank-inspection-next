@@ -1,0 +1,83 @@
+{
+  "id": "leopard2_a7v",
+  "name": "Leopard 2 A7V",
+  "type": "Main Battle Tank",
+  "manufacturer": "Krauss-Maffei Wegmann",
+  "country": "Germany",
+  "in_service_since": 2019,
+  "variant": "A7V",
+  "specs": {
+    "weight_tons": 66.5,
+    "dimensions": {
+      "length_m": 10.97,
+      "width_m": 3.76,
+      "height_m": 3.03
+    },
+    "crew": 4,
+    "engine": {
+      "model": "MTU MB 873 Ka-501",
+      "type": "V12 Diesel",
+      "power_hp": 1500,
+      "power_kw": 1103,
+      "displacement_l": 47.6,
+      "cylinders": 12,
+      "cooling": "Liquid-cooled"
+    },
+    "transmission": {
+      "model": "RENK HSWL 354",
+      "type": "Automatic",
+      "gears_forward": 4,
+      "gears_reverse": 2
+    },
+    "armament": {
+      "main_gun": {
+        "model": "Rheinmetall L/55",
+        "caliber_mm": 120,
+        "barrel_length": "L/55",
+        "ammunition_capacity": 42
+      },
+      "secondary_weapons": [
+        {
+          "type": "Coaxial Machine Gun",
+          "model": "MG3",
+          "caliber_mm": 7.62,
+          "ammunition_capacity": 4750
+        },
+        {
+          "type": "Remote Weapon Station",
+          "model": "FLW 200",
+          "caliber_mm": 12.7,
+          "ammunition_capacity": 500
+        }
+      ]
+    },
+    "fuel_capacity_l": 1200,
+    "max_speed_kmh": 72,
+    "range_km": 500,
+    "armor": {
+      "hull_front_mm": 620,
+      "turret_front_mm": 800,
+      "type": "Third-generation composite armor with enhanced all-around protection"
+    }
+  },
+  "systems": [
+    "turm_hydraulik",
+    "feuerleitanlage_attica",
+    "nbc_schutz",
+    "feuerloesch",
+    "funkanlage_svf",
+    "kraftstoffsystem",
+    "kuehlsystem",
+    "bremssystem",
+    "zusatzpanzerung",
+    "minenschutz",
+    "fernbediente_waffenstation",
+    "klima",
+    "aps_trophy"
+  ],
+  "notes": "Latest variant for German Army with Israeli Trophy APS (Active Protection System), improved all-around protection, upgraded fire control, digital architecture for future upgrades, and auxiliary power unit (APU). Optimized for network-centric warfare.",
+  "source": "https://en.wikipedia.org/wiki/Leopard_2",
+  "source_type": "public",
+  "last_verified": "2024-11-01"
+}
+

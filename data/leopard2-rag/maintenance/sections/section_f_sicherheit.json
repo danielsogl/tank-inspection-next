@@ -1,0 +1,193 @@
+{
+  "id": "section_f",
+  "name": "Sicherheitssysteme",
+  "responsible_roles": ["driver", "commander", "gunner", "loader"],
+  "subsystems": [
+    {
+      "id": "F01",
+      "number": 66,
+      "name": "Feuerlöschanlage prüfen",
+      "description": "Automatische Feuerlöschung und Handbedienung testen",
+      "type": "functional_test",
+      "expected_value": "Sensoren reagieren, Auslösung manuell möglich, Druck >10 bar",
+      "tools_required": ["Druckmessgerät"],
+      "estimated_time_min": 8,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "F01-D01",
+          "description": "Feuerlöschanlage Druckverlust",
+          "indicators": ["Druck <8 bar", "Warnleuchte aktiv"],
+          "priority": "critical",
+          "action": "Fahrzeug nicht einsatzbereit. System prüfen und nachfüllen. Lebensbedrohlich!"
+        }
+      ]
+    },
+    {
+      "id": "F02",
+      "number": 67,
+      "name": "Feuerlöscher prüfen",
+      "description": "Handfeuerlöscher kontrollieren",
+      "type": "visual_check",
+      "expected_value": "Druck im grünen Bereich, Plomben intakt, TÜV aktuell",
+      "tools_required": [],
+      "estimated_time_min": 3,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "loader",
+      "common_defects": [
+        {
+          "id": "F02-D01",
+          "description": "Feuerlöscher defekt",
+          "indicators": ["Druckzeiger im roten Bereich", "TÜV abgelaufen", "Beschädigung"],
+          "priority": "high",
+          "action": "Feuerlöscher vor Ausfahrt austauschen. Sicherheitsrisiko."
+        }
+      ]
+    },
+    {
+      "id": "F03",
+      "number": 68,
+      "name": "NBC-Schutzanlage prüfen",
+      "description": "Überdruckanlage und Filter testen",
+      "type": "functional_test",
+      "expected_value": "Überdruck aufbaut, Filter intakt, kein Alarm",
+      "tools_required": ["Druckmessgerät"],
+      "estimated_time_min": 10,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "F03-D01",
+          "description": "NBC-Anlage defekt",
+          "indicators": ["kein Überdruck", "Filter verschmutzt", "Leckage"],
+          "priority": "high",
+          "action": "Filter austauschen. Dichtungen prüfen. ABC-Schutz nicht gegeben."
+        }
+      ]
+    },
+    {
+      "id": "F04",
+      "number": 69,
+      "name": "Schutzmasken prüfen",
+      "description": "Atemschutzmasken aller Besatzungsmitglieder kontrollieren",
+      "type": "visual_check",
+      "expected_value": "alle Masken vorhanden, Dichtungen intakt, Filter aktuell",
+      "tools_required": [],
+      "estimated_time_min": 5,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "commander"
+    },
+    {
+      "id": "F05",
+      "number": 70,
+      "name": "Luken auf Funktion prüfen",
+      "description": "Alle Luken öffnen und schließen",
+      "type": "functional_test",
+      "expected_value": "leichtgängig, Verriegelung schließt sicher, keine Verformungen",
+      "tools_required": [],
+      "estimated_time_min": 6,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "F05-D01",
+          "description": "Luke klemmt",
+          "indicators": ["schwergängig", "schließt nicht vollständig", "Verriegelung defekt"],
+          "priority": "medium",
+          "action": "Scharniere schmieren. Verriegelung justieren. Notausstieg sicherstellen."
+        }
+      ]
+    },
+    {
+      "id": "F06",
+      "number": 71,
+      "name": "Notausstiegssprengbolzen prüfen",
+      "description": "Pyrotechnische Notöffnung kontrollieren",
+      "type": "visual_check",
+      "expected_value": "Sprengbolzen vorhanden, Auslöser zugänglich, Ablaufdatum gültig",
+      "tools_required": [],
+      "estimated_time_min": 4,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "commander",
+      "common_defects": [
+        {
+          "id": "F06-D01",
+          "description": "Sprengbolzen abgelaufen",
+          "indicators": ["Ablaufdatum überschritten"],
+          "priority": "high",
+          "action": "Sprengbolzen vor Ausfahrt austauschen. Notausstieg nicht sicher."
+        }
+      ]
+    },
+    {
+      "id": "F07",
+      "number": 72,
+      "name": "Erste-Hilfe-Ausrüstung prüfen",
+      "description": "Sanitätsmaterial kontrollieren",
+      "type": "visual_check",
+      "expected_value": "Verbandskasten vollständig, Ablaufdatum gültig, Tourniquet vorhanden",
+      "tools_required": [],
+      "estimated_time_min": 4,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "commander"
+    },
+    {
+      "id": "F08",
+      "number": 73,
+      "name": "Warndreieck und Sicherungsausrüstung prüfen",
+      "description": "Absicherungsmaterial für Pannen kontrollieren",
+      "type": "visual_check",
+      "expected_value": "Warndreieck, Warnweste, Abschleppseile vorhanden",
+      "tools_required": [],
+      "estimated_time_min": 3,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver"
+    },
+    {
+      "id": "F09",
+      "number": 74,
+      "name": "Notfallkommunikation prüfen",
+      "description": "Notsignale und Notfunk testen",
+      "type": "functional_test",
+      "expected_value": "Notrufknopf funktioniert, Signalraketen vorhanden",
+      "tools_required": [],
+      "estimated_time_min": 4,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "commander"
+    },
+    {
+      "id": "F10",
+      "number": 75,
+      "name": "Active Protection System prüfen (A7V)",
+      "description": "Trophy APS auf Funktion testen",
+      "type": "functional_test",
+      "expected_value": "System aktiv, Radar funktioniert, keine Fehlermeldungen",
+      "tools_required": [],
+      "estimated_time_min": 8,
+      "photo_required": false,
+      "vehicle_variants": ["A7V"],
+      "responsible_role": "commander",
+      "notes": "Nur für A7V mit Trophy APS",
+      "common_defects": [
+        {
+          "id": "F10-D01",
+          "description": "APS defekt",
+          "indicators": ["System offline", "Radararme bewegen sich nicht", "Fehlermeldung"],
+          "priority": "high",
+          "action": "System neu starten. Bei Persistenz: Spezialwartung erforderlich."
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,173 @@
+{
+  "entities": [
+    {
+      "id": "vehicle_variant",
+      "name": "Leopard 2 Variante",
+      "values": [
+        {
+          "value": "A4",
+          "synonyms": ["A4", "Leopard 2 A4", "Leo 2 A4", "2A4"]
+        },
+        {
+          "value": "A5",
+          "synonyms": ["A5", "Leopard 2 A5", "Leo 2 A5", "2A5"]
+        },
+        {
+          "value": "A6",
+          "synonyms": ["A6", "Leopard 2 A6", "Leo 2 A6", "2A6"]
+        },
+        {
+          "value": "A6M",
+          "synonyms": ["A6M", "Leopard 2 A6M", "Leo 2 A6M", "2A6M", "Minenschutz"]
+        },
+        {
+          "value": "A7",
+          "synonyms": ["A7", "Leopard 2 A7", "Leo 2 A7", "2A7"]
+        },
+        {
+          "value": "A7V",
+          "synonyms": ["A7V", "Leopard 2 A7V", "Leo 2 A7V", "2A7V", "neueste Version"]
+        }
+      ]
+    },
+    {
+      "id": "crew_role",
+      "name": "Besatzungsrolle",
+      "values": [
+        {
+          "value": "commander",
+          "synonyms": ["Kommandant", "Commander", "Kdt", "Fahrzeugführer"]
+        },
+        {
+          "value": "gunner",
+          "synonyms": ["Richtschütze", "Gunner", "R", "Schütze"]
+        },
+        {
+          "value": "loader",
+          "synonyms": ["Ladeschütze", "Loader", "L", "Lader"]
+        },
+        {
+          "value": "driver",
+          "synonyms": ["Kraftfahrer", "Driver", "Kfz", "Fahrer"]
+        }
+      ]
+    },
+    {
+      "id": "maintenance_section",
+      "name": "Wartungssektion",
+      "values": [
+        {
+          "value": "A",
+          "synonyms": ["Sektion A", "Section A", "Motor", "Antrieb", "Motor und Antrieb"]
+        },
+        {
+          "value": "B",
+          "synonyms": ["Sektion B", "Section B", "Fahrwerk", "Laufwerk", "Fahrwerk und Laufwerk"]
+        },
+        {
+          "value": "C",
+          "synonyms": ["Sektion C", "Section C", "Turm", "Waffe", "Waffensystem", "Turm und Waffensystem"]
+        },
+        {
+          "value": "D",
+          "synonyms": ["Sektion D", "Section D", "Elektrik", "Elektronik", "Bordelektrik"]
+        },
+        {
+          "value": "E",
+          "synonyms": ["Sektion E", "Section E", "Kommunikation", "Funk", "Führung"]
+        },
+        {
+          "value": "F",
+          "synonyms": ["Sektion F", "Section F", "Sicherheit", "Sicherheitssysteme", "Brandschutz"]
+        }
+      ]
+    },
+    {
+      "id": "defect_priority",
+      "name": "Mangelpriorität",
+      "values": [
+        {
+          "value": "critical",
+          "synonyms": ["kritisch", "critical", "sofort", "akut", "gefahr"]
+        },
+        {
+          "value": "high",
+          "synonyms": ["hoch", "high", "wichtig", "dringend"]
+        },
+        {
+          "value": "medium",
+          "synonyms": ["mittel", "medium", "moderat", "normal"]
+        },
+        {
+          "value": "low",
+          "synonyms": ["niedrig", "low", "gering", "unwichtig"]
+        },
+        {
+          "value": "info",
+          "synonyms": ["info", "information", "hinweis", "beobachtung"]
+        }
+      ]
+    },
+    {
+      "id": "component_type",
+      "name": "Komponententyp",
+      "values": [
+        {
+          "value": "motor",
+          "synonyms": ["Motor", "Engine", "MTU", "Triebwerk"]
+        },
+        {
+          "value": "getriebe",
+          "synonyms": ["Getriebe", "Transmission", "RENK", "Schaltgetriebe"]
+        },
+        {
+          "value": "hauptwaffe",
+          "synonyms": ["Hauptwaffe", "Main Gun", "Kanone", "120mm", "L44", "L55"]
+        },
+        {
+          "value": "turm",
+          "synonyms": ["Turm", "Turret", "Turmantrieb", "Turmdrehkranz"]
+        },
+        {
+          "value": "kette",
+          "synonyms": ["Kette", "Track", "Gleiskette", "Laufwerk"]
+        },
+        {
+          "value": "feuerleitanlage",
+          "synonyms": ["Feuerleitanlage", "Fire Control", "EMES", "ATTICA", "Zielgerät"]
+        },
+        {
+          "value": "hydraulik",
+          "synonyms": ["Hydraulik", "Hydraulics", "Hydrauliksystem"]
+        },
+        {
+          "value": "funk",
+          "synonyms": ["Funk", "Radio", "Funkanlage", "Kommunikation"]
+        }
+      ]
+    },
+    {
+      "id": "maintenance_level",
+      "name": "Wartungsebene",
+      "values": [
+        {
+          "value": "L1",
+          "synonyms": ["L1", "Level 1", "Besatzung", "Crew", "Organisational"]
+        },
+        {
+          "value": "L2",
+          "synonyms": ["L2", "Level 2", "Einheit", "Unit", "Intermediate", "Techniker"]
+        },
+        {
+          "value": "L3",
+          "synonyms": ["L3", "Level 3", "Feldwerft", "Field Depot", "Mobile Werkstatt"]
+        },
+        {
+          "value": "L4",
+          "synonyms": ["L4", "Level 4", "HIL", "Depot", "Base Depot", "Hersteller"]
+        }
+      ]
+    }
+  ]
+}
+

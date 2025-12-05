@@ -1,0 +1,191 @@
+{
+  "id": "section_d",
+  "name": "Bordelektrik und Elektronik",
+  "responsible_roles": ["driver"],
+  "subsystems": [
+    {
+      "id": "D01",
+      "number": 48,
+      "name": "Batteriespannung prüfen",
+      "description": "Bordnetzspannung messen",
+      "type": "measurement",
+      "expected_value": {
+        "description": "Spannung 24-28V bei laufendem Motor",
+        "min": 24,
+        "max": 28,
+        "unit": "V"
+      },
+      "tools_required": ["Multimeter"],
+      "estimated_time_min": 3,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "D01-D01",
+          "description": "Ladespannung zu niedrig",
+          "indicators": ["Spannung <24V", "Batterie entlädt sich"],
+          "priority": "high",
+          "action": "Lichtmaschine prüfen. Batterie testen. Keilriemen kontrollieren."
+        }
+      ]
+    },
+    {
+      "id": "D02",
+      "number": 49,
+      "name": "Beleuchtung prüfen",
+      "description": "Alle Außenleuchten testen",
+      "type": "functional_test",
+      "expected_value": "alle Leuchten funktionieren: Scheinwerfer, Brems-, Rück-, Blink-, Kennung",
+      "tools_required": [],
+      "estimated_time_min": 8,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "D02-D01",
+          "description": "Beleuchtung defekt",
+          "indicators": ["Lampe leuchtet nicht", "Flackern", "nur eine Seite"],
+          "priority": "medium",
+          "action": "Leuchtmittel austauschen. Kabel und Stecker prüfen."
+        }
+      ]
+    },
+    {
+      "id": "D03",
+      "number": 50,
+      "name": "Innenbeleuchtung prüfen",
+      "description": "Kampfraum- und Wannenbeleuchtung testen",
+      "type": "functional_test",
+      "expected_value": "alle Lampen funktionieren, Dimmer regelt",
+      "tools_required": [],
+      "estimated_time_min": 4,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver"
+    },
+    {
+      "id": "D04",
+      "number": 51,
+      "name": "Instrumentenbeleuchtung prüfen",
+      "description": "Armaturenbrett und Anzeigen testen",
+      "type": "functional_test",
+      "expected_value": "alle Instrumente ablesbar, Beleuchtung funktioniert",
+      "tools_required": [],
+      "estimated_time_min": 3,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver"
+    },
+    {
+      "id": "D05",
+      "number": 52,
+      "name": "Warnleuchten und Anzeigen prüfen",
+      "description": "Fehleranzeigen beim Zündung einschalten testen",
+      "type": "functional_test",
+      "expected_value": "alle Warnleuchten leuchten kurz auf, erlöschen nach Start",
+      "tools_required": [],
+      "estimated_time_min": 2,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "D05-D01",
+          "description": "Warnleuchte bleibt an",
+          "indicators": ["Dauerleuchten", "System meldet Fehler"],
+          "priority": "medium",
+          "action": "Fehlercode auslesen. System prüfen. Je nach System Priorität anpassen."
+        }
+      ]
+    },
+    {
+      "id": "D06",
+      "number": 53,
+      "name": "Verkabelung auf Beschädigungen prüfen",
+      "description": "Sichtbare Kabel im Kampfraum inspizieren",
+      "type": "visual_check",
+      "expected_value": "keine beschädigte Isolierung, Stecker fest",
+      "tools_required": ["Taschenlampe"],
+      "estimated_time_min": 10,
+      "photo_required": true,
+      "photo_points": ["Beschädigte Kabel"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "D06-D01",
+          "description": "Kabelschaden",
+          "indicators": ["freiliegende Adern", "angeschmolzte Isolierung", "Kurzschluss"],
+          "priority": "high",
+          "action": "Kabel isolieren oder austauschen. Brandgefahr!"
+        }
+      ]
+    },
+    {
+      "id": "D07",
+      "number": 54,
+      "name": "Sicherungen prüfen",
+      "description": "Sicherungskasten kontrollieren",
+      "type": "visual_check",
+      "expected_value": "alle Sicherungen intakt, keine durchgebrannten",
+      "tools_required": ["Ersatzsicherungen"],
+      "estimated_time_min": 5,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver"
+    },
+    {
+      "id": "D08",
+      "number": 55,
+      "name": "Bordcomputer Selbsttest",
+      "description": "Diagnose-Selbsttest durchführen",
+      "type": "functional_test",
+      "expected_value": "keine Fehlercodes, alle Systeme OK",
+      "tools_required": [],
+      "estimated_time_min": 5,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "D08-D01",
+          "description": "Fehlercodes vorhanden",
+          "indicators": ["Warnmeldungen", "System-Fehler"],
+          "priority": "medium",
+          "action": "Fehlerspeicher auslesen und dokumentieren. Entsprechende Systeme prüfen."
+        }
+      ]
+    },
+    {
+      "id": "D09",
+      "number": 56,
+      "name": "Klimaanlage prüfen (A7/A7V)",
+      "description": "Kühlleistung und Luftverteilung testen",
+      "type": "functional_test",
+      "expected_value": "Kühlung funktioniert, alle Düsen blasen, keine Geräusche",
+      "tools_required": [],
+      "estimated_time_min": 6,
+      "photo_required": false,
+      "vehicle_variants": ["A7", "A7V"],
+      "responsible_role": "driver",
+      "notes": "Nur für A7 und A7V mit Klimaanlage"
+    },
+    {
+      "id": "D10",
+      "number": 57,
+      "name": "Zusatzstromversorgung (APU) prüfen (A7V)",
+      "description": "Auxiliary Power Unit testen",
+      "type": "functional_test",
+      "expected_value": "APU startet, liefert Strom, Abgase normal",
+      "tools_required": [],
+      "estimated_time_min": 8,
+      "photo_required": false,
+      "vehicle_variants": ["A7V"],
+      "responsible_role": "driver",
+      "notes": "Nur für A7V mit APU"
+    }
+  ]
+}
+

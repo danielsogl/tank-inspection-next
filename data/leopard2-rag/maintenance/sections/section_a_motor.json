@@ -1,0 +1,396 @@
+{
+  "id": "section_a",
+  "name": "Motor und Antrieb",
+  "responsible_roles": ["driver", "commander"],
+  "subsystems": [
+    {
+      "id": "A01",
+      "number": 1,
+      "name": "Motorölstand prüfen",
+      "description": "Ölstand am Peilstab kontrollieren",
+      "type": "visual_check",
+      "expected_value": "zwischen MIN und MAX Markierung",
+      "tools_required": ["Reinigungstuch"],
+      "estimated_time_min": 2,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "notes": "Motor muss auf Betriebstemperatur und 5 Minuten abgestellt sein"
+    },
+    {
+      "id": "A02",
+      "number": 2,
+      "name": "Motoröl auf Verschmutzung prüfen",
+      "description": "Ölqualität visuell und durch Reibetest beurteilen",
+      "type": "visual_check",
+      "expected_value": "sauber, keine Metallpartikel, nicht milchig",
+      "tools_required": ["Reinigungstuch", "Taschenlampe"],
+      "estimated_time_min": 3,
+      "photo_required": true,
+      "photo_points": ["Öl auf Tuch", "Peilstab"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "A02-D01",
+          "description": "Metallpartikel im Öl",
+          "indicators": ["silbrige oder goldene Partikel sichtbar", "magnetische Späne"],
+          "priority": "high",
+          "action": "Motor nicht starten. Sofortige Meldung an Schirrmeister. Ölanalyse durchführen lassen."
+        },
+        {
+          "id": "A02-D02",
+          "description": "Milchiges Öl (Kühlmittel)",
+          "indicators": ["weiße/braune Emulsion", "schaumige Konsistenz"],
+          "priority": "critical",
+          "action": "Motor nicht starten. Zylinderkopfdichtung defekt. Sofortige Reparatur erforderlich."
+        }
+      ]
+    },
+    {
+      "id": "A03",
+      "number": 3,
+      "name": "Kraftstofffilter Wasserabscheider prüfen",
+      "description": "Wassergehalt im Abscheider kontrollieren",
+      "type": "visual_check",
+      "expected_value": "kein Wasser sichtbar",
+      "tools_required": ["Taschenlampe"],
+      "estimated_time_min": 2,
+      "photo_required": true,
+      "photo_points": ["Sichtglas Wasserabscheider"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "A03-D01",
+          "description": "Wasser im Filter",
+          "indicators": ["Wasser sichtbar im Sichtglas", "Wasserstand über Markierung"],
+          "priority": "high",
+          "action": "Wasser ablassen über Ablassschraube. Bei >100ml Meldung an Wartung."
+        }
+      ]
+    },
+    {
+      "id": "A04",
+      "number": 4,
+      "name": "Luftfilter Vorabscheider leeren",
+      "description": "Staubauffangbehälter prüfen und leeren",
+      "type": "inspection_action",
+      "expected_value": "Behälter zu weniger als 50% gefüllt",
+      "tools_required": ["Auffangbehälter", "Reinigungstuch"],
+      "estimated_time_min": 5,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "tasks": [
+        {
+          "step": 1,
+          "description": "Verschlusskappe öffnen"
+        },
+        {
+          "step": 2,
+          "description": "Auffangbehälter entleeren"
+        },
+        {
+          "step": 3,
+          "description": "Dichtung auf Beschädigungen prüfen"
+        }
+      ]
+    },
+    {
+      "id": "A05",
+      "number": 5,
+      "name": "Kühlmittelstand prüfen",
+      "description": "Füllstand im Ausgleichsbehälter kontrollieren",
+      "type": "visual_check",
+      "expected_value": {
+        "description": "zwischen MIN und MAX bei kaltem Motor",
+        "unit": "l",
+        "critical_threshold": {
+          "min": 0
+        }
+      },
+      "tools_required": [],
+      "estimated_time_min": 2,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "notes": "Nur bei kaltem Motor prüfen (<40°C)",
+      "common_defects": [
+        {
+          "id": "A05-D01",
+          "description": "Kühlmittelverlust",
+          "indicators": ["Füllstand unter MIN", "wiederkehrender Bedarf", "Pfützen unter Fahrzeug"],
+          "priority": "high",
+          "action": "Leckage lokalisieren. Schläuche und Verbindungen prüfen. Vor Ausfahrt beheben."
+        }
+      ]
+    },
+    {
+      "id": "A06",
+      "number": 6,
+      "name": "Keilriemen auf Spannung und Zustand prüfen",
+      "description": "V-Riemen visuell prüfen und Spannung testen",
+      "type": "inspection_action",
+      "expected_value": "Durchbiegung 10-15mm bei 10kg Druckkraft",
+      "tools_required": ["Taschenlampe"],
+      "estimated_time_min": 4,
+      "photo_required": true,
+      "photo_points": ["Riemenoberfläche", "Riemenspannung"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "A06-D01",
+          "description": "Risse im Riemen",
+          "indicators": ["Längsrisse", "Querrisse", "ausgefranste Kanten"],
+          "priority": "high",
+          "action": "Riemen vor nächster Ausfahrt austauschen. Risiko des Reißens."
+        },
+        {
+          "id": "A06-D02",
+          "description": "Riemen zu lose",
+          "indicators": ["Durchbiegung >20mm", "Quietschgeräusche beim Start"],
+          "priority": "medium",
+          "action": "Riemenspannung nachstellen. Spannrolle prüfen."
+        }
+      ]
+    },
+    {
+      "id": "A07",
+      "number": 7,
+      "name": "Kraftstoffleitungen auf Undichtigkeiten prüfen",
+      "description": "Alle sichtbaren Kraftstoffleitungen inspizieren",
+      "type": "visual_check",
+      "expected_value": "keine Leckagen, keine Risse, Schellen fest",
+      "tools_required": ["Taschenlampe", "Reinigungstuch"],
+      "estimated_time_min": 8,
+      "photo_required": true,
+      "photo_points": ["Verdächtige Stellen"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "A07-D01",
+          "description": "Kraftstoffleckage",
+          "indicators": ["Dieselgeruch", "feuchte Stellen", "Tropfenbildung"],
+          "priority": "critical",
+          "action": "Motor nicht starten. Brandgefahr! Leitung ersetzen oder Verbindung nachziehen."
+        }
+      ]
+    },
+    {
+      "id": "A08",
+      "number": 8,
+      "name": "Motorlager auf Beschädigung prüfen",
+      "description": "Sichtprüfung der Gummilager auf Risse",
+      "type": "visual_check",
+      "expected_value": "keine Risse, kein Austreten von Hydraulikflüssigkeit",
+      "tools_required": ["Taschenlampe", "Spiegel"],
+      "estimated_time_min": 6,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver"
+    },
+    {
+      "id": "A09",
+      "number": 9,
+      "name": "Abgasanlage auf Dichtheit prüfen",
+      "description": "Abgasrohre und Verbindungen inspizieren",
+      "type": "visual_check",
+      "expected_value": "keine Rußspuren außerhalb der Rohre, alle Schellen fest",
+      "tools_required": ["Taschenlampe"],
+      "estimated_time_min": 5,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "A09-D01",
+          "description": "Abgasleckage",
+          "indicators": ["Rußspuren", "Pfeifgeräusche", "Abgase im Fahrzeuginneren"],
+          "priority": "high",
+          "action": "Leckage abdichten. Bei Abgasen im Innenraum: sofort abstellen, Gesundheitsgefahr!"
+        }
+      ]
+    },
+    {
+      "id": "A10",
+      "number": 10,
+      "name": "Getriebeölstand prüfen",
+      "description": "Ölstand am Getriebe kontrollieren",
+      "type": "measurement",
+      "expected_value": {
+        "description": "zwischen MIN und MAX",
+        "unit": "l",
+        "normal_range": {
+          "min": 95,
+          "max": 100
+        }
+      },
+      "tools_required": ["Reinigungstuch"],
+      "estimated_time_min": 3,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "notes": "Getriebe muss auf Betriebstemperatur sein (60-80°C)"
+    },
+    {
+      "id": "A11",
+      "number": 11,
+      "name": "Getriebe auf Undichtigkeiten prüfen",
+      "description": "Gehäuse und Dichtungen auf Ölaustritt prüfen",
+      "type": "visual_check",
+      "expected_value": "keine Ölspuren, Gehäuse trocken",
+      "tools_required": ["Taschenlampe", "Reinigungstuch"],
+      "estimated_time_min": 5,
+      "photo_required": true,
+      "photo_points": ["Undichte Stellen"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "A11-D01",
+          "description": "Getriebeöl-Leckage",
+          "indicators": ["Öltropfen", "feuchte Gehäusestellen", "Ölflecken unter Fahrzeug"],
+          "priority": "high",
+          "action": "Dichtungen ersetzen. Bei starkem Verlust (>0,5l/Tag): nicht einsatzbereit."
+        }
+      ]
+    },
+    {
+      "id": "A12",
+      "number": 12,
+      "name": "Kraftstofftanks auf Beschädigungen prüfen",
+      "description": "Äußere Prüfung der Tanks und Halterungen",
+      "type": "visual_check",
+      "expected_value": "keine Dellen, keine Rost, Halterungen fest",
+      "tools_required": ["Taschenlampe"],
+      "estimated_time_min": 6,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver"
+    },
+    {
+      "id": "A13",
+      "number": 13,
+      "name": "Lüfterflügel auf Beschädigungen prüfen",
+      "description": "Visuelle Prüfung der Kühlerlüfter",
+      "type": "visual_check",
+      "expected_value": "keine gebrochenen Flügel, kein Unwuchtlauf",
+      "tools_required": ["Taschenlampe"],
+      "estimated_time_min": 3,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "common_defects": [
+        {
+          "id": "A13-D01",
+          "description": "Lüfterflügel gebrochen",
+          "indicators": ["fehlende Flügelteile", "Vibrationen", "lautes Geräusch"],
+          "priority": "high",
+          "action": "Lüfter austauschen. Überhitzungsgefahr bei Betrieb."
+        }
+      ]
+    },
+    {
+      "id": "A14",
+      "number": 14,
+      "name": "Batterie prüfen",
+      "description": "Batteriezustand und -befestigung kontrollieren",
+      "type": "inspection_action",
+      "expected_value": "Spannung >24V, Pole sauber, fest verschraubt",
+      "tools_required": ["Multimeter", "Drahtbürste"],
+      "estimated_time_min": 5,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "tasks": [
+        {
+          "step": 1,
+          "description": "Batteriespannung messen (Sollwert: 24-28V)"
+        },
+        {
+          "step": 2,
+          "description": "Pole auf Korrosion prüfen"
+        },
+        {
+          "step": 3,
+          "description": "Befestigung auf festen Sitz prüfen"
+        },
+        {
+          "step": 4,
+          "description": "Elektrolytstand prüfen (wenn zugänglich)"
+        }
+      ],
+      "common_defects": [
+        {
+          "id": "A14-D01",
+          "description": "Niedrige Spannung",
+          "indicators": ["Spannung <24V", "schwacher Motorstart", "Elektronikfehler"],
+          "priority": "medium",
+          "action": "Batterie laden oder austauschen. Lichtmaschine prüfen."
+        }
+      ]
+    },
+    {
+      "id": "A15",
+      "number": 15,
+      "name": "Motorstarttest durchführen",
+      "description": "Startverhalten und Motorlauf prüfen",
+      "type": "functional_test",
+      "expected_value": "Start innerhalb 5 Sekunden, gleichmäßiger Leerlauf, keine Rauchentwicklung",
+      "tools_required": [],
+      "estimated_time_min": 10,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "driver",
+      "tasks": [
+        {
+          "step": 1,
+          "description": "Vorglühen (Winter: 30 Sekunden)"
+        },
+        {
+          "step": 2,
+          "description": "Motor starten und Startdauer notieren"
+        },
+        {
+          "step": 3,
+          "description": "Leerlaufdrehzahl prüfen (Sollwert: 700-800 U/min)"
+        },
+        {
+          "step": 4,
+          "description": "Abgasfarbe beobachten"
+        },
+        {
+          "step": 5,
+          "description": "Ungewöhnliche Geräusche prüfen"
+        }
+      ],
+      "common_defects": [
+        {
+          "id": "A15-D01",
+          "description": "Motor startet nicht",
+          "indicators": ["kein Zünden", "Anlasser dreht durch", "nur einzelne Zündungen"],
+          "priority": "critical",
+          "action": "Kraftstoffversorgung prüfen. Vorglühanlage testen. Bei Fehler: nicht einsatzbereit."
+        },
+        {
+          "id": "A15-D02",
+          "description": "Schwarzer Rauch beim Start",
+          "indicators": ["starke Rußwolke", "anhaltende schwarze Abgase"],
+          "priority": "medium",
+          "action": "Luftfilter prüfen. Einspritzdüsen kontrollieren lassen."
+        },
+        {
+          "id": "A15-D03",
+          "description": "Weißer Rauch beim Start",
+          "indicators": ["weiße Abgase", "süßlicher Geruch"],
+          "priority": "high",
+          "action": "Kühlmittel im Brennraum. Zylinderkopfdichtung prüfen lassen."
+        }
+      ]
+    }
+  ]
+}
+

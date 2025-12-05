@@ -1,0 +1,118 @@
+{
+  "intents": [
+    {
+      "id": "check_status",
+      "name": "Fahrzeugstatus abfragen",
+      "patterns": [
+        "Wie ist der Status des Fahrzeugs",
+        "Gibt es Mängel",
+        "Ist das Fahrzeug einsatzbereit",
+        "Zeige mir den Zustand",
+        "Was ist defekt",
+        "Welche Probleme gibt es"
+      ],
+      "response_template": "Der aktuelle Fahrzeugstatus ist: {vehicle_status}. {defect_count} Mängel gemeldet: {defects_list}",
+      "parameters": ["vehicle_status", "defect_count", "defects_list"]
+    },
+    {
+      "id": "query_checkpoint",
+      "name": "Prüfpunkt abfragen",
+      "patterns": [
+        "Wie prüfe ich {checkpoint}",
+        "Was muss ich bei {checkpoint} beachten",
+        "Anleitung für {checkpoint}",
+        "Erkläre mir {checkpoint}",
+        "Checkpoint {checkpoint_number}"
+      ],
+      "response_template": "Checkpoint {checkpoint_number} - {checkpoint_name}: {description}. Erwarteter Wert: {expected_value}. Benötigte Werkzeuge: {tools}. Geschätzte Zeit: {time} Minuten.",
+      "parameters": ["checkpoint_number", "checkpoint_name", "description", "expected_value", "tools", "time"]
+    },
+    {
+      "id": "report_defect",
+      "name": "Mangel melden",
+      "patterns": [
+        "Ich habe einen Defekt an {component}",
+        "Melde Mangel {description}",
+        "Problem mit {component}",
+        "{component} ist defekt",
+        "Schaden an {component}"
+      ],
+      "response_template": "Mangel an {component} wurde erfasst. Priorität: {priority}. Empfohlene Maßnahme: {action}. Status: {vehicle_status}",
+      "parameters": ["component", "description", "priority", "action", "vehicle_status"]
+    },
+    {
+      "id": "query_maintenance_interval",
+      "name": "Wartungsintervall abfragen",
+      "patterns": [
+        "Wann ist die nächste Wartung",
+        "Wartungsintervalle zeigen",
+        "Was ist bei {hours} Betriebsstunden fällig",
+        "Welche Wartung steht an",
+        "Übersicht Wartungstermine"
+      ],
+      "response_template": "Nächste Wartung: {interval_name} bei {trigger_value} {trigger_unit}. Dauer: {duration}. Ausführung durch: {executor}.",
+      "parameters": ["interval_name", "trigger_value", "trigger_unit", "duration", "executor"]
+    },
+    {
+      "id": "query_crew_role",
+      "name": "Besatzungsrolle abfragen",
+      "patterns": [
+        "Was sind meine Aufgaben als {role}",
+        "Verantwortlichkeiten {role}",
+        "Welche Sektionen prüft der {role}",
+        "Aufgaben für {role}"
+      ],
+      "response_template": "Als {role_name} sind Sie verantwortlich für die Sektionen: {sections}. Hauptsysteme: {systems}. Aufgaben: {responsibilities}",
+      "parameters": ["role_name", "sections", "systems", "responsibilities"]
+    },
+    {
+      "id": "query_vehicle_variant",
+      "name": "Fahrzeugvariante abfragen",
+      "patterns": [
+        "Unterschied zwischen {variant1} und {variant2}",
+        "Spezifikationen {variant}",
+        "Was ist neu beim {variant}",
+        "Technische Daten {variant}"
+      ],
+      "response_template": "Leopard 2 {variant}: Baujahr ab {year}, Gewicht {weight} Tonnen, Bewaffnung {armament}. Besonderheiten: {notes}",
+      "parameters": ["variant", "year", "weight", "armament", "notes"]
+    },
+    {
+      "id": "start_inspection",
+      "name": "Inspektion starten",
+      "patterns": [
+        "Starte Inspektion für Sektion {section}",
+        "Beginne Wartung",
+        "Checkliste für {section} zeigen",
+        "Ich möchte {section} prüfen"
+      ],
+      "response_template": "Inspektion Sektion {section_id} - {section_name} gestartet. {checkpoint_count} Prüfpunkte. Geschätzte Dauer: {total_time} Minuten. Erster Checkpoint: {first_checkpoint}",
+      "parameters": ["section_id", "section_name", "checkpoint_count", "total_time", "first_checkpoint"]
+    },
+    {
+      "id": "query_component_spec",
+      "name": "Komponentendetails abfragen",
+      "patterns": [
+        "Details zum {component}",
+        "Technische Daten {component}",
+        "Was sind die Grenzwerte für {component}",
+        "Monitoring-Parameter {component}"
+      ],
+      "response_template": "Komponente {component_name}: {specs}. Normale Betriebsparameter: {normal_range}. Kritische Grenzwerte: {critical_threshold}.",
+      "parameters": ["component_name", "specs", "normal_range", "critical_threshold"]
+    },
+    {
+      "id": "classify_defect",
+      "name": "Mangel klassifizieren",
+      "patterns": [
+        "Wie kritisch ist {defect_description}",
+        "Priorisiere {defect_description}",
+        "Wie dringend ist {defect_description}",
+        "Einstufung für {defect_description}"
+      ],
+      "response_template": "Mangel '{defect_description}' wird als {priority} eingestuft. Reaktionszeit: {response_time}. Fahrzeugstatus: {vehicle_status}. Eskalation: {escalation}",
+      "parameters": ["defect_description", "priority", "response_time", "vehicle_status", "escalation"]
+    }
+  ]
+}
+

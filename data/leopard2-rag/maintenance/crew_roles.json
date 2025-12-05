@@ -1,0 +1,87 @@
+{
+  "roles": [
+    {
+      "id": "commander",
+      "name_de": "Kommandant",
+      "name_en": "Commander",
+      "responsibilities": [
+        "Gesamtverantwortung für Fahrzeug und Besatzung",
+        "Taktische Führung",
+        "Überwachung aller Wartungsarbeiten",
+        "Mängelmeldungen an vorgesetzte Stellen",
+        "Einsatzbereitschaft prüfen und freigeben"
+      ],
+      "maintenance_sections": ["A", "B", "E", "F"],
+      "primary_systems": [
+        "kommunikation",
+        "feuerleitanlage",
+        "periskope",
+        "funkanlage",
+        "gesamtfahrzeug"
+      ]
+    },
+    {
+      "id": "gunner",
+      "name_de": "Richtschütze",
+      "name_en": "Gunner",
+      "responsibilities": [
+        "Bedienung der Hauptwaffe",
+        "Wartung des Waffensystems",
+        "Feuerleitanlage bedienen und warten",
+        "Turmhydraulik prüfen",
+        "Munitionslagerung kontrollieren"
+      ],
+      "maintenance_sections": ["C"],
+      "primary_systems": [
+        "hauptwaffe",
+        "feuerleitanlage",
+        "turm_hydraulik",
+        "waermebildgeraet",
+        "laserentfernungsmesser"
+      ]
+    },
+    {
+      "id": "loader",
+      "name_de": "Ladeschütze",
+      "name_en": "Loader",
+      "responsibilities": [
+        "Hauptwaffe laden",
+        "Munitionsverwaltung",
+        "Unterstützung bei Turm-Wartung",
+        "Sekundärbewaffnung bedienen",
+        "Innenraum sauber halten"
+      ],
+      "maintenance_sections": ["C", "F"],
+      "primary_systems": [
+        "munitionslagerung",
+        "turm_mechanik",
+        "sekundaerwaffen",
+        "feuerloesch",
+        "nbc_schutz"
+      ]
+    },
+    {
+      "id": "driver",
+      "name_de": "Kraftfahrer",
+      "name_en": "Driver",
+      "responsibilities": [
+        "Fahrzeugführung",
+        "Motor und Antriebsstrang warten",
+        "Fahrwerk prüfen",
+        "Kraftstoffsystem kontrollieren",
+        "Tägliche Vor- und Nachbereitung"
+      ],
+      "maintenance_sections": ["A", "B", "D", "F"],
+      "primary_systems": [
+        "motor",
+        "getriebe",
+        "laufwerk",
+        "kraftstoffsystem",
+        "kuehlsystem",
+        "bremssystem",
+        "lenkung"
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,449 @@
+{
+  "id": "section_c",
+  "name": "Turm und Waffensystem",
+  "responsible_roles": ["gunner", "loader"],
+  "subsystems": [
+    {
+      "id": "C01",
+      "number": 28,
+      "name": "Hauptwaffe Rohrreinigung",
+      "description": "Rohr nach Schießübung reinigen",
+      "type": "inspection_action",
+      "expected_value": "Rohr sauber, keine Ablagerungen",
+      "tools_required": ["Putzstock", "Reinigungslappen", "Waffenöl"],
+      "estimated_time_min": 20,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner",
+      "tasks": [
+        {
+          "step": 1,
+          "description": "Rohrschutzkappe entfernen"
+        },
+        {
+          "step": 2,
+          "description": "Visuell auf grobe Verschmutzung prüfen"
+        },
+        {
+          "step": 3,
+          "description": "Mit Putzstock und Lappen durchziehen"
+        },
+        {
+          "step": 4,
+          "description": "Prozess bis sauberer Lappen wiederholen"
+        },
+        {
+          "step": 5,
+          "description": "Dünn mit Waffenöl einölen"
+        }
+      ]
+    },
+    {
+      "id": "C02",
+      "number": 29,
+      "name": "Hauptwaffe auf Beschädigungen prüfen",
+      "description": "Rohr und Bremse visuell inspizieren",
+      "type": "visual_check",
+      "expected_value": "keine Risse, keine Ausbrüche, Mündungsbremse fest",
+      "tools_required": ["Taschenlampe", "Endoskop"],
+      "estimated_time_min": 10,
+      "photo_required": true,
+      "photo_points": ["Rohrmündung", "Verschlussstück"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner",
+      "common_defects": [
+        {
+          "id": "C02-D01",
+          "description": "Rohrschaden",
+          "indicators": ["Risse im Rohr", "Ausbrüche an Mündung", "verformte Züge"],
+          "priority": "critical",
+          "action": "Waffe außer Betrieb nehmen. Rohr austauschen. Nicht schießen!"
+        }
+      ]
+    },
+    {
+      "id": "C03",
+      "number": 30,
+      "name": "Verschluss auf Funktion prüfen",
+      "description": "Verschlussmechanismus testen",
+      "type": "functional_test",
+      "expected_value": "leichtgängig, vollständiges Schließen, Extraktor fest",
+      "tools_required": ["Reinigungstuch", "Waffenöl"],
+      "estimated_time_min": 8,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner",
+      "common_defects": [
+        {
+          "id": "C03-D01",
+          "description": "Verschluss schwergängig",
+          "indicators": ["erhöhter Kraftaufwand", "Klemmen", "unvollständiges Schließen"],
+          "priority": "high",
+          "action": "Verschluss reinigen und schmieren. Bei anhaltenden Problemen: Mechanik prüfen lassen."
+        }
+      ]
+    },
+    {
+      "id": "C04",
+      "number": 31,
+      "name": "Munitionslagerung prüfen",
+      "description": "Munitionsbehälter und Halterungen kontrollieren",
+      "type": "visual_check",
+      "expected_value": "alle Halterungen intakt, Munition gesichert, keine Beschädigungen",
+      "tools_required": ["Taschenlampe"],
+      "estimated_time_min": 8,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "loader"
+    },
+    {
+      "id": "C05",
+      "number": 32,
+      "name": "Hülsenauswurf prüfen",
+      "description": "Auswurfmechanismus testen",
+      "type": "functional_test",
+      "expected_value": "automatischer Auswurf funktioniert, Klappe öffnet/schließt",
+      "tools_required": [],
+      "estimated_time_min": 5,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner"
+    },
+    {
+      "id": "C06",
+      "number": 33,
+      "name": "Rohrrücklaufbremse prüfen",
+      "description": "Hydraulische Bremse auf Dichtheit kontrollieren",
+      "type": "visual_check",
+      "expected_value": "keine Ölleckage, Rücklauf gleichmäßig",
+      "tools_required": ["Taschenlampe", "Reinigungstuch"],
+      "estimated_time_min": 6,
+      "photo_required": true,
+      "photo_points": ["Bremszylinder"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner",
+      "common_defects": [
+        {
+          "id": "C06-D01",
+          "description": "Hydrauliköl-Leckage",
+          "indicators": ["Öl an Zylinder", "ungleichmäßiger Rücklauf", "hartes Anschlagen"],
+          "priority": "high",
+          "action": "Dichtungen ersetzen. Bei Totalausfall: Schießen nicht möglich."
+        }
+      ]
+    },
+    {
+      "id": "C07",
+      "number": 34,
+      "name": "Turmantrieb Elektromotor prüfen",
+      "description": "Elektrischen Turmantrieb testen",
+      "type": "functional_test",
+      "expected_value": "Drehung in beide Richtungen, Geschwindigkeit regelbar, kein Motorgeräusch",
+      "tools_required": [],
+      "estimated_time_min": 5,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner",
+      "common_defects": [
+        {
+          "id": "C07-D01",
+          "description": "Turmantrieb defekt",
+          "indicators": ["Motor läuft nicht", "nur eine Richtung", "stark verzögerte Reaktion"],
+          "priority": "critical",
+          "action": "Fahrzeug nur bedingt einsatzbereit. Hydraulischer Notantrieb nutzen."
+        }
+      ]
+    },
+    {
+      "id": "C08",
+      "number": 35,
+      "name": "Turmhydraulik prüfen",
+      "description": "Hydraulikflüssigkeit und -druck kontrollieren",
+      "type": "measurement",
+      "expected_value": {
+        "description": "Druck 200-220 bar, Ölstand zwischen MIN/MAX",
+        "min": 200,
+        "max": 220,
+        "unit": "bar"
+      },
+      "tools_required": ["Druckmessgerät"],
+      "estimated_time_min": 8,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner",
+      "common_defects": [
+        {
+          "id": "C08-D01",
+          "description": "Hydraulikdruck zu niedrig",
+          "indicators": ["Druck <180 bar", "langsame Drehung", "Pumpengeräusche"],
+          "priority": "high",
+          "action": "Hydraulikflüssigkeit nachfüllen. Leckage suchen. Pumpe prüfen."
+        }
+      ]
+    },
+    {
+      "id": "C09",
+      "number": 36,
+      "name": "Turmdrehkranz Wartung",
+      "description": "Drehkranz reinigen, schmieren und testen",
+      "type": "inspection_action",
+      "expected_value": "gleichmäßige Drehung, kein Knirschen, alle Schmierstellen gefüllt",
+      "tools_required": ["Schmierpresse", "Reinigungstuch", "Taschenlampe", "Fett TL 9150-0027"],
+      "estimated_time_min": 25,
+      "photo_required": true,
+      "photo_points": ["Schmierstellen Übersicht", "Dichtungsringe"],
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner",
+      "tasks": [
+        {
+          "step": 1,
+          "description": "Drehkranz von grobem Schmutz reinigen"
+        },
+        {
+          "step": 2,
+          "description": "Schmierstellen lokalisieren (12 Punkte)",
+          "details": "Positionen: 0°, 30°, 60°, 90°, 120°, 150°, 180°, 210°, 240°, 270°, 300°, 330°",
+          "lubricant": {
+            "type": "TL 9150-0027",
+            "quantity": "2-3 Hübe pro Punkt",
+            "points": 12,
+            "positions": ["0°", "30°", "60°", "90°", "120°", "150°", "180°", "210°", "240°", "270°", "300°", "330°"]
+          }
+        },
+        {
+          "step": 3,
+          "description": "Mit Schmierpresse abschmieren (2-3 Hübe pro Stelle)"
+        },
+        {
+          "step": 4,
+          "description": "Dichtungsringe auf Risse prüfen"
+        },
+        {
+          "step": 5,
+          "description": "Turm 360° drehen und auf Geräusche achten"
+        }
+      ],
+      "common_defects": [
+        {
+          "id": "C09-D01",
+          "description": "Dichtungsring gerissen",
+          "indicators": ["sichtbare Risse", "Fettaustritt außerhalb Schmierstelle"],
+          "priority": "high",
+          "action": "Dichtung vor nächster Ausfahrt austauschen. Verschmutzung des Lagers möglich."
+        },
+        {
+          "id": "C09-D02",
+          "description": "Knirschen beim Drehen",
+          "indicators": ["metallisches Geräusch", "ruckartiger Lauf", "Widerstand"],
+          "priority": "medium",
+          "action": "Intensivschmierung durchführen. Bei Persistenz: Lagerschaden möglich."
+        }
+      ]
+    },
+    {
+      "id": "C10",
+      "number": 37,
+      "name": "Waffenstabilisierung prüfen",
+      "description": "Stabilisator während Fahrt testen",
+      "type": "functional_test",
+      "expected_value": "Ziel bleibt im Fadenkreuz bei Fahrt, max. 0,5° Abweichung",
+      "tools_required": [],
+      "estimated_time_min": 10,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner",
+      "common_defects": [
+        {
+          "id": "C10-D01",
+          "description": "Stabilisierung defekt",
+          "indicators": ["Zielverlust bei Fahrt", "Waffe pendelt", "Fehlermeldung im System"],
+          "priority": "high",
+          "action": "Gyroskope kalibrieren lassen. Fahrtfeuer nicht möglich."
+        }
+      ]
+    },
+    {
+      "id": "C11",
+      "number": 38,
+      "name": "Feuerleitanlage Selbsttest",
+      "description": "Built-in Test (BIT) durchführen",
+      "type": "functional_test",
+      "expected_value": "alle Tests bestanden, keine Fehlercodes",
+      "tools_required": [],
+      "estimated_time_min": 5,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner",
+      "notes": "Für A7/A7V: ATTICA System, für A4-A6: EMES-15"
+    },
+    {
+      "id": "C12",
+      "number": 39,
+      "name": "Laserentfernungsmesser prüfen",
+      "description": "Laser auf bekannte Distanz testen",
+      "type": "functional_test",
+      "expected_value": "Messung innerhalb ±5m Toleranz",
+      "tools_required": ["Referenzziel mit bekannter Distanz"],
+      "estimated_time_min": 8,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner",
+      "common_defects": [
+        {
+          "id": "C12-D01",
+          "description": "Laser ungenau",
+          "indicators": ["Abweichung >10m", "keine Messung", "Fehlermeldung"],
+          "priority": "high",
+          "action": "Laser kalibrieren lassen. Schussgenauigkeit stark beeinträchtigt."
+        }
+      ]
+    },
+    {
+      "id": "C13",
+      "number": 40,
+      "name": "Wärmebildgerät prüfen",
+      "description": "Thermalkamera auf Funktion testen",
+      "type": "functional_test",
+      "expected_value": "klares Bild, keine toten Pixel, automatische Kalibrierung funktioniert",
+      "tools_required": ["Wärmequelle zum Testen"],
+      "estimated_time_min": 6,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner",
+      "common_defects": [
+        {
+          "id": "C13-D01",
+          "description": "Wärmebildgerät defekt",
+          "indicators": ["kein Bild", "viele tote Pixel", "unscharfes Bild"],
+          "priority": "high",
+          "action": "Nachtkampffähigkeit eingeschränkt. Gerät zur Wartung einschicken."
+        }
+      ]
+    },
+    {
+      "id": "C14",
+      "number": 41,
+      "name": "Koaxial-MG prüfen",
+      "description": "MG3 reinigen und Funktion testen",
+      "type": "inspection_action",
+      "expected_value": "sauber, leichtgängig, sichere Zuführung",
+      "tools_required": ["Waffenreinigungsset", "Waffenöl"],
+      "estimated_time_min": 15,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner",
+      "tasks": [
+        {
+          "step": 1,
+          "description": "Waffe sichern und entladen"
+        },
+        {
+          "step": 2,
+          "description": "Zerlegen und reinigen"
+        },
+        {
+          "step": 3,
+          "description": "Verschleiß an kritischen Teilen prüfen"
+        },
+        {
+          "step": 4,
+          "description": "Zusammenbauen und schmieren"
+        },
+        {
+          "step": 5,
+          "description": "Funktion trocken prüfen"
+        }
+      ]
+    },
+    {
+      "id": "C15",
+      "number": 42,
+      "name": "Munitionszuführung testen",
+      "description": "Automatische Zuführung der Hauptwaffenmunition testen",
+      "type": "functional_test",
+      "expected_value": "Munition wird sicher und ohne Verkanten zugeführt",
+      "tools_required": ["Übungsmunition"],
+      "estimated_time_min": 10,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "loader"
+    },
+    {
+      "id": "C16",
+      "number": 43,
+      "name": "Turmlüfter auf Funktion prüfen",
+      "description": "Ventilation im Turm testen",
+      "type": "functional_test",
+      "expected_value": "Lüfter läuft in allen Stufen, kein ungewöhnliches Geräusch",
+      "tools_required": [],
+      "estimated_time_min": 3,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner"
+    },
+    {
+      "id": "C17",
+      "number": 44,
+      "name": "Fernbediente Waffenstation prüfen (A7/A7V)",
+      "description": "FLW 200 Remote Weapon Station testen",
+      "type": "functional_test",
+      "expected_value": "volle Beweglichkeit, Kamera funktioniert, Waffe lädt",
+      "tools_required": [],
+      "estimated_time_min": 8,
+      "photo_required": false,
+      "vehicle_variants": ["A7", "A7V"],
+      "responsible_role": "loader",
+      "notes": "Nur für A7 und A7V Varianten mit FLW 200"
+    },
+    {
+      "id": "C18",
+      "number": 45,
+      "name": "Nebelwurfanlage prüfen",
+      "description": "Nebelwerfer auf Funktion testen",
+      "type": "visual_check",
+      "expected_value": "alle Werfer vorhanden, Zündmechanismus funktioniert, kein Ausfall",
+      "tools_required": [],
+      "estimated_time_min": 5,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "gunner",
+      "common_defects": [
+        {
+          "id": "C18-D01",
+          "description": "Nebelwerfer defekt",
+          "indicators": ["Werfer löst nicht aus", "elektrischer Fehler", "Werfer fehlt"],
+          "priority": "medium",
+          "action": "Werfer austauschen. Selbstschutzmittel reduziert."
+        }
+      ]
+    },
+    {
+      "id": "C19",
+      "number": 46,
+      "name": "Kommandantenkuppel Drehtest",
+      "description": "Kuppel auf Leichtgängigkeit prüfen",
+      "type": "functional_test",
+      "expected_value": "360° Drehung ohne Widerstand, kein Klemmen",
+      "tools_required": [],
+      "estimated_time_min": 3,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
+      "responsible_role": "loader"
+    },
+    {
+      "id": "C20",
+      "number": 47,
+      "name": "Ladeschützen-MG prüfen",
+      "description": "Dachgeschütz reinigen und testen",
+      "type": "inspection_action",
+      "expected_value": "sauber, vollständig beweglich, sichere Munitionszuführung",
+      "tools_required": ["Waffenreinigungsset", "Waffenöl"],
+      "estimated_time_min": 12,
+      "photo_required": false,
+      "vehicle_variants": ["A4", "A5", "A6", "A6M"],
+      "responsible_role": "loader",
+      "notes": "Für A7/A7V durch FLW 200 ersetzt"
+    }
+  ]
+}
+

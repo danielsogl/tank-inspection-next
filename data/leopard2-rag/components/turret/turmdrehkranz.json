@@ -1,0 +1,113 @@
+{
+  "id": "turmdrehkranz",
+  "name": "Turmdrehkranz",
+  "category": "turret",
+  "specs": {
+    "type": "Ball bearing turret ring",
+    "manufacturer": "Krauss-Maffei Wegmann",
+    "diameter_mm": 2240,
+    "ball_count": 224,
+    "max_rotation_speed_deg_s": 40,
+    "load_capacity_tons": 30,
+    "lubrication_points": 12,
+    "sealing": "Multi-lip radial shaft seals"
+  },
+  "maintenance_schedule": [
+    {
+      "interval_hours": 50,
+      "description": "Regular lubrication",
+      "tasks": [
+        "Clean ring from dust and debris",
+        "Apply grease to all 12 lubrication points (TL 9150-0027)",
+        "Inspect sealing rings for damage",
+        "Check for unusual noises during rotation"
+      ]
+    },
+    {
+      "interval_hours": 250,
+      "description": "Detailed inspection",
+      "tasks": [
+        "Measure bearing play",
+        "Inspect ball bearings for pitting",
+        "Check gear teeth for wear",
+        "Torque check mounting bolts",
+        "Replace damaged seals"
+      ]
+    },
+    {
+      "interval_hours": 1000,
+      "description": "Major service",
+      "tasks": [
+        "Complete disassembly and cleaning",
+        "Ball bearing replacement if play >0.5mm",
+        "Gear inspection and measurement",
+        "Seal replacement",
+        "Re-greasing with fresh lubricant"
+      ]
+    }
+  ],
+  "monitoring_points": [
+    {
+      "name": "Lagerspiel",
+      "unit": "mm",
+      "normal_range": {
+        "min": 0,
+        "max": 0.3
+      },
+      "critical_threshold": {
+        "max": 0.5
+      }
+    },
+    {
+      "name": "Drehmoment",
+      "unit": "Nm",
+      "normal_range": {
+        "min": 50,
+        "max": 150
+      },
+      "critical_threshold": {
+        "max": 250
+      }
+    }
+  ],
+  "common_failures": [
+    {
+      "id": "TR-F01",
+      "name": "Seal failure",
+      "mtbf_hours": 2000,
+      "symptoms": [
+        "Fettaustritt außerhalb Schmierstellen",
+        "Sichtbare Risse in Dichtung",
+        "Eindringen von Schmutz und Wasser",
+        "Erhöhter Verschleiß"
+      ],
+      "cause": "Alterung des Gummimaterials durch UV-Strahlung und Temperaturwechsel"
+    },
+    {
+      "id": "TR-F02",
+      "name": "Ball bearing pitting",
+      "mtbf_hours": 5000,
+      "symptoms": [
+        "Knirschen beim Drehen",
+        "Ruckartiger Lauf",
+        "Erhöhtes Lagerspiel",
+        "Metallische Geräusche"
+      ],
+      "cause": "Materialermüdung durch zyklische Belastung oder Verschmutzung"
+    },
+    {
+      "id": "TR-F03",
+      "name": "Gear tooth wear",
+      "mtbf_hours": 8000,
+      "symptoms": [
+        "Ratterndes Geräusch beim Drehen",
+        "Ungleichmäßige Drehung",
+        "Erhöhter Kraftaufwand",
+        "Sichtbare Abnutzung der Zähne"
+      ],
+      "cause": "Abrieb durch ständige Lastzyklen, beschleunigt bei unzureichender Schmierung"
+    }
+  ],
+  "notes": "The turret ring is one of the most critical components for turret operation. It must support the entire weight of the turret (approx. 15 tons) while allowing smooth 360° rotation. Regular lubrication is essential to prevent premature wear."
+}
+

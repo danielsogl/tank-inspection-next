@@ -17,6 +17,13 @@ import {
   MessageResponse,
 } from "@/components/ai-elements/message";
 import {
+  Tool,
+  ToolHeader,
+  ToolContent,
+  ToolInput,
+  ToolOutput,
+} from "@/components/ai-elements/tool";
+import {
   PromptInput,
   PromptInputBody,
   PromptInputTextarea,
@@ -120,6 +127,25 @@ export function ChatPanel({ className, selectedPart, onPartHandled }: ChatPanelP
                           )}
                         </MessageContent>
                       </Message>
+                    );
+                  }
+                  // Handle tool parts (type starts with "tool-" or is "dynamic-tool")
+                  if (part.type?.startsWith("tool-") || part.type === "dynamic-tool") {
+                    return (
+                      <Tool key={`${message.id}-${i}`} className="my-2">
+                        <ToolHeader
+                          title={part.toolName}
+                          type={part.type}
+                          state={part.state}
+                        />
+                        <ToolContent>
+                          <ToolInput input={part.input} />
+                          <ToolOutput
+                            output={part.output}
+                            errorText={part.errorText}
+                          />
+                        </ToolContent>
+                      </Tool>
                     );
                   }
                   return null;

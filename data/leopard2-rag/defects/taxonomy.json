@@ -1,0 +1,212 @@
+{
+  "priorities": [
+    {
+      "level": "critical",
+      "name_de": "KRITISCH",
+      "name_en": "CRITICAL",
+      "response_time": "sofort",
+      "vehicle_status": "nicht einsatzbereit (NMC - Not Mission Capable)",
+      "escalation": "Kommandant + Schirrmeister sofort informieren → Kompaniechef innerhalb 1h",
+      "color": "#FF0000",
+      "icon": "🔴",
+      "examples": [
+        "Feuerlöschanlage Druckverlust >20%",
+        "Bremssystem Totalausfall",
+        "Hauptwaffe blockiert",
+        "Kühlmitteltemperatur kritisch (>105°C)",
+        "Kraftstoffleckage (Brandgefahr)",
+        "Lenkung defekt",
+        "Motor startet nicht",
+        "Zylinderkopfdichtung defekt",
+        "Antriebsrad Zahnschaden"
+      ],
+      "keywords": [
+        "ausfall",
+        "blockiert",
+        "kritisch",
+        "sofort",
+        "gefahr",
+        "feuer",
+        "explosion",
+        "totalausfall",
+        "nicht funktionsfähig",
+        "lebensbedrohlich",
+        "brand"
+      ]
+    },
+    {
+      "level": "high",
+      "name_de": "HOCH",
+      "name_en": "HIGH",
+      "response_time": "vor nächster Ausfahrt (innerhalb 24h)",
+      "vehicle_status": "bedingt einsatzbereit (PMC - Partially Mission Capable)",
+      "escalation": "Kommandant → Schirrmeister am selben Tag",
+      "color": "#FF8C00",
+      "icon": "🟠",
+      "examples": [
+        "Hydrauliköl-Leckage",
+        "Dichtungen gerissen",
+        "Wärmebildgerät Ausfall",
+        "Stabilisierung defekt",
+        "Kettenverschleiß >60mm Durchhang",
+        "Metallpartikel im Motoröl",
+        "Getriebeöl-Leckage",
+        "Kühlmittelverlust",
+        "Laserentfernungsmesser ungenau",
+        "Turmantrieb defekt"
+      ],
+      "keywords": [
+        "gerissen",
+        "leckage",
+        "defekt",
+        "funktioniert nicht",
+        "ausgefallen",
+        "stark",
+        "erheblich",
+        "beschädigt",
+        "versagt"
+      ]
+    },
+    {
+      "level": "medium",
+      "name_de": "MITTEL",
+      "name_en": "MEDIUM",
+      "response_time": "innerhalb 48h",
+      "vehicle_status": "voll einsatzbereit mit Einschränkung (FMC-S)",
+      "escalation": "Meldung an Schirrmeister, Dokumentation für nächste Wartung",
+      "color": "#FFD700",
+      "icon": "🟡",
+      "examples": [
+        "Erhöhter Kettenverschleiß",
+        "Beleuchtung teilweise defekt",
+        "Kleinere Ölundichtigkeiten",
+        "Stoßdämpfer Ölaustritt",
+        "Keilriemen zu locker",
+        "Batterie niedrige Spannung",
+        "Nebelwerfer defekt",
+        "Schürze lose",
+        "Luke schwergängig"
+      ],
+      "keywords": [
+        "verschleiß",
+        "erhöht",
+        "grenzwert",
+        "nachlässt",
+        "beeinträchtigt",
+        "kleinere",
+        "teilweise",
+        "reduziert"
+      ]
+    },
+    {
+      "level": "low",
+      "name_de": "NIEDRIG",
+      "name_en": "LOW",
+      "response_time": "bei nächster planmäßiger Wartung",
+      "vehicle_status": "voll einsatzbereit (FMC - Fully Mission Capable)",
+      "escalation": "keine, nur Dokumentation",
+      "color": "#32CD32",
+      "icon": "🟢",
+      "examples": [
+        "Leichte Lackschäden",
+        "Geringfügige Abnutzung",
+        "Kleinere Kratzer",
+        "Warndreieck fehlt",
+        "Kosmetische Mängel",
+        "Werkzeug unvollständig",
+        "Schmutz auf Optiken"
+      ],
+      "keywords": [
+        "leicht",
+        "minimal",
+        "kosmetisch",
+        "oberflächlich",
+        "geringfügig",
+        "unerheblich"
+      ]
+    },
+    {
+      "level": "info",
+      "name_de": "INFO",
+      "name_en": "INFO",
+      "response_time": "Kenntnisnahme",
+      "vehicle_status": "voll einsatzbereit (FMC - Fully Mission Capable)",
+      "escalation": "keine",
+      "color": "#1E90FF",
+      "icon": "🔵",
+      "examples": [
+        "Wartung fällig in 50 Betriebsstunden",
+        "Nächster TÜV in 3 Monaten",
+        "Komponente wurde gewechselt",
+        "Verbesserungsvorschlag",
+        "Beobachtung ohne Mangel"
+      ],
+      "keywords": [
+        "hinweis",
+        "information",
+        "beobachtung",
+        "notiz",
+        "vorschlag"
+      ]
+    }
+  ],
+  "categories": [
+    {
+      "id": "mechanical",
+      "name": "Mechanisch",
+      "subcategories": [
+        "verschleiß",
+        "bruch",
+        "verformung",
+        "blockade",
+        "lockerung",
+        "korrosion"
+      ]
+    },
+    {
+      "id": "hydraulic",
+      "name": "Hydraulik",
+      "subcategories": [
+        "leckage",
+        "druckverlust",
+        "verschmutzung",
+        "schlauch_defekt",
+        "ventil_defekt"
+      ]
+    },
+    {
+      "id": "electrical",
+      "name": "Elektrik",
+      "subcategories": [
+        "kabelbruch",
+        "kurzschluss",
+        "spannungsabfall",
+        "kontaktprobleme",
+        "sicherung_defekt"
+      ]
+    },
+    {
+      "id": "electronic",
+      "name": "Elektronik",
+      "subcategories": [
+        "sensor_ausfall",
+        "steuergerät_fehler",
+        "software_fehler",
+        "kommunikation_gestört",
+        "anzeige_defekt"
+      ]
+    },
+    {
+      "id": "structural",
+      "name": "Strukturell",
+      "subcategories": [
+        "riss",
+        "delle",
+        "schweißnaht_defekt",
+        "materialermüdung",
+        "perforation"
+      ]
+    }
+  ]
+}
+
