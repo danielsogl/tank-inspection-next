@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DefaultChatTransport } from "ai";
 import { useChat } from "@ai-sdk/react";
 import { MessageCircle, Trash2 } from "lucide-react";
@@ -27,10 +27,20 @@ import { cn } from "@/lib/utils";
 
 interface ChatPanelProps {
   className?: string;
+  selectedPart?: string | null;
+  onPartHandled?: () => void;
 }
 
-export function ChatPanel({ className }: ChatPanelProps) {
+export function ChatPanel({ className, selectedPart, onPartHandled }: ChatPanelProps) {
   const [input, setInput] = useState<string>("");
+
+  // When a part is selected, pre-fill the input with a question about it
+  useEffect(() => {
+    if (selectedPart) {
+      setInput(`Tell me about the "${selectedPart}" part of the tank.`);
+      onPartHandled?.();
+    }
+  }, [selectedPart, onPartHandled]);
 
   const { messages, setMessages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
