@@ -17,20 +17,22 @@ interface CacheStats {
 }
 
 /**
- * Creates a simple in-memory cache with TTL support.
- * @param ttlMs Time-to-live in milliseconds (default: 15 minutes)
+ * Generate a cache key from query and filter parameters.
  */
-export function createQueryCache<T>(ttlMs = 15 * 60 * 1000) {
+function generateCacheKey(query: string, filters?: Record<string, unknown>): string {
+  const filterStr = filters
+    ? JSON.stringify(filters, Object.keys(filters).sort((a, b) => a.localeCompare(b)))
+    : '';
+  return `${query}|${filterStr}`;
+}
+
+/**
+ * Creates a simple in-memory cache with TTL support.
+ * @param ttlMs Time-to-live in milliseconds (default: 1 hour for stable inspection data)
+ */
+export function createQueryCache<T>(ttlMs = 60 * 60 * 1000) {
   const cache = new Map<string, CacheEntry<T>>();
   const stats: CacheStats = { hits: 0, misses: 0 };
-
-  /**
-   * Generate a cache key from query and filter parameters.
-   */
-  function generateKey(query: string, filters?: Record<string, unknown>): string {
-    const filterStr = filters ? JSON.stringify(filters, Object.keys(filters).sort()) : '';
-    return `${query}|${filterStr}`;
-  }
 
   /**
    * Get a value from the cache.
@@ -99,7 +101,7 @@ export function createQueryCache<T>(ttlMs = 15 * 60 * 1000) {
   }
 
   return {
-    generateKey,
+    generateKey: generateCacheKey,
     get,
     set,
     clear,

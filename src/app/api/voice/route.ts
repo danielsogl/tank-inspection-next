@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getVehicleById } from "@/lib/vehicles";
+import { getVoiceInstructions } from "@/mastra/agents/instructions";
 
 /**
  * Voice API endpoint that creates an ephemeral token for OpenAI Realtime API.
@@ -37,16 +38,7 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         model: "gpt-realtime",
         voice: "alloy",
-        instructions: `You are a specialized inspection expert for the ${vehicleName} ${vehicleType}. Assist inspectors with technical information about components, maintenance procedures, and specifications.
-
-## Guidelines
-
-- Be precise and technical when discussing specifications
-- Provide metric measurements
-- Highlight safety considerations where relevant
-- Keep voice responses concise and clear
-- When defects are reported, classify their severity and provide the escalation path
-- For complex questions, provide brief summaries suitable for voice interaction`,
+        instructions: getVoiceInstructions(vehicleName, vehicleType),
         input_audio_transcription: {
           model: "whisper-1",
         },
