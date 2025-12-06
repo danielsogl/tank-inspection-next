@@ -1,4 +1,5 @@
 import { PgVector } from '@mastra/pg';
+import { EMBEDDING_DIMENSIONS } from './models';
 
 /**
  * Vector store configuration for Supabase (pgvector).
@@ -41,13 +42,13 @@ export function getVectorStore(): PgVector {
 
 /**
  * Index configuration for inspection documents.
- * Using OpenAI's text-embedding-3-small which outputs 1536 dimensions.
+ * Dimension is derived from the centralized embedding model configuration.
  */
 export const INSPECTION_INDEX_CONFIG = {
   indexName: 'inspection_documents',
-  dimension: 1536,
+  dimension: EMBEDDING_DIMENSIONS,
   metric: 'cosine' as const,
-};
+} as const;
 
 // Re-export the metadata type for convenience
 export type { InspectionChunkMetadata } from '../types/rag-data.types';

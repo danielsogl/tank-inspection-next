@@ -13,8 +13,8 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { embedMany } from 'ai';
-import { openai } from '@ai-sdk/openai';
 import { getVectorStore, INSPECTION_INDEX_CONFIG } from '../lib/vector';
+import { getEmbeddingModel, EMBEDDING_MODEL_NAME } from '../lib/models';
 import type {
   VehicleData,
   MaintenanceSection,
@@ -404,12 +404,12 @@ async function seedInspectionData() {
   }
 
   // Generate embeddings
-  console.log('Generating embeddings with OpenAI text-embedding-3-small...');
+  console.log(`Generating embeddings with OpenAI ${EMBEDDING_MODEL_NAME}...`);
   console.log('  This may take a moment...\n');
 
   try {
     const { embeddings } = await embedMany({
-      model: openai.embedding('text-embedding-3-small'),
+      model: getEmbeddingModel(),
       values: allChunks.map((chunk) => chunk.text),
     });
     console.log(`  Generated ${embeddings.length} embeddings\n`);

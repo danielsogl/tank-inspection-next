@@ -1,5 +1,5 @@
 import { embed } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { getEmbeddingModel } from './models';
 
 /**
  * Simple in-memory cache for RAG query results and embeddings.
@@ -133,7 +133,7 @@ export async function getCachedEmbedding(query: string): Promise<number[]> {
   }
 
   const { embedding } = await embed({
-    model: openai.embedding('text-embedding-3-small'),
+    model: getEmbeddingModel(),
     value: query,
   });
 

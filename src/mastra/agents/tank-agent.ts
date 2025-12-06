@@ -8,6 +8,7 @@ import {
   getComponentDetailsTool,
   getMaintenanceIntervalTool,
 } from '../tools';
+import { AGENT_MODEL } from '../lib/models';
 
 export const tankAgent = new Agent({
   id: 'tank-agent',
@@ -22,7 +23,7 @@ export const tankAgent = new Agent({
 - Highlight safety considerations where relevant
 - Structure complex information with bullet points or numbered lists
 - When defects are reported, classify them and provide the escalation path`,
-  model: 'openai/gpt-5-mini',
+  model: AGENT_MODEL,
   tools: {
     queryInspectionTool,
     getCheckpointTool,

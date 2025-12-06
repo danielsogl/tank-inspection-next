@@ -2,7 +2,8 @@ import { Agent } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
 import { LibSQLStore } from '@mastra/libsql';
 import { tankAgent } from './tank-agent';
-import { VEHICLES, getVehicleById, DEFAULT_VEHICLE_ID, type VehicleConfig } from '@/lib/vehicles';
+import { getVehicleById, DEFAULT_VEHICLE_ID } from '@/lib/vehicles';
+import { AGENT_MODEL } from '../lib/models';
 
 // Vehicle-specific agent registry mapping vehicleId to their specialized agent
 const vehicleAgentRegistry: Record<string, Agent> = {
@@ -70,7 +71,7 @@ To delegate, use the ${vehicle.agentId} when you recognize the query is about ${
 - Helpful and patient
 - Clear and concise`;
   },
-  model: 'openai/gpt-5-mini',
+  model: AGENT_MODEL,
   agents: ({ requestContext }) => {
     const vehicleId = (requestContext?.get('vehicleId') as string) || DEFAULT_VEHICLE_ID;
     const vehicleAgent = vehicleAgentRegistry[vehicleId];
