@@ -5,6 +5,7 @@ import { Observability } from '@mastra/observability';
 import { PgVector } from '@mastra/pg';
 import { vehicleInspectionAgent } from './agents/vehicle-inspection-agent';
 import { INSPECTION_INDEX_CONFIG } from './lib/vector';
+import { troubleshootingWorkflow } from './workflows';
 
 // Only create vector store if SUPABASE_DB_URL is configured
 const vectors = process.env.SUPABASE_DB_URL
@@ -18,6 +19,7 @@ const vectors = process.env.SUPABASE_DB_URL
 
 export const mastra = new Mastra({
   agents: { vehicleInspectionAgent },
+  workflows: { troubleshootingWorkflow },
   storage: new LibSQLStore({
     id: 'mastra-storage',
     // stores observability, scores, ... into memory storage, if it needs to persist, change to file:../mastra.db
