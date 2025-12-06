@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getVehicleById } from "@/lib/vehicles";
 
 /**
  * Voice API endpoint that creates an ephemeral token for OpenAI Realtime API.
@@ -7,7 +8,7 @@ import { NextResponse } from "next/server";
  * This approach keeps the API key secure on the server while allowing
  * real-time audio streaming directly between the client and OpenAI.
  */
-export async function POST() {
+export async function POST(req: Request) {
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
@@ -16,6 +17,14 @@ export async function POST() {
       { status: 500 }
     );
   }
+
+  // Get vehicle ID from request body
+  const body = await req.json().catch(() => ({}));
+  const vehicleId = body.vehicleId || "leopard2";
+  const vehicle = getVehicleById(vehicleId);
+
+  const vehicleName = vehicle?.name || "military vehicle";
+  const vehicleType = vehicle?.type || "combat vehicle";
 
   try {
     // Create an ephemeral token for the client to connect to OpenAI Realtime
@@ -26,9 +35,9 @@ export async function POST() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-realtime-preview-2024-12-17",
+        model: "gpt-realtime",
         voice: "alloy",
-        instructions: `You are a specialized tank inspection expert for the Leopard 2 main battle tank. Assist inspectors with technical information about components, maintenance procedures, and specifications.
+        instructions: `You are a specialized inspection expert for the ${vehicleName} ${vehicleType}. Assist inspectors with technical information about components, maintenance procedures, and specifications.
 
 ## Guidelines
 
@@ -64,6 +73,7 @@ export async function POST() {
     return NextResponse.json({
       token: data.client_secret?.value,
       expiresAt: data.client_secret?.expires_at,
+      vehicleId,
     });
   } catch (error) {
     console.error("Voice session error:", error);
