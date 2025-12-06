@@ -2,11 +2,11 @@ import { mastra } from "@/mastra";
 import { NextResponse, type NextRequest } from "next/server";
 import { toAISdkStream } from "@mastra/ai-sdk";
 import { convertMessages } from "@mastra/core/agent";
+import { RequestContext } from "@mastra/core/request-context";
 import { createUIMessageStreamResponse } from "ai";
 
-// Call tankAgent directly to eliminate routing layer latency (~500-1000ms savings)
-// The inspectionAgent routing layer added an extra LLM call just for delegation
-const tankAgent = mastra.getAgent("tankAgent");
+// Get the vehicle inspection agent
+const vehicleInspectionAgent = mastra.getAgent("vehicleInspectionAgent");
 
 export async function POST(req: Request) {
   const { messages, vehicleId = "leopard2" } = await req.json();
@@ -14,12 +14,17 @@ export async function POST(req: Request) {
   // Create vehicle-specific thread ID for memory isolation
   const threadId = `${vehicleId}-inspection-chat`;
 
-  // Stream directly from tankAgent (no routing overhead)
-  const stream = await tankAgent.stream(messages, {
+  // Create request context with vehicle ID for dynamic agent instructions and tool context
+  const requestContext = new RequestContext<{ vehicleId: string }>();
+  requestContext.set("vehicleId", vehicleId);
+
+  // Stream from the vehicle inspection agent with vehicle context
+  const stream = await vehicleInspectionAgent.stream(messages, {
     memory: {
       thread: threadId,
       resource: "example-user-id",
     },
+    requestContext,
   });
 
   return createUIMessageStreamResponse({
@@ -32,7 +37,7 @@ export async function GET(req: NextRequest) {
   const vehicleId = searchParams.get("vehicleId") ?? "leopard2";
   const threadId = `${vehicleId}-inspection-chat`;
 
-  const memory = await tankAgent.getMemory();
+  const memory = await vehicleInspectionAgent.getMemory();
 
   if (!memory) {
     return NextResponse.json([]);

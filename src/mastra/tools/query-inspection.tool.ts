@@ -6,6 +6,7 @@ import {
   type InspectionChunkMetadata,
 } from '../lib/vector';
 import { ragQueryCache, getCachedEmbedding } from '../lib/cache';
+import { mapToRagVehicleType } from '../lib/vehicle-mapping';
 
 /**
  * Tool for querying the inspection vector database.
@@ -19,8 +20,9 @@ export const queryInspectionTool = createTool({
 Use this tool to find specific inspection procedures, specifications, thresholds,
 and maintenance instructions for vehicle checkpoints.
 
-The tool supports filtering by:
-- Vehicle type (leopard2, m1a2)
+The vehicle type is automatically determined from the current inspection context.
+
+The tool supports additional filtering by:
 - Vehicle variant (A4, A5, A6, A6M, A7, A7V)
 - Crew role (driver, commander, gunner, loader)
 - Maintenance level (L1, L2, L3, L4)
@@ -31,11 +33,6 @@ The tool supports filtering by:
 The tool returns the most relevant information based on semantic similarity and filters.`,
   inputSchema: z.object({
     query: z.string().describe('The search query to find relevant inspection information'),
-    vehicleType: z
-      .enum(['leopard2', 'm1a2', 'any'])
-      .optional()
-      .default('any')
-      .describe('Filter results by vehicle type. Use "any" to search across all vehicles.'),
     vehicleVariant: z
       .enum(['A4', 'A5', 'A6', 'A6M', 'A7', 'A7V'])
       .optional()
@@ -83,10 +80,9 @@ The tool returns the most relevant information based on semantic similarity and 
     ),
     totalFound: z.number(),
   }),
-  execute: async (inputData) => {
+  execute: async (inputData, context) => {
     const {
       query,
-      vehicleType,
       vehicleVariant,
       crewRole,
       maintenanceLevel,
@@ -96,11 +92,14 @@ The tool returns the most relevant information based on semantic similarity and 
       topK,
     } = inputData;
 
-    // Build filter object
-    const filter: Record<string, unknown> = {};
-    if (vehicleType !== 'any') {
-      filter.vehicleType = vehicleType;
-    }
+    // Get vehicleId from context and map to RAG vehicle type
+    const vehicleId = (context?.requestContext?.get('vehicleId') as string) || 'leopard2';
+    const vehicleType = mapToRagVehicleType(vehicleId);
+
+    // Build filter object - always filter by vehicle type from context
+    const filter: Record<string, unknown> = {
+      vehicleType,
+    };
     if (vehicleVariant) {
       filter.vehicleVariant = vehicleVariant;
     }
@@ -195,18 +194,17 @@ The tool returns the most relevant information based on semantic similarity and 
 
 /**
  * Tool for getting checkpoint details by number.
+ * Vehicle type is automatically determined from the current inspection context.
  */
 export const getCheckpointTool = createTool({
   id: 'get-checkpoint',
   description: `Get detailed information about a specific checkpoint by its number.
-Use this when you know the exact checkpoint number and vehicle type.`,
+Use this when you know the exact checkpoint number. The vehicle type is automatically
+determined from the current inspection context.`,
   inputSchema: z.object({
     checkpointNumber: z
       .number()
       .describe('The checkpoint number (1-34 for Leopard 2, 1-34 for M1A2)'),
-    vehicleType: z
-      .enum(['leopard2', 'm1a2'])
-      .describe('The vehicle type to get the checkpoint for'),
   }),
   outputSchema: z.object({
     found: z.boolean(),
@@ -222,8 +220,12 @@ Use this when you know the exact checkpoint number and vehicle type.`,
       })
       .optional(),
   }),
-  execute: async (inputData) => {
-    const { checkpointNumber, vehicleType } = inputData;
+  execute: async (inputData, context) => {
+    const { checkpointNumber } = inputData;
+
+    // Get vehicleId from context and map to RAG vehicle type
+    const vehicleId = (context?.requestContext?.get('vehicleId') as string) || 'leopard2';
+    const vehicleType = mapToRagVehicleType(vehicleId);
 
     const query = `checkpoint ${checkpointNumber} ${vehicleType}`;
 
