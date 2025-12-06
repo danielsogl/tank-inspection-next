@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { VOICE_MODEL } from "@/mastra/lib/voice-config";
 
 /**
- * Voice API endpoint that creates an ephemeral token for OpenAI Realtime API.
- * The client uses this token to establish a direct WebSocket connection to OpenAI.
+ * Voice API endpoint that creates an ephemeral API key for OpenAI Realtime API.
+ * The client uses this key with the OpenAI Agents SDK to establish a WebRTC connection.
  *
  * This approach keeps the API key secure on the server while allowing
  * real-time audio streaming directly between the client and OpenAI.
@@ -18,41 +19,24 @@ export async function POST() {
   }
 
   try {
-    // Create an ephemeral token for the client to connect to OpenAI Realtime
-    const response = await fetch("https://api.openai.com/v1/realtime/sessions", {
+    // Create an ephemeral client secret for the browser to connect via WebRTC
+    const response = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-realtime-preview-2024-12-17",
-        voice: "alloy",
-        instructions: `You are a specialized tank inspection expert for the Leopard 2 main battle tank. Assist inspectors with technical information about components, maintenance procedures, and specifications.
-
-## Guidelines
-
-- Be precise and technical when discussing specifications
-- Provide metric measurements
-- Highlight safety considerations where relevant
-- Keep voice responses concise and clear
-- When defects are reported, classify their severity and provide the escalation path
-- For complex questions, provide brief summaries suitable for voice interaction`,
-        input_audio_transcription: {
-          model: "whisper-1",
-        },
-        turn_detection: {
-          type: "server_vad",
-          threshold: 0.5,
-          prefix_padding_ms: 300,
-          silence_duration_ms: 500,
+        session: {
+          type: "realtime",
+          model: VOICE_MODEL,
         },
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("OpenAI Realtime session error:", errorText);
+      console.error("OpenAI client secret error:", errorText);
       return NextResponse.json(
         { error: "Failed to create voice session" },
         { status: response.status }
@@ -61,9 +45,10 @@ export async function POST() {
 
     const data = await response.json();
 
+    // Response format: { value: "ek_...", expires_at: ... }
     return NextResponse.json({
-      token: data.client_secret?.value,
-      expiresAt: data.client_secret?.expires_at,
+      apiKey: data.value,
+      expiresAt: data.expires_at,
     });
   } catch (error) {
     console.error("Voice session error:", error);

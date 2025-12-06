@@ -1,13 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { RealtimeAgent, RealtimeSession } from "@openai/agents-realtime";
+import { VOICE_MODEL, VOICE_INSTRUCTIONS } from "@/mastra/lib/voice-config";
 
 export type VoiceState =
   | "idle"
   | "connecting"
   | "listening"
   | "thinking"
-  | "responding";
+  | "responding"
+  | "paused";
 
 export interface VoiceMessage {
   id: string;
@@ -28,9 +31,19 @@ interface UseRealtimeVoiceReturn {
   error: string | null;
   start: () => Promise<void>;
   stop: () => void;
+  disconnect: () => void;
   interrupt: () => void;
 }
 
+/**
+ * React hook for real-time voice interaction using OpenAI Agents SDK.
+ *
+ * The SDK automatically handles:
+ * - Microphone capture
+ * - Audio playback
+ * - WebRTC connection (in browser)
+ * - Audio encoding/decoding
+ */
 export function useRealtimeVoice(
   options: UseRealtimeVoiceOptions = {}
 ): UseRealtimeVoiceReturn {
@@ -39,15 +52,7 @@ export function useRealtimeVoice(
   const [state, setState] = useState<VoiceState>("idle");
   const [error, setError] = useState<string | null>(null);
 
-  const wsRef = useRef<WebSocket | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
-  const workletNodeRef = useRef<AudioWorkletNode | null>(null);
-  const sourceNodeRef = useRef<MediaStreamAudioSourceNode | null>(null);
-  const playbackQueueRef = useRef<Int16Array[]>([]);
-  const isPlayingRef = useRef(false);
-  const currentResponseIdRef = useRef<string | null>(null);
-  const currentTranscriptRef = useRef<string>("");
+  const sessionRef = useRef<RealtimeSession | null>(null);
 
   // Update state and notify
   const updateState = useCallback(
@@ -58,183 +63,16 @@ export function useRealtimeVoice(
     [onStateChange]
   );
 
-  // Convert Float32Array to Int16Array for sending to OpenAI
-  const floatTo16BitPCM = (float32Array: Float32Array): Int16Array => {
-    const int16Array = new Int16Array(float32Array.length);
-    for (let i = 0; i < float32Array.length; i++) {
-      const s = Math.max(-1, Math.min(1, float32Array[i]));
-      int16Array[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
-    }
-    return int16Array;
-  };
-
-  // Convert Int16Array to Float32Array for playback
-  const int16ToFloat32 = (int16Array: Int16Array): Float32Array => {
-    const float32Array = new Float32Array(int16Array.length);
-    for (let i = 0; i < int16Array.length; i++) {
-      float32Array[i] = int16Array[i] / (int16Array[i] < 0 ? 0x8000 : 0x7fff);
-    }
-    return float32Array;
-  };
-
-  // Base64 encode Int16Array
-  const encodeAudioData = (int16Array: Int16Array): string => {
-    const uint8Array = new Uint8Array(int16Array.buffer);
-    let binary = "";
-    for (let i = 0; i < uint8Array.length; i++) {
-      binary += String.fromCharCode(uint8Array[i]);
-    }
-    return btoa(binary);
-  };
-
-  // Base64 decode to Int16Array
-  const decodeAudioData = (base64: string): Int16Array => {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return new Int16Array(bytes.buffer);
-  };
-
-  // Play audio from queue
-  const playNextAudio = useCallback(async () => {
-    if (isPlayingRef.current || playbackQueueRef.current.length === 0) {
-      return;
-    }
-
-    isPlayingRef.current = true;
-    const audioContext = audioContextRef.current;
-
-    if (!audioContext) {
-      isPlayingRef.current = false;
-      return;
-    }
-
-    while (playbackQueueRef.current.length > 0) {
-      const audioData = playbackQueueRef.current.shift()!;
-      const float32Data = int16ToFloat32(audioData);
-
-      // OpenAI Realtime API outputs 24kHz audio
-      const audioBuffer = audioContext.createBuffer(1, float32Data.length, 24000);
-      audioBuffer.getChannelData(0).set(float32Data);
-
-      const source = audioContext.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(audioContext.destination);
-
-      await new Promise<void>((resolve) => {
-        source.onended = () => resolve();
-        source.start();
-      });
-    }
-
-    isPlayingRef.current = false;
-
-    // If we finished playing and no more audio, we may return to listening
-    if (state === "responding" && playbackQueueRef.current.length === 0) {
-      updateState("listening");
-    }
-  }, [state, updateState]);
-
-  // Stop all audio playback
-  const stopPlayback = useCallback(() => {
-    playbackQueueRef.current = [];
-    isPlayingRef.current = false;
-  }, []);
-
-  // Handle WebSocket messages
-  const handleMessage = useCallback(
-    (event: MessageEvent) => {
-      try {
-        const data = JSON.parse(event.data);
-
-        switch (data.type) {
-          case "session.created":
-            updateState("listening");
-            break;
-
-          case "input_audio_buffer.speech_started":
-            // User started speaking - clear any pending playback
-            stopPlayback();
-            if (state === "responding") {
-              // Interrupt the response
-              wsRef.current?.send(JSON.stringify({ type: "response.cancel" }));
-            }
-            updateState("listening");
-            break;
-
-          case "input_audio_buffer.speech_stopped":
-            updateState("thinking");
-            break;
-
-          case "conversation.item.input_audio_transcription.completed":
-            // User's speech was transcribed
-            if (data.transcript) {
-              const message: VoiceMessage = {
-                id: data.item_id || crypto.randomUUID(),
-                role: "user",
-                content: data.transcript,
-                isVoice: true,
-                timestamp: new Date(),
-              };
-              onMessage?.(message);
-            }
-            break;
-
-          case "response.created":
-            currentResponseIdRef.current = data.response?.id;
-            currentTranscriptRef.current = "";
-            updateState("responding");
-            break;
-
-          case "response.audio.delta":
-            // Audio chunk received
-            if (data.delta) {
-              const audioData = decodeAudioData(data.delta);
-              playbackQueueRef.current.push(audioData);
-              playNextAudio();
-            }
-            break;
-
-          case "response.audio_transcript.delta":
-            // Progressive transcript of assistant's response
-            if (data.delta) {
-              currentTranscriptRef.current += data.delta;
-            }
-            break;
-
-          case "response.audio_transcript.done":
-          case "response.done":
-            // Response completed - emit the full transcript as a message
-            if (currentTranscriptRef.current) {
-              const message: VoiceMessage = {
-                id: currentResponseIdRef.current || crypto.randomUUID(),
-                role: "assistant",
-                content: currentTranscriptRef.current,
-                isVoice: true,
-                timestamp: new Date(),
-              };
-              onMessage?.(message);
-              currentTranscriptRef.current = "";
-            }
-            break;
-
-          case "error":
-            const errorMessage = data.error?.message || "An error occurred";
-            setError(errorMessage);
-            onError?.(errorMessage);
-            break;
-        }
-      } catch (err) {
-        console.error("Error parsing WebSocket message:", err);
-      }
-    },
-    [onMessage, onError, state, updateState, stopPlayback, playNextAudio]
-  );
-
-  // Start voice session
+  // Start or resume voice session
   const start = useCallback(async () => {
+    // If paused, just unmute to resume
+    if (state === "paused" && sessionRef.current) {
+      sessionRef.current.mute(false);
+      updateState("listening");
+      return;
+    }
+
+    // Only start new session from idle state
     if (state !== "idle") {
       return;
     }
@@ -243,188 +81,142 @@ export function useRealtimeVoice(
     updateState("connecting");
 
     try {
-      // Request microphone permission
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          sampleRate: 24000,
-          channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: true,
-        },
-      });
-      mediaStreamRef.current = stream;
-
-      // Get ephemeral token from our API
+      // Get ephemeral API key from our backend
       const tokenResponse = await fetch("/api/voice", { method: "POST" });
       if (!tokenResponse.ok) {
         const errorData = await tokenResponse.json();
         throw new Error(errorData.error || "Failed to get voice session token");
       }
 
-      const { token } = await tokenResponse.json();
-      if (!token) {
-        throw new Error("No token received from server");
+      const { apiKey } = await tokenResponse.json();
+      if (!apiKey) {
+        throw new Error("No API key received from server");
       }
 
-      // Create AudioContext for both capture and playback
-      const audioContext = new AudioContext({ sampleRate: 24000 });
-      audioContextRef.current = audioContext;
+      // Create agent with tank inspection instructions
+      const agent = new RealtimeAgent({
+        name: "Tank Inspector",
+        instructions: VOICE_INSTRUCTIONS,
+      });
 
-      // Connect to OpenAI Realtime API
-      const ws = new WebSocket(
-        `wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17`,
-        ["realtime", `openai-insecure-api-key.${token}`, "openai-beta.realtime-v1"]
-      );
-      wsRef.current = ws;
+      // Create session - automatically handles audio I/O in browser
+      const session = new RealtimeSession(agent, {
+        model: VOICE_MODEL,
+      });
+      sessionRef.current = session;
 
-      ws.onopen = () => {
-        // Session will be configured by the server based on our API call
-      };
+      // Listen for transport events to track state and transcripts
+      // The '*' event receives a single TransportEvent object with a 'type' property
+      session.transport.on("*", (event) => {
+        // Handle state changes based on Realtime API events
+        switch (event.type) {
+          case "input_audio_buffer.speech_started":
+            updateState("listening");
+            break;
 
-      ws.onmessage = handleMessage;
+          case "input_audio_buffer.speech_stopped":
+            updateState("thinking");
+            break;
 
-      ws.onerror = () => {
-        const errorMessage = "WebSocket connection error";
-        setError(errorMessage);
-        onError?.(errorMessage);
-        updateState("idle");
-      };
+          case "response.created":
+            updateState("responding");
+            break;
 
-      ws.onclose = () => {
-        updateState("idle");
-      };
+          case "response.done":
+            updateState("listening");
+            break;
 
-      // Set up audio capture using AudioWorklet
-      await audioContext.audioWorklet.addModule(
-        URL.createObjectURL(
-          new Blob(
-            [
-              `
-              class AudioProcessor extends AudioWorkletProcessor {
-                constructor() {
-                  super();
-                  this.buffer = [];
-                }
+          // User's transcribed speech
+          case "conversation.item.input_audio_transcription.completed":
+            if (event.transcript) {
+              onMessage?.({
+                id: event.item_id || crypto.randomUUID(),
+                role: "user",
+                content: event.transcript,
+                isVoice: true,
+                timestamp: new Date(),
+              });
+            }
+            break;
 
-                process(inputs) {
-                  const input = inputs[0];
-                  if (input.length > 0) {
-                    const channelData = input[0];
-                    // Accumulate samples
-                    for (let i = 0; i < channelData.length; i++) {
-                      this.buffer.push(channelData[i]);
-                    }
+          // Assistant's transcribed response
+          case "response.output_audio_transcript.done":
+            if ("transcript" in event && event.transcript) {
+              onMessage?.({
+                id: crypto.randomUUID(),
+                role: "assistant",
+                content: event.transcript as string,
+                isVoice: true,
+                timestamp: new Date(),
+              });
+            }
+            break;
 
-                    // Send chunks of ~100ms (2400 samples at 24kHz)
-                    if (this.buffer.length >= 2400) {
-                      this.port.postMessage(new Float32Array(this.buffer));
-                      this.buffer = [];
-                    }
-                  }
-                  return true;
-                }
-              }
-
-              registerProcessor('audio-processor', AudioProcessor);
-            `,
-            ],
-            { type: "application/javascript" }
-          )
-        )
-      );
-
-      const workletNode = new AudioWorkletNode(audioContext, "audio-processor");
-      workletNodeRef.current = workletNode;
-
-      workletNode.port.onmessage = (event) => {
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-          const int16Data = floatTo16BitPCM(event.data);
-          const base64Audio = encodeAudioData(int16Data);
-
-          wsRef.current.send(
-            JSON.stringify({
-              type: "input_audio_buffer.append",
-              audio: base64Audio,
-            })
-          );
+          case "error":
+            const errorMessage =
+              (event.error as { message?: string })?.message ||
+              "An error occurred";
+            setError(errorMessage);
+            onError?.(errorMessage);
+            break;
         }
-      };
+      });
 
-      const sourceNode = audioContext.createMediaStreamSource(stream);
-      sourceNodeRef.current = sourceNode;
-      sourceNode.connect(workletNode);
+      // Connect - automatically starts microphone and speaker in browser
+      await session.connect({ apiKey });
+      updateState("listening");
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to start voice session";
       setError(errorMessage);
       onError?.(errorMessage);
       updateState("idle");
-      cleanup();
     }
-  }, [state, updateState, onError, handleMessage]);
+  }, [state, updateState, onMessage, onError]);
 
-  // Cleanup resources
-  const cleanup = useCallback(() => {
-    stopPlayback();
-
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-
-    if (workletNodeRef.current) {
-      workletNodeRef.current.disconnect();
-      workletNodeRef.current = null;
-    }
-
-    if (sourceNodeRef.current) {
-      sourceNodeRef.current.disconnect();
-      sourceNodeRef.current = null;
-    }
-
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-    }
-
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-      mediaStreamRef.current = null;
-    }
-
-    currentTranscriptRef.current = "";
-    currentResponseIdRef.current = null;
-  }, [stopPlayback]);
-
-  // Stop voice session
+  // Pause voice session (mute but keep connection alive)
   const stop = useCallback(() => {
-    cleanup();
+    if (sessionRef.current) {
+      sessionRef.current.mute(true);
+      // Also interrupt any ongoing response
+      sessionRef.current.interrupt();
+    }
+    updateState("paused");
+  }, [updateState]);
+
+  // Fully disconnect the voice session
+  const disconnect = useCallback(() => {
+    if (sessionRef.current) {
+      sessionRef.current.close();
+      sessionRef.current = null;
+    }
     updateState("idle");
-  }, [cleanup, updateState]);
+  }, [updateState]);
 
   // Interrupt current response
   const interrupt = useCallback(() => {
-    stopPlayback();
-
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: "response.cancel" }));
+    if (sessionRef.current) {
+      sessionRef.current.interrupt();
     }
-
     updateState("listening");
-  }, [stopPlayback, updateState]);
+  }, [updateState]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      cleanup();
+      if (sessionRef.current) {
+        sessionRef.current.close();
+        sessionRef.current = null;
+      }
     };
-  }, [cleanup]);
+  }, []);
 
   return {
     state,
     error,
     start,
     stop,
+    disconnect,
     interrupt,
   };
 }

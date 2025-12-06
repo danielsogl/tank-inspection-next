@@ -77,7 +77,7 @@ const voiceStateConfig: Record<
   },
   listening: {
     icon: Mic,
-    tooltip: "Listening... (click to stop)",
+    tooltip: "Listening... (click to pause)",
     animate: true,
   },
   thinking: {
@@ -89,6 +89,10 @@ const voiceStateConfig: Record<
     icon: Volume2,
     tooltip: "Speaking... (click to interrupt)",
     animate: true,
+  },
+  paused: {
+    icon: MicOff,
+    tooltip: "Voice paused (click to resume)",
   },
 };
 
@@ -123,7 +127,8 @@ export function ChatPanel({
     onError: handleVoiceError,
   });
 
-  const isVoiceActive = voiceState !== "idle";
+  const isVoiceActive = voiceState !== "idle" && voiceState !== "paused";
+  const isVoicePaused = voiceState === "paused";
   const isVoiceConnecting = voiceState === "connecting";
 
   // When a part is selected, pre-fill the input with a question about it
@@ -159,6 +164,7 @@ export function ChatPanel({
   const handleVoiceClick = () => {
     switch (voiceState) {
       case "idle":
+      case "paused":
         startVoice();
         break;
       case "responding":
@@ -321,7 +327,7 @@ export function ChatPanel({
         <PromptInput onSubmit={handleSubmit}>
           <PromptInputBody>
             {/* Voice state indicator */}
-            {isVoiceActive && (
+            {(isVoiceActive || isVoicePaused) && (
               <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground border-b border-border">
                 {voiceState === "listening" && (
                   <>
@@ -345,6 +351,12 @@ export function ChatPanel({
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span>Connecting...</span>
+                  </>
+                )}
+                {voiceState === "paused" && (
+                  <>
+                    <MicOff className="h-4 w-4 text-muted-foreground" />
+                    <span>Voice paused</span>
                   </>
                 )}
               </div>
@@ -372,13 +384,14 @@ export function ChatPanel({
                   <TooltipTrigger asChild>
                     <Button
                       type="button"
-                      variant={isVoiceActive ? "default" : "outline"}
+                      variant={isVoiceActive || isVoicePaused ? "default" : "outline"}
                       size="icon"
                       disabled={isVoiceConnecting}
                       onClick={handleVoiceClick}
                       className={cn(
                         "h-9 w-9 rounded-full transition-all",
                         isVoiceActive && "bg-primary hover:bg-primary/90",
+                        isVoicePaused && "bg-muted-foreground/50 hover:bg-muted-foreground/70",
                         voiceState === "listening" && "animate-pulse",
                         voiceState === "responding" && "bg-green-600 hover:bg-green-700"
                       )}
