@@ -84,112 +84,120 @@ The tool returns the most relevant information based on semantic similarity and 
     totalFound: z.number(),
   }),
   execute: async (inputData) => {
-    const {
-      query,
-      vehicleType,
-      vehicleVariant,
-      crewRole,
-      maintenanceLevel,
-      priority,
-      componentId,
-      dataType,
-      topK,
-    } = inputData;
+    try {
+      const {
+        query,
+        vehicleType,
+        vehicleVariant,
+        crewRole,
+        maintenanceLevel,
+        priority,
+        componentId,
+        dataType,
+        topK,
+      } = inputData;
 
-    // Build filter object
-    const filter: Record<string, unknown> = {};
-    if (vehicleType !== 'any') {
-      filter.vehicleType = vehicleType;
-    }
-    if (vehicleVariant) {
-      filter.vehicleVariant = vehicleVariant;
-    }
-    if (crewRole) {
-      filter.crewRole = crewRole;
-    }
-    if (maintenanceLevel) {
-      filter.maintenanceLevel = maintenanceLevel;
-    }
-    if (priority) {
-      filter.priority = priority;
-    }
-    if (componentId) {
-      filter.componentId = componentId;
-    }
-    if (dataType) {
-      filter.dataType = dataType;
-    }
+      // Build filter object
+      const filter: Record<string, unknown> = {};
+      if (vehicleType !== 'any') {
+        filter.vehicleType = vehicleType;
+      }
+      if (vehicleVariant) {
+        filter.vehicleVariant = vehicleVariant;
+      }
+      if (crewRole) {
+        filter.crewRole = crewRole;
+      }
+      if (maintenanceLevel) {
+        filter.maintenanceLevel = maintenanceLevel;
+      }
+      if (priority) {
+        filter.priority = priority;
+      }
+      if (componentId) {
+        filter.componentId = componentId;
+      }
+      if (dataType) {
+        filter.dataType = dataType;
+      }
 
-    // Check cache first
-    const cacheKey = ragQueryCache.generateKey(query, { ...filter, topK });
-    const cachedResult = ragQueryCache.get(cacheKey);
-    if (cachedResult) {
-      return cachedResult as {
-        results: {
-          checkpointNumber?: number;
-          checkpointName?: string;
-          sectionName?: string;
-          sectionId: string;
-          vehicleType: string;
-          vehicleVariant?: string;
-          crewRole?: string;
-          maintenanceLevel?: string;
-          componentId?: string;
-          priority?: string;
-          estimatedTimeMin?: number;
-          dataType: string;
-          content: string;
-          score: number;
-        }[];
-        totalFound: number;
+      // Check cache first
+      const cacheKey = ragQueryCache.generateKey(query, { ...filter, topK });
+      const cachedResult = ragQueryCache.get(cacheKey);
+      if (cachedResult) {
+        return cachedResult as {
+          results: {
+            checkpointNumber?: number;
+            checkpointName?: string;
+            sectionName?: string;
+            sectionId: string;
+            vehicleType: string;
+            vehicleVariant?: string;
+            crewRole?: string;
+            maintenanceLevel?: string;
+            componentId?: string;
+            priority?: string;
+            estimatedTimeMin?: number;
+            dataType: string;
+            content: string;
+            score: number;
+          }[];
+          totalFound: number;
+        };
+      }
+
+      // Generate embedding for the query (cached)
+      const queryEmbedding = await getCachedEmbedding(query);
+
+      // Get singleton vector store (connection pooled)
+      const vectorStore = getVectorStore();
+
+      // Query the vector store
+      const queryResults = await vectorStore.query({
+        indexName: INSPECTION_INDEX_CONFIG.indexName,
+        queryVector: queryEmbedding,
+        topK,
+        filter: Object.keys(filter).length > 0 ? (filter as Record<string, string | number | boolean>) : undefined,
+        includeVector: false,
+      });
+
+      // Transform results
+      const results = queryResults.map((result) => {
+        const metadata = result.metadata as InspectionChunkMetadata;
+        return {
+          checkpointNumber: metadata.checkpointNumber,
+          checkpointName: metadata.checkpointName,
+          sectionName: metadata.sectionName,
+          sectionId: metadata.sectionId,
+          vehicleType: metadata.vehicleType,
+          vehicleVariant: metadata.vehicleVariant,
+          crewRole: metadata.crewRole,
+          maintenanceLevel: metadata.maintenanceLevel,
+          componentId: metadata.componentId,
+          priority: metadata.priority,
+          estimatedTimeMin: metadata.estimatedTimeMin,
+          dataType: metadata.dataType,
+          content: metadata.text,
+          score: result.score ?? 0,
+        };
+      });
+
+      const response = {
+        results,
+        totalFound: results.length,
       };
-    }
 
-    // Generate embedding for the query (cached)
-    const queryEmbedding = await getCachedEmbedding(query);
+      // Cache the result
+      ragQueryCache.set(cacheKey, response);
 
-    // Get singleton vector store (connection pooled)
-    const vectorStore = getVectorStore();
-
-    // Query the vector store
-    const queryResults = await vectorStore.query({
-      indexName: INSPECTION_INDEX_CONFIG.indexName,
-      queryVector: queryEmbedding,
-      topK,
-      filter: Object.keys(filter).length > 0 ? (filter as Record<string, string | number | boolean>) : undefined,
-      includeVector: false,
-    });
-
-    // Transform results
-    const results = queryResults.map((result) => {
-      const metadata = result.metadata as InspectionChunkMetadata;
+      return response;
+    } catch (error) {
+      console.error('[query-inspection] Error:', error);
       return {
-        checkpointNumber: metadata.checkpointNumber,
-        checkpointName: metadata.checkpointName,
-        sectionName: metadata.sectionName,
-        sectionId: metadata.sectionId,
-        vehicleType: metadata.vehicleType,
-        vehicleVariant: metadata.vehicleVariant,
-        crewRole: metadata.crewRole,
-        maintenanceLevel: metadata.maintenanceLevel,
-        componentId: metadata.componentId,
-        priority: metadata.priority,
-        estimatedTimeMin: metadata.estimatedTimeMin,
-        dataType: metadata.dataType,
-        content: metadata.text,
-        score: result.score ?? 0,
+        results: [],
+        totalFound: 0,
       };
-    });
-
-    const response = {
-      results,
-      totalFound: results.length,
-    };
-
-    // Cache the result
-    ragQueryCache.set(cacheKey, response);
-
-    return response;
+    }
   },
 });
 
@@ -223,53 +231,61 @@ Use this when you know the exact checkpoint number and vehicle type.`,
       .optional(),
   }),
   execute: async (inputData) => {
-    const { checkpointNumber, vehicleType } = inputData;
+    try {
+      const { checkpointNumber, vehicleType } = inputData;
 
-    const query = `checkpoint ${checkpointNumber} ${vehicleType}`;
+      const query = `checkpoint ${checkpointNumber} ${vehicleType}`;
 
-    // Use cached embedding
-    const queryEmbedding = await getCachedEmbedding(query);
+      // Use cached embedding
+      const queryEmbedding = await getCachedEmbedding(query);
 
-    // Get singleton vector store
-    const vectorStore = getVectorStore();
+      // Get singleton vector store
+      const vectorStore = getVectorStore();
 
-    const queryResults = await vectorStore.query({
-      indexName: INSPECTION_INDEX_CONFIG.indexName,
-      queryVector: queryEmbedding,
-      topK: 5,
-      filter: {
-        vehicleType,
-        checkpointNumber,
-      },
-      includeVector: false,
-    });
-
-    const exactMatch = queryResults.find((result) => {
-      const metadata = result.metadata as InspectionChunkMetadata;
-      return (
-        metadata.checkpointNumber === checkpointNumber && metadata.vehicleType === vehicleType
-      );
-    });
-
-    if (exactMatch) {
-      const metadata = exactMatch.metadata as InspectionChunkMetadata;
-      return {
-        found: true,
-        checkpoint: {
-          checkpointNumber: metadata.checkpointNumber!,
-          sectionName: metadata.sectionName,
-          checkpointName: metadata.checkpointName,
-          sectionId: metadata.sectionId,
-          vehicleType: metadata.vehicleType,
-          role: metadata.crewRole,
-          content: metadata.text,
+      const queryResults = await vectorStore.query({
+        indexName: INSPECTION_INDEX_CONFIG.indexName,
+        queryVector: queryEmbedding,
+        topK: 5,
+        filter: {
+          vehicleType,
+          checkpointNumber,
         },
+        includeVector: false,
+      });
+
+      const exactMatch = queryResults.find((result) => {
+        const metadata = result.metadata as InspectionChunkMetadata;
+        return (
+          metadata.checkpointNumber === checkpointNumber && metadata.vehicleType === vehicleType
+        );
+      });
+
+      if (exactMatch) {
+        const metadata = exactMatch.metadata as InspectionChunkMetadata;
+        return {
+          found: true,
+          checkpoint: {
+            checkpointNumber: metadata.checkpointNumber!,
+            sectionName: metadata.sectionName,
+            checkpointName: metadata.checkpointName,
+            sectionId: metadata.sectionId,
+            vehicleType: metadata.vehicleType,
+            role: metadata.crewRole,
+            content: metadata.text,
+          },
+        };
+      }
+
+      return {
+        found: false,
+        checkpoint: undefined,
+      };
+    } catch (error) {
+      console.error('[get-checkpoint] Error:', error);
+      return {
+        found: false,
+        checkpoint: undefined,
       };
     }
-
-    return {
-      found: false,
-      checkpoint: undefined,
-    };
   },
 });

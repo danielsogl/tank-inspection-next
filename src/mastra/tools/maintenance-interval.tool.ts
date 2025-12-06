@@ -347,95 +347,105 @@ Use this tool when:
     }),
   }),
   execute: async (inputData) => {
-    const { level, operatingHours, intervalId, includeTasksInRange } = inputData;
+    try {
+      const { level, operatingHours, intervalId, includeTasksInRange } = inputData;
 
-    let filteredIntervals = [...MAINTENANCE_INTERVALS];
+      let filteredIntervals = [...MAINTENANCE_INTERVALS];
 
-    if (intervalId) {
-      filteredIntervals = filteredIntervals.filter((i) => i.id === intervalId);
-    }
-
-    if (level) {
-      filteredIntervals = filteredIntervals.filter((i) => i.level === level);
-    }
-
-    const processedIntervals = filteredIntervals.map((interval) => {
-      const executorName = EXECUTOR_DESCRIPTIONS[interval.executor] || {
-        de: interval.executor,
-        en: interval.executor,
-      };
-
-      const processed: {
-        id: string;
-        level: 'L1' | 'L2' | 'L3' | 'L4';
-        name: string;
-        executor: string;
-        executorName: { de: string; en: string };
-        trigger: { type: 'event' | 'calendar' | 'operating_hours'; value: string | number; unit?: string };
-        duration: string;
-        tasks: string[];
-        sections: string[];
-        notes: string;
-        isDue?: boolean;
-        hoursUntilDue?: number;
-      } = {
-        id: interval.id,
-        level: interval.level,
-        name: interval.name,
-        executor: interval.executor,
-        executorName,
-        trigger: interval.trigger as { type: 'event' | 'calendar' | 'operating_hours'; value: string | number; unit?: string },
-        duration: interval.duration,
-        tasks: interval.tasks,
-        sections: interval.sections,
-        notes: interval.notes,
-      };
-
-      if (operatingHours !== undefined && interval.trigger.type === 'operating_hours') {
-        const triggerHours = interval.trigger.value as number;
-        const hoursUntilDue = triggerHours - (operatingHours % triggerHours);
-        processed.isDue = hoursUntilDue <= 50;
-        processed.hoursUntilDue = hoursUntilDue;
+      if (intervalId) {
+        filteredIntervals = filteredIntervals.filter((i) => i.id === intervalId);
       }
 
-      return processed;
-    });
+      if (level) {
+        filteredIntervals = filteredIntervals.filter((i) => i.level === level);
+      }
 
-    let resultIntervals = processedIntervals;
-    if (operatingHours !== undefined && includeTasksInRange) {
-      resultIntervals = processedIntervals.filter((i) => {
-        if (i.trigger.type === 'operating_hours') {
-          return (i.trigger.value as number) <= operatingHours;
+      const processedIntervals = filteredIntervals.map((interval) => {
+        const executorName = EXECUTOR_DESCRIPTIONS[interval.executor] || {
+          de: interval.executor,
+          en: interval.executor,
+        };
+
+        const processed: {
+          id: string;
+          level: 'L1' | 'L2' | 'L3' | 'L4';
+          name: string;
+          executor: string;
+          executorName: { de: string; en: string };
+          trigger: { type: 'event' | 'calendar' | 'operating_hours'; value: string | number; unit?: string };
+          duration: string;
+          tasks: string[];
+          sections: string[];
+          notes: string;
+          isDue?: boolean;
+          hoursUntilDue?: number;
+        } = {
+          id: interval.id,
+          level: interval.level,
+          name: interval.name,
+          executor: interval.executor,
+          executorName,
+          trigger: interval.trigger as { type: 'event' | 'calendar' | 'operating_hours'; value: string | number; unit?: string },
+          duration: interval.duration,
+          tasks: interval.tasks,
+          sections: interval.sections,
+          notes: interval.notes,
+        };
+
+        if (operatingHours !== undefined && interval.trigger.type === 'operating_hours') {
+          const triggerHours = interval.trigger.value as number;
+          const hoursUntilDue = triggerHours - (operatingHours % triggerHours);
+          processed.isDue = hoursUntilDue <= 50;
+          processed.hoursUntilDue = hoursUntilDue;
         }
-        return true;
+
+        return processed;
       });
-    }
 
-    const dueIntervals = resultIntervals.filter((i) => i.isDue).length;
-    const hourBasedIntervals = resultIntervals
-      .filter((i) => i.trigger.type === 'operating_hours' && i.hoursUntilDue !== undefined)
-      .sort((a, b) => (a.hoursUntilDue || 0) - (b.hoursUntilDue || 0));
-
-    const summary: {
-      totalIntervals: number;
-      dueIntervals?: number;
-      nextDueInterval?: string;
-      hoursUntilNext?: number;
-    } = {
-      totalIntervals: resultIntervals.length,
-    };
-
-    if (operatingHours !== undefined) {
-      summary.dueIntervals = dueIntervals;
-      if (hourBasedIntervals.length > 0) {
-        summary.nextDueInterval = hourBasedIntervals[0].id;
-        summary.hoursUntilNext = hourBasedIntervals[0].hoursUntilDue;
+      let resultIntervals = processedIntervals;
+      if (operatingHours !== undefined && includeTasksInRange) {
+        resultIntervals = processedIntervals.filter((i) => {
+          if (i.trigger.type === 'operating_hours') {
+            return (i.trigger.value as number) <= operatingHours;
+          }
+          return true;
+        });
       }
-    }
 
-    return {
-      intervals: resultIntervals,
-      summary,
-    };
+      const dueIntervals = resultIntervals.filter((i) => i.isDue).length;
+      const hourBasedIntervals = resultIntervals
+        .filter((i) => i.trigger.type === 'operating_hours' && i.hoursUntilDue !== undefined)
+        .sort((a, b) => (a.hoursUntilDue || 0) - (b.hoursUntilDue || 0));
+
+      const summary: {
+        totalIntervals: number;
+        dueIntervals?: number;
+        nextDueInterval?: string;
+        hoursUntilNext?: number;
+      } = {
+        totalIntervals: resultIntervals.length,
+      };
+
+      if (operatingHours !== undefined) {
+        summary.dueIntervals = dueIntervals;
+        if (hourBasedIntervals.length > 0) {
+          summary.nextDueInterval = hourBasedIntervals[0].id;
+          summary.hoursUntilNext = hourBasedIntervals[0].hoursUntilDue;
+        }
+      }
+
+      return {
+        intervals: resultIntervals,
+        summary,
+      };
+    } catch (error) {
+      console.error('[get-maintenance-interval] Error:', error);
+      return {
+        intervals: [],
+        summary: {
+          totalIntervals: 0,
+        },
+      };
+    }
   },
 });

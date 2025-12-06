@@ -271,71 +271,88 @@ Use this tool when:
     recommendations: z.array(z.string()),
   }),
   execute: async (inputData) => {
-    const { description, componentId, checkpointNumber } = inputData;
+    try {
+      const { description, componentId, checkpointNumber } = inputData;
 
-    const classification = classifyByKeywords(description);
+      const classification = classifyByKeywords(description);
 
-    const priorityDetails = DEFECT_TAXONOMY.priorities.find(
-      (p) => p.level === classification.priority,
-    )!;
+      const priorityDetails = DEFECT_TAXONOMY.priorities.find(
+        (p) => p.level === classification.priority,
+      )!;
 
-    const categoryInfo = identifyCategory(description);
+      const categoryInfo = identifyCategory(description);
 
-    const recommendations: string[] = [];
+      const recommendations: string[] = [];
 
-    switch (classification.priority) {
-      case 'critical':
-        recommendations.push('Fahrzeug sofort stilllegen');
-        recommendations.push('Kommandant und Schirrmeister informieren');
-        recommendations.push('Kompaniechef innerhalb 1 Stunde informieren');
-        recommendations.push('Fahrzeug nicht bewegen bis Freigabe');
-        if (componentId) {
-          recommendations.push(`Komponente ${componentId} auf Austausch prüfen`);
-        }
-        break;
-      case 'high':
-        recommendations.push('Fahrzeug vor nächster Ausfahrt instandsetzen');
-        recommendations.push('Schirrmeister am selben Tag informieren');
-        recommendations.push('Ersatzteile beschaffen falls nötig');
-        if (checkpointNumber) {
-          recommendations.push(`Prüfpunkt ${checkpointNumber} nach Reparatur erneut prüfen`);
-        }
-        break;
-      case 'medium':
-        recommendations.push('In Mängelliste aufnehmen');
-        recommendations.push('Bei nächster L2-Wartung beheben');
-        recommendations.push('Entwicklung beobachten');
-        break;
-      case 'low':
-        recommendations.push('Dokumentieren für nächste planmäßige Wartung');
-        recommendations.push('Keine sofortige Maßnahme erforderlich');
-        break;
-      case 'info':
-        recommendations.push('Zur Kenntnis genommen');
-        recommendations.push('Optional: In Fahrzeugakte vermerken');
-        break;
-    }
-
-    return {
-      priority: classification.priority,
-      priorityName: {
-        de: priorityDetails.name_de,
-        en: priorityDetails.name_en,
-      },
-      responseTime: priorityDetails.response_time,
-      vehicleStatus: priorityDetails.vehicle_status,
-      escalation: priorityDetails.escalation,
-      color: priorityDetails.color,
-      matchedKeywords: classification.matchedKeywords,
-      confidence: classification.confidence,
-      category: categoryInfo
-        ? {
-            id: categoryInfo.category,
-            name: categoryInfo.categoryName,
-            subcategory: categoryInfo.subcategory,
+      switch (classification.priority) {
+        case 'critical':
+          recommendations.push('Fahrzeug sofort stilllegen');
+          recommendations.push('Kommandant und Schirrmeister informieren');
+          recommendations.push('Kompaniechef innerhalb 1 Stunde informieren');
+          recommendations.push('Fahrzeug nicht bewegen bis Freigabe');
+          if (componentId) {
+            recommendations.push(`Komponente ${componentId} auf Austausch prüfen`);
           }
-        : undefined,
-      recommendations,
-    };
+          break;
+        case 'high':
+          recommendations.push('Fahrzeug vor nächster Ausfahrt instandsetzen');
+          recommendations.push('Schirrmeister am selben Tag informieren');
+          recommendations.push('Ersatzteile beschaffen falls nötig');
+          if (checkpointNumber) {
+            recommendations.push(`Prüfpunkt ${checkpointNumber} nach Reparatur erneut prüfen`);
+          }
+          break;
+        case 'medium':
+          recommendations.push('In Mängelliste aufnehmen');
+          recommendations.push('Bei nächster L2-Wartung beheben');
+          recommendations.push('Entwicklung beobachten');
+          break;
+        case 'low':
+          recommendations.push('Dokumentieren für nächste planmäßige Wartung');
+          recommendations.push('Keine sofortige Maßnahme erforderlich');
+          break;
+        case 'info':
+          recommendations.push('Zur Kenntnis genommen');
+          recommendations.push('Optional: In Fahrzeugakte vermerken');
+          break;
+      }
+
+      return {
+        priority: classification.priority,
+        priorityName: {
+          de: priorityDetails.name_de,
+          en: priorityDetails.name_en,
+        },
+        responseTime: priorityDetails.response_time,
+        vehicleStatus: priorityDetails.vehicle_status,
+        escalation: priorityDetails.escalation,
+        color: priorityDetails.color,
+        matchedKeywords: classification.matchedKeywords,
+        confidence: classification.confidence,
+        category: categoryInfo
+          ? {
+              id: categoryInfo.category,
+              name: categoryInfo.categoryName,
+              subcategory: categoryInfo.subcategory,
+            }
+          : undefined,
+        recommendations,
+      };
+    } catch (error) {
+      console.error('[classify-defect] Error:', error);
+      // Return a safe default classification on error
+      return {
+        priority: 'info' as const,
+        priorityName: { de: 'INFO', en: 'INFO' },
+        responseTime: 'Kenntnisnahme',
+        vehicleStatus: 'unbekannt',
+        escalation: 'Fehler bei der Klassifizierung - bitte manuell prüfen',
+        color: '#1E90FF',
+        matchedKeywords: [],
+        confidence: 0,
+        category: undefined,
+        recommendations: ['Fehler bei automatischer Klassifizierung', 'Bitte manuell klassifizieren'],
+      };
+    }
   },
 });
