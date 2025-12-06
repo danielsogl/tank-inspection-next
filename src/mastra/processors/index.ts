@@ -11,13 +11,14 @@ import {
   PIIDetector,
   TokenLimiterProcessor,
 } from '@mastra/core/processors';
+import { GUARDRAIL_MODEL, MODERATION_MODEL } from '../lib/models';
 
 /**
  * Input moderation processor - blocks harmful content before LLM processing.
  * Uses a lightweight model for fast classification.
  */
 export const inputModerationProcessor = new ModerationProcessor({
-  model: 'openai/gpt-4.1-mini',
+  model: MODERATION_MODEL,
   categories: ['hate', 'harassment', 'violence', 'self-harm'],
   threshold: 0.7,
   strategy: 'block',
@@ -29,7 +30,7 @@ export const inputModerationProcessor = new ModerationProcessor({
  * Ensures no personal data leaks in agent responses.
  */
 export const outputPIIProcessor = new PIIDetector({
-  model: 'openai/gpt-4.1-mini',
+  model: GUARDRAIL_MODEL,
   detectionTypes: ['email', 'phone', 'ssn', 'credit-card'],
   threshold: 0.6,
   strategy: 'redact',

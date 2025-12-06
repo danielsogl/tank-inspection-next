@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getVehicleById } from "@/lib/vehicles";
 import { getVoiceInstructions } from "@/mastra/agents/instructions";
+import { VOICE_MODEL, VOICE_SPEAKER } from "@/mastra/lib/models";
 
 /**
  * Voice API endpoint that creates an ephemeral token for OpenAI Realtime API.
@@ -36,8 +37,8 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-realtime",
-        voice: "alloy",
+        model: VOICE_MODEL,
+        voice: VOICE_SPEAKER,
         instructions: getVoiceInstructions(vehicleName, vehicleType),
         input_audio_transcription: {
           model: "whisper-1",

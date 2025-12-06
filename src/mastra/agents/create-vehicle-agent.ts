@@ -6,6 +6,45 @@ import {
   inputModerationProcessor,
   tokenLimiterProcessor,
 } from '../processors';
+import {
+  getMemoryStorage,
+  getMemoryVectorStore,
+  memoryEmbedder,
+} from '../lib/memory';
+import { AGENT_MODEL, VOICE_MODEL, VOICE_SPEAKER } from '../lib/models';
+
+/**
+ * Creates a Memory instance with semantic recall if vector store is available.
+ * Falls back to basic lastMessages-only memory otherwise.
+ */
+function createMemoryWithSemanticRecall(): Memory {
+  const storage = getMemoryStorage();
+  const vectorStore = getMemoryVectorStore();
+
+  if (vectorStore) {
+    return new Memory({
+      storage,
+      vector: vectorStore,
+      embedder: memoryEmbedder,
+      options: {
+        lastMessages: 20,
+        semanticRecall: {
+          topK: 3,
+          messageRange: { before: 2, after: 1 },
+          scope: 'thread',
+        },
+      },
+    });
+  }
+
+  // Fallback: No semantic recall if vector store not configured
+  return new Memory({
+    storage,
+    options: {
+      lastMessages: 20,
+    },
+  });
+}
 
 interface CreateVehicleAgentOptions {
   vehicle: VehicleConfig;
@@ -21,8 +60,8 @@ interface CreateVehicleAgentOptions {
  */
 function createVoiceProvider(): OpenAIRealtimeVoice {
   const voice = new OpenAIRealtimeVoice({
-    model: 'gpt-realtime',
-    speaker: 'ballad',
+    model: VOICE_MODEL,
+    speaker: VOICE_SPEAKER,
   });
 
   voice.updateConfig({
@@ -76,17 +115,10 @@ export function createVehicleAgent({
     name: `${vehicle.name} Inspection Agent`,
     description: `Specialized inspection agent for ${vehicle.name} (${vehicle.type})`,
     instructions,
-    model: 'openai/gpt-5-mini',
+    model: AGENT_MODEL,
     tools,
-    // Memory configuration - conversation history
-    // Note: Semantic recall requires vector store + embedder on Memory instance
-    // For now, using lastMessages only. Enable semantic recall by passing
-    // vector store and embedder when creating the Memory.
-    memory: new Memory({
-      options: {
-        lastMessages: 20,
-      },
-    }),
+    // Memory with semantic recall when vector store is available
+    memory: createMemoryWithSemanticRecall(),
     voice: createVoiceProvider(),
     // Guardrails: input moderation and output token limiting
     ...(enableGuardrails && {
