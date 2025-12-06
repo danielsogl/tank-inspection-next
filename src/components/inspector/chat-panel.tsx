@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { DefaultChatTransport } from "ai";
 import { useChat } from "@ai-sdk/react";
-import { MessageCircle, Trash2, Loader2, Mic } from "lucide-react";
+import { MessageCircle, Trash2, Loader2, Mic, MicOff, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Conversation,
   ConversationContent,
@@ -32,14 +38,13 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { cn } from "@/lib/utils";
 import { useVehicle } from "@/contexts/vehicle-context";
-import { type VoiceMessage } from "@/hooks/use-realtime-voice";
+import { useRealtimeVoice, type VoiceMessage, type VoiceState } from "@/hooks/use-realtime-voice";
+import { toast } from "sonner";
 
 interface ChatPanelProps {
   className?: string;
   selectedPart?: string | null;
   onPartHandled?: () => void;
-  voiceMessages?: VoiceMessage[];
-  onClearVoiceMessages?: () => void;
 }
 
 // Combined message type for unified display
@@ -52,16 +57,74 @@ interface DisplayMessage {
   parts?: any[];
 }
 
+// Voice button configuration for different states
+const voiceStateConfig: Record<
+  VoiceState,
+  {
+    icon: React.ComponentType<{ className?: string }>;
+    tooltip: string;
+    animate?: boolean;
+  }
+> = {
+  idle: {
+    icon: MicOff,
+    tooltip: "Start voice mode",
+  },
+  connecting: {
+    icon: Loader2,
+    tooltip: "Connecting...",
+    animate: true,
+  },
+  listening: {
+    icon: Mic,
+    tooltip: "Listening... (click to stop)",
+    animate: true,
+  },
+  thinking: {
+    icon: Loader2,
+    tooltip: "Thinking...",
+    animate: true,
+  },
+  responding: {
+    icon: Volume2,
+    tooltip: "Speaking... (click to interrupt)",
+    animate: true,
+  },
+};
+
 export function ChatPanel({
   className,
   selectedPart,
   onPartHandled,
-  voiceMessages = [],
-  onClearVoiceMessages,
 }: ChatPanelProps) {
   const [input, setInput] = useState<string>("");
+  const [voiceMessages, setVoiceMessages] = useState<VoiceMessage[]>([]);
   const { selectedVehicle } = useVehicle();
   const previousVehicleIdRef = useRef(selectedVehicle.id);
+
+  // Voice message handler
+  const handleVoiceMessage = useCallback((message: VoiceMessage) => {
+    setVoiceMessages((prev) => [...prev, message]);
+  }, []);
+
+  // Voice error handler
+  const handleVoiceError = useCallback((error: string) => {
+    toast.error(error);
+  }, []);
+
+  // Realtime voice hook
+  const {
+    state: voiceState,
+    start: startVoice,
+    stop: stopVoice,
+    interrupt: interruptVoice,
+  } = useRealtimeVoice({
+    onMessage: handleVoiceMessage,
+    onError: handleVoiceError,
+  });
+
+  const isVoiceActive = voiceState !== "idle";
+  const isVoiceConnecting = voiceState === "connecting";
 
   // When a part is selected, pre-fill the input with a question about it
   useEffect(() => {
@@ -82,14 +145,31 @@ export function ChatPanel({
   useEffect(() => {
     if (previousVehicleIdRef.current !== selectedVehicle.id) {
       setMessages([]);
-      onClearVoiceMessages?.();
+      setVoiceMessages([]);
       previousVehicleIdRef.current = selectedVehicle.id;
     }
-  }, [selectedVehicle.id, setMessages, onClearVoiceMessages]);
+  }, [selectedVehicle.id, setMessages]);
 
   const handleClearChat = () => {
     setMessages([]);
-    onClearVoiceMessages?.();
+    setVoiceMessages([]);
+  };
+
+  // Handle voice button click
+  const handleVoiceClick = () => {
+    switch (voiceState) {
+      case "idle":
+        startVoice();
+        break;
+      case "responding":
+        interruptVoice();
+        break;
+      case "listening":
+      case "thinking":
+        stopVoice();
+        break;
+      // connecting state is disabled
+    }
   };
 
   const handleSubmit = async () => {
@@ -240,19 +320,91 @@ export function ChatPanel({
       <div className="p-3 border-t border-border bg-card shrink-0">
         <PromptInput onSubmit={handleSubmit}>
           <PromptInputBody>
+            {/* Voice state indicator */}
+            {isVoiceActive && (
+              <div className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground border-b border-border">
+                {voiceState === "listening" && (
+                  <>
+                    <Mic className="h-4 w-4 text-primary animate-pulse" />
+                    <span>Listening...</span>
+                  </>
+                )}
+                {voiceState === "thinking" && (
+                  <>
+                    <Loader2 className="h-4 w-4 text-primary animate-spin" />
+                    <span>Thinking...</span>
+                  </>
+                )}
+                {voiceState === "responding" && (
+                  <>
+                    <Volume2 className="h-4 w-4 text-green-600 animate-pulse" />
+                    <span>Speaking...</span>
+                  </>
+                )}
+                {voiceState === "connecting" && (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Connecting...</span>
+                  </>
+                )}
+              </div>
+            )}
             <PromptInputTextarea
               value={input}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setInput(e.target.value)
               }
-              placeholder={`Ask about the ${selectedVehicle.name} inspection...`}
+              placeholder={
+                isVoiceActive
+                  ? "Voice mode active..."
+                  : `Ask about the ${selectedVehicle.name} inspection...`
+              }
               className="min-h-12 bg-secondary"
-              disabled={status !== "ready"}
+              disabled={status !== "ready" || isVoiceActive}
             />
           </PromptInputBody>
           <PromptInputFooter>
             <div />
-            <PromptInputSubmit disabled={status !== "ready"} />
+            <div className="flex items-center gap-2">
+              {/* Voice button */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant={isVoiceActive ? "default" : "outline"}
+                      size="icon"
+                      disabled={isVoiceConnecting}
+                      onClick={handleVoiceClick}
+                      className={cn(
+                        "h-9 w-9 rounded-full transition-all",
+                        isVoiceActive && "bg-primary hover:bg-primary/90",
+                        voiceState === "listening" && "animate-pulse",
+                        voiceState === "responding" && "bg-green-600 hover:bg-green-700"
+                      )}
+                    >
+                      {(() => {
+                        const config = voiceStateConfig[voiceState];
+                        const Icon = config.icon;
+                        return (
+                          <Icon
+                            className={cn(
+                              "h-4 w-4",
+                              config.animate && (voiceState === "connecting" || voiceState === "thinking") && "animate-spin"
+                            )}
+                          />
+                        );
+                      })()}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    {voiceStateConfig[voiceState].tooltip}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              {/* Submit button */}
+              <PromptInputSubmit disabled={status !== "ready" || isVoiceActive} />
+            </div>
           </PromptInputFooter>
         </PromptInput>
       </div>

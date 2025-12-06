@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useVehicle } from "@/contexts/vehicle-context";
 import {
   Select,
@@ -12,6 +12,11 @@ import {
 
 export function VehicleSelector() {
   const { selectedVehicle, vehicles, setSelectedVehicle } = useVehicle();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleValueChange = (vehicleId: string) => {
     const vehicle = vehicles.find((v) => v.id === vehicleId);
@@ -19,6 +24,13 @@ export function VehicleSelector() {
       setSelectedVehicle(vehicle);
     }
   };
+
+  // Prevent hydration mismatch by only rendering after mount
+  if (!mounted) {
+    return (
+      <div className="w-[180px] h-9 bg-secondary border border-border rounded-md animate-pulse" />
+    );
+  }
 
   return (
     <Select value={selectedVehicle.id} onValueChange={handleValueChange}>
