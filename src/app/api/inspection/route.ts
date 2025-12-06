@@ -31,53 +31,78 @@ function getUserId(req: Request): string {
 }
 
 export async function POST(req: Request) {
-  const { messages, vehicleId = "leopard2" } = await req.json();
+  try {
+    const { messages, vehicleId = "leopard2" } = await req.json();
 
-  // Get the appropriate agent for the vehicle (programmatic routing)
-  const vehicleAgent = getVehicleAgent(vehicleId);
+    // Get the appropriate agent for the vehicle (programmatic routing)
+    const vehicleAgent = getVehicleAgent(vehicleId);
 
-  // Create vehicle-specific thread ID for memory isolation
-  const threadId = `${vehicleId}-inspection-chat`;
+    // Create vehicle-specific thread ID for memory isolation
+    const threadId = `${vehicleId}-inspection-chat`;
 
-  // Extract dynamic user ID from request
-  const resourceId = getUserId(req);
+    // Extract dynamic user ID from request
+    const resourceId = getUserId(req);
 
-  // Stream from the vehicle-specific agent
-  const stream = await vehicleAgent.stream(messages, {
-    memory: {
-      thread: threadId,
-      resource: resourceId,
-    },
-  });
+    // Stream from the vehicle-specific agent
+    const stream = await vehicleAgent.stream(messages, {
+      memory: {
+        thread: threadId,
+        resource: resourceId,
+      },
+    });
 
-  return createUIMessageStreamResponse({
-    stream: toAISdkStream(stream, { from: "agent" }),
-  });
+    return createUIMessageStreamResponse({
+      stream: toAISdkStream(stream, { from: "agent" }),
+    });
+  } catch (error) {
+    console.error("Inspection API POST error:", error);
+
+    // Return structured error response
+    return NextResponse.json(
+      {
+        error: "Failed to process inspection request",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
 }
 
 export async function GET(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams;
-  const vehicleId = searchParams.get("vehicleId") ?? "leopard2";
+  try {
+    const searchParams = req.nextUrl.searchParams;
+    const vehicleId = searchParams.get("vehicleId") ?? "leopard2";
 
-  // Get the appropriate agent for the vehicle
-  const vehicleAgent = getVehicleAgent(vehicleId);
+    // Get the appropriate agent for the vehicle
+    const vehicleAgent = getVehicleAgent(vehicleId);
 
-  const threadId = `${vehicleId}-inspection-chat`;
+    const threadId = `${vehicleId}-inspection-chat`;
 
-  // Extract dynamic user ID from request
-  const resourceId = getUserId(req);
+    // Extract dynamic user ID from request
+    const resourceId = getUserId(req);
 
-  const memory = await vehicleAgent.getMemory();
+    const memory = await vehicleAgent.getMemory();
 
-  if (!memory) {
-    return NextResponse.json([]);
+    if (!memory) {
+      return NextResponse.json([]);
+    }
+
+    const { messages } = await memory.recall({
+      threadId,
+      resourceId,
+    });
+
+    const convertedMessages = convertMessages(messages).to("AIV5.UI");
+    return NextResponse.json(convertedMessages);
+  } catch (error) {
+    console.error("Inspection API GET error:", error);
+
+    return NextResponse.json(
+      {
+        error: "Failed to retrieve conversation history",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
-
-  const { messages } = await memory.recall({
-    threadId,
-    resourceId,
-  });
-
-  const convertedMessages = convertMessages(messages).to("AIV5.UI");
-  return NextResponse.json(convertedMessages);
 }

@@ -68,9 +68,12 @@ export async function POST(req: Request) {
       vehicleId,
     });
   } catch (error) {
-    console.error("Voice session error:", error);
+    console.error("Voice API error:", error);
     return NextResponse.json(
-      { error: "Failed to initialize voice session" },
+      {
+        error: "Failed to initialize voice session",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

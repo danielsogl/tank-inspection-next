@@ -2,11 +2,17 @@ import { Agent, type AgentConfig } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
 import { OpenAIRealtimeVoice } from '@mastra/voice-openai-realtime';
 import type { VehicleConfig } from '@/lib/vehicles';
+import {
+  inputModerationProcessor,
+  tokenLimiterProcessor,
+} from '../processors';
 
 interface CreateVehicleAgentOptions {
   vehicle: VehicleConfig;
   tools: AgentConfig['tools'];
   additionalInstructions?: string;
+  /** Enable guardrails (moderation, token limits). Defaults to true. */
+  enableGuardrails?: boolean;
 }
 
 /**
@@ -47,6 +53,7 @@ export function createVehicleAgent({
   vehicle,
   tools,
   additionalInstructions = '',
+  enableGuardrails = true,
 }: CreateVehicleAgentOptions): Agent {
   const baseInstructions = `You are a specialized inspection expert for the ${vehicle.name} ${vehicle.type}. Assist inspectors with technical information about components, maintenance procedures, and specifications.
 
@@ -71,12 +78,20 @@ export function createVehicleAgent({
     instructions,
     model: 'openai/gpt-5-mini',
     tools,
-    // Memory inherits storage from Mastra instance - no separate storage config needed
+    // Memory configuration - conversation history
+    // Note: Semantic recall requires vector store + embedder on Memory instance
+    // For now, using lastMessages only. Enable semantic recall by passing
+    // vector store and embedder when creating the Memory.
     memory: new Memory({
       options: {
         lastMessages: 20,
       },
     }),
     voice: createVoiceProvider(),
+    // Guardrails: input moderation and output token limiting
+    ...(enableGuardrails && {
+      inputProcessors: [inputModerationProcessor],
+      outputProcessors: [tokenLimiterProcessor],
+    }),
   });
 }
