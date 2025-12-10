@@ -64,7 +64,7 @@
     "mastra": "^1.0.0-beta.6",
     "motion": "^12.23.25",
     "nanoid": "^5.1.6",
-    "next": "16.0.7",
+    "next": "^16.0.8",
     "next-themes": "^0.4.6",
     "react": "^19.2.1",
     "react-babylonjs": "^3.2.5-beta.2",
