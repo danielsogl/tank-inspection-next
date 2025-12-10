@@ -10,6 +10,9 @@
  * Run with: npx tsx src/mastra/scripts/seed-inspection-data.ts
  */
 
+// Load environment variables from .env file
+import 'dotenv/config';
+
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { embedMany } from 'ai';
