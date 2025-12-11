@@ -17,13 +17,13 @@ import type { EmbeddingModelId, ModelRouterModelId } from '@mastra/core/llm/mode
  * Primary language model for agents.
  * GPT-5 is OpenAI's latest model offering improved reasoning and capabilities.
  */
-export const AGENT_MODEL: ModelRouterModelId = 'openai/gpt-5';
+export const AGENT_MODEL: ModelRouterModelId = 'openai/gpt-5-mini';
 
 /**
  * Mini variant for cost-effective operations.
  * Use for less complex tasks or high-volume operations.
  */
-export const AGENT_MODEL_MINI: ModelRouterModelId = 'openai/gpt-5-mini';
+export const AGENT_MODEL_MINI: ModelRouterModelId = 'openai/gpt-5-nano';
 
 /**
  * All available agent models for type safety.
