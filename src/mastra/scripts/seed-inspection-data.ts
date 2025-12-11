@@ -4,7 +4,7 @@
  * This script:
  * 1. Reads structured JSON data from data/leopard2-rag/
  * 2. Parses data into structured chunks with metadata
- * 3. Generates embeddings using OpenAI
+ * 3. Generates embeddings using Mastra's ModelRouterEmbeddingModel
  * 4. Upserts the chunks into the Supabase pgvector database
  *
  * Run with: npx tsx src/mastra/scripts/seed-inspection-data.ts
@@ -17,7 +17,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { embedMany } from 'ai';
 import { getVectorStore, INSPECTION_INDEX_CONFIG } from '../lib/vector';
-import { getEmbeddingModel, EMBEDDING_MODEL_NAME } from '../lib/models';
+import { getEmbeddingModel, EMBEDDING_MODEL_ID } from '../lib/models';
 import type {
   VehicleData,
   MaintenanceSection,
@@ -406,8 +406,8 @@ async function seedInspectionData() {
     process.exit(1);
   }
 
-  // Generate embeddings
-  console.log(`Generating embeddings with OpenAI ${EMBEDDING_MODEL_NAME}...`);
+  // Generate embeddings using Mastra's ModelRouterEmbeddingModel
+  console.log(`Generating embeddings with ${EMBEDDING_MODEL_ID}...`);
   console.log('  This may take a moment...\n');
 
   try {

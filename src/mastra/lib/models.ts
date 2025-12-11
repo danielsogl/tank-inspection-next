@@ -6,8 +6,8 @@
  * @see https://mastra.ai/docs/v1/agents/overview
  */
 
-import { openai } from '@ai-sdk/openai';
-import type { ModelRouterModelId } from '@mastra/core/llm/model';
+import { ModelRouterEmbeddingModel } from '@mastra/core/llm';
+import type { EmbeddingModelId, ModelRouterModelId } from '@mastra/core/llm/model';
 
 // ============================================================================
 // AGENT / LANGUAGE MODELS
@@ -62,8 +62,13 @@ export type VoiceModel = (typeof VOICE_MODELS)[keyof typeof VOICE_MODELS];
 // ============================================================================
 
 /**
- * Embedding model name for vector embeddings.
- * text-embedding-3-small outputs 1536 dimensions.
+ * Embedding model ID for vector embeddings using Mastra's model router format.
+ * OpenAI text-embedding-3-small outputs 1536 dimensions.
+ */
+export const EMBEDDING_MODEL_ID: EmbeddingModelId = 'openai/text-embedding-3-small';
+
+/**
+ * Embedding model name (without provider prefix) for reference.
  */
 export const EMBEDDING_MODEL_NAME = 'text-embedding-3-small' as const;
 
@@ -73,21 +78,23 @@ export const EMBEDDING_MODEL_NAME = 'text-embedding-3-small' as const;
 export const EMBEDDING_DIMENSIONS = 1536 as const;
 
 /**
- * Get the configured embedding model instance from AI SDK.
+ * Get the configured embedding model instance using Mastra's ModelRouterEmbeddingModel.
  * Use this function to get the embedding model for generating embeddings.
  *
- * @returns The OpenAI embedding model instance
+ * @returns The ModelRouterEmbeddingModel instance for the configured embedding model
  *
  * @example
  * ```ts
- * const { embedding } = await embed({
+ * import { embedMany } from 'ai';
+ *
+ * const { embeddings } = await embedMany({
  *   model: getEmbeddingModel(),
- *   value: 'text to embed',
+ *   values: ['text to embed'],
  * });
  * ```
  */
 export function getEmbeddingModel() {
-  return openai.embedding(EMBEDDING_MODEL_NAME);
+  return new ModelRouterEmbeddingModel(EMBEDDING_MODEL_ID);
 }
 
 /**
@@ -95,7 +102,7 @@ export function getEmbeddingModel() {
  */
 export const EMBEDDING_MODELS = {
   /** OpenAI text-embedding-3-small - 1536 dimensions, cost-effective */
-  TEXT_EMBEDDING_3_SMALL: EMBEDDING_MODEL_NAME,
+  TEXT_EMBEDDING_3_SMALL: EMBEDDING_MODEL_ID,
 } as const;
 
 export type EmbeddingModel = (typeof EMBEDDING_MODELS)[keyof typeof EMBEDDING_MODELS];
@@ -117,7 +124,8 @@ export const MODELS = {
     default: VOICE_MODEL,
   },
   embedding: {
-    default: EMBEDDING_MODEL_NAME,
+    id: EMBEDDING_MODEL_ID,
+    name: EMBEDDING_MODEL_NAME,
     dimensions: EMBEDDING_DIMENSIONS,
     getInstance: getEmbeddingModel,
   },

@@ -119,7 +119,7 @@ const embeddingCache = createQueryCache<number[]>(60 * 60 * 1000); // 1 hour TTL
 
 /**
  * Get a cached embedding or generate a new one.
- * This eliminates redundant OpenAI embedding API calls (~400ms each).
+ * Uses Mastra's ModelRouterEmbeddingModel to eliminate redundant API calls (~400ms each).
  *
  * @param query The text to embed
  * @returns The embedding vector
