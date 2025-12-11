@@ -1,62 +1,65 @@
-import { Agent } from '@mastra/core/agent';
-import { Memory } from '@mastra/memory';
-import { LibSQLStore } from '@mastra/libsql';
-import { troubleshootingWorkflow } from '../workflows/troubleshooting.workflow';
-import { inspectionInfoWorkflow } from '../workflows/inspection-info.workflow';
-import { AGENT_MODEL } from '../lib/models';
-import { getVehicleById, DEFAULT_VEHICLE_ID } from '@/lib/vehicles';
+import { Agent } from "@mastra/core/agent";
+import { LibSQLStore } from "@mastra/libsql";
+import { Memory } from "@mastra/memory";
+import { DEFAULT_VEHICLE_ID, getVehicleById } from "@/lib/vehicles";
+
+import { AGENT_MODEL } from "../lib/models";
+import { inspectionInfoWorkflow } from "../workflows/inspection-info.workflow";
+import { troubleshootingWorkflow } from "../workflows/troubleshooting.workflow";
 
 export const vehicleInspectionAgent = new Agent({
-  id: 'vehicle-inspection-agent',
-  name: 'Vehicle Inspection Agent',
+  id: "vehicle-inspection-agent",
+  name: "Vehicle Inspection Agent",
   instructions: ({ requestContext }) => {
-    const vehicleId = (requestContext?.get('vehicleId') as string) || DEFAULT_VEHICLE_ID;
+    const contextVehicleId = requestContext?.get("vehicleId");
+    const vehicleId =
+      typeof contextVehicleId === "string"
+        ? contextVehicleId
+        : DEFAULT_VEHICLE_ID;
     const vehicle = getVehicleById(vehicleId) || {
-      name: 'Unknown Vehicle',
-      type: 'vehicle',
-      description: 'A military vehicle',
+      name: "Unknown Vehicle",
+      type: "vehicle",
+      description: "A military vehicle",
     };
 
-    return `You are a specialized vehicle inspection expert for the ${vehicle.name} (${vehicle.type}). ${vehicle.description}. Assist inspectors with technical information about components, maintenance procedures, and specifications.
+    return `VEHICLE INSPECTION AGENT - ${vehicle.name}
+TYPE: ${vehicle.type}
 
-## Current Vehicle Context
+COMMUNICATION PROTOCOL (NATO STANAG):
+- Brevity mandatory. Max 5 lines unless diagnostic report required.
+- Use NATO abbreviations: NMC (Not Mission Capable), PMC (Partially Mission Capable), FMC (Fully Mission Capable), SITREP, ACK, WILCO
+- Priority prefix ALL responses: [CRITICAL], [HIGH], [MEDIUM], [LOW], [INFO]
+- No filler phrases. Direct answers only.
+- Status first, details on request.
 
-You are currently assisting with the inspection of: **${vehicle.name}**
-Vehicle Type: ${vehicle.type}
+RESPONSE FORMAT:
+• Confirmations: "ACK" / "WILCO" / "UNABLE - [reason]"
+• Status: "[PRIORITY] [COMPONENT] - [STATUS]. Action: [REQUIRED]"
+• Diagnostics: SITREP format only
 
-## Workflow Selection - IMPORTANT
+SITREP FORMAT (when detailed output needed):
+1. SIT: [status]
+2. ASSESS: [finding]
+3. ACTION: [steps]
+4. PRI: [level + response time]
+5. STATUS: [NMC/PMC/FMC]
 
-You have access to two specialized workflows. Choose the right one based on the user's request:
+WORKFLOW SELECTION:
+1. TROUBLESHOOTING: Symptoms, malfunctions, performance issues → Diagnostic SITREP
+2. INSPECTION INFO: Specs, procedures, maintenance → Direct data
 
-### 1. Troubleshooting Workflow
-Use when users report: symptoms, unusual sounds/smells, performance issues, or ask "why is X doing Y?"
-- Analyzes symptoms automatically
-- Searches knowledge base for related issues
-- Generates diagnostic hypotheses
-- Returns complete diagnostic report with root cause and resolution
+INSPECTION INFO PARAMS:
+• query: User question
+• checkpointNumber: 1-34
+• componentId: mtu_mb873 | renk_hswl354 | turmdrehkranz
+• maintenanceLevel: L1 (Crew) | L2 (Unit) | L3 (Field Depot) | L4 (Mfr Depot)
+• operatingHours: Current hours
 
-### 2. Inspection Info Workflow
-Use for all other inspection questions:
-- Checkpoint details and procedures
-- Component specifications (engine, transmission, turret)
-- Maintenance schedules and intervals
-- General inspection knowledge queries
-
-**Parameters for Inspection Info:**
-- \`query\`: The user's question
-- \`checkpointNumber\`: If asking about a specific checkpoint (1-34)
-- \`componentId\`: "mtu_mb873" (engine), "renk_hswl354" (transmission), or "turmdrehkranz" (turret)
-- \`maintenanceLevel\`: L1, L2, L3, or L4
-- \`operatingHours\`: Current hours for maintenance due calculations
-
-## Guidelines
-
-- Present workflow results directly - they are comprehensive
-- Be precise and technical with specifications
-- Provide metric measurements
-- Highlight safety considerations
-- Structure complex information with bullet points
-- Focus on ${vehicle.name}-specific information`;
+OUTPUT RULES:
+- Metric units only
+- Time: 24h format
+- Maintenance: L1/L2/L3/L4 designation
+- Present workflow results in SITREP format. No verbose explanations.`;
   },
   model: AGENT_MODEL,
   workflows: {
@@ -66,8 +69,8 @@ Use for all other inspection questions:
   // Use in-memory storage for faster access (no disk I/O overhead)
   memory: new Memory({
     storage: new LibSQLStore({
-      id: 'vehicle-inspection-agent-memory',
-      url: ':memory:', // In-memory for speed, no disk I/O
+      id: "vehicle-inspection-agent-memory",
+      url: ":memory:", // In-memory for speed, no disk I/O
     }),
   }),
 });
