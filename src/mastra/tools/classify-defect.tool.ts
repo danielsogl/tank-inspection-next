@@ -1,5 +1,5 @@
-import { createTool } from '@mastra/core/tools';
-import { z } from 'zod';
+import { createTool } from "@mastra/core/tools";
+import { z } from "zod";
 
 /**
  * Defect priority levels with associated keywords for automatic classification.
@@ -8,154 +8,186 @@ import { z } from 'zod';
 const DEFECT_TAXONOMY = {
   priorities: [
     {
-      level: 'critical' as const,
-      name_de: 'KRITISCH',
-      name_en: 'CRITICAL',
-      response_time: 'sofort',
-      vehicle_status: 'nicht einsatzbereit (NMC - Not Mission Capable)',
-      escalation: 'Kommandant + Schirrmeister sofort informieren -> Kompaniechef innerhalb 1h',
-      color: '#FF0000',
+      level: "critical" as const,
+      name_de: "KRITISCH",
+      name_en: "CRITICAL",
+      response_time: "sofort",
+      vehicle_status: "nicht einsatzbereit (NMC - Not Mission Capable)",
+      escalation:
+        "Kommandant + Schirrmeister sofort informieren -> Kompaniechef innerhalb 1h",
+      color: "#FF0000",
       keywords: [
-        'ausfall',
-        'blockiert',
-        'kritisch',
-        'sofort',
-        'gefahr',
-        'feuer',
-        'explosion',
-        'totalausfall',
-        'nicht funktionsfähig',
-        'lebensbedrohlich',
-        'brand',
-        'failure',
-        'blocked',
-        'critical',
-        'danger',
-        'fire',
+        "ausfall",
+        "blockiert",
+        "kritisch",
+        "sofort",
+        "gefahr",
+        "feuer",
+        "explosion",
+        "totalausfall",
+        "nicht funktionsfähig",
+        "lebensbedrohlich",
+        "brand",
+        "failure",
+        "blocked",
+        "critical",
+        "danger",
+        "fire",
       ],
     },
     {
-      level: 'high' as const,
-      name_de: 'HOCH',
-      name_en: 'HIGH',
-      response_time: 'vor nächster Ausfahrt (innerhalb 24h)',
-      vehicle_status: 'bedingt einsatzbereit (PMC - Partially Mission Capable)',
-      escalation: 'Kommandant -> Schirrmeister am selben Tag',
-      color: '#FF8C00',
+      level: "high" as const,
+      name_de: "HOCH",
+      name_en: "HIGH",
+      response_time: "vor nächster Ausfahrt (innerhalb 24h)",
+      vehicle_status: "bedingt einsatzbereit (PMC - Partially Mission Capable)",
+      escalation: "Kommandant -> Schirrmeister am selben Tag",
+      color: "#FF8C00",
       keywords: [
-        'gerissen',
-        'leckage',
-        'defekt',
-        'funktioniert nicht',
-        'ausgefallen',
-        'stark',
-        'erheblich',
-        'beschädigt',
-        'versagt',
-        'torn',
-        'leakage',
-        'defect',
-        'broken',
-        'damaged',
-        'failed',
+        "gerissen",
+        "leckage",
+        "defekt",
+        "funktioniert nicht",
+        "ausgefallen",
+        "stark",
+        "erheblich",
+        "beschädigt",
+        "versagt",
+        "torn",
+        "leakage",
+        "defect",
+        "broken",
+        "damaged",
+        "failed",
       ],
     },
     {
-      level: 'medium' as const,
-      name_de: 'MITTEL',
-      name_en: 'MEDIUM',
-      response_time: 'innerhalb 48h',
-      vehicle_status: 'voll einsatzbereit mit Einschränkung (FMC-S)',
-      escalation: 'Meldung an Schirrmeister, Dokumentation für nächste Wartung',
-      color: '#FFD700',
+      level: "medium" as const,
+      name_de: "MITTEL",
+      name_en: "MEDIUM",
+      response_time: "innerhalb 48h",
+      vehicle_status: "voll einsatzbereit mit Einschränkung (FMC-S)",
+      escalation: "Meldung an Schirrmeister, Dokumentation für nächste Wartung",
+      color: "#FFD700",
       keywords: [
-        'verschleiß',
-        'erhöht',
-        'grenzwert',
-        'nachlässt',
-        'beeinträchtigt',
-        'kleinere',
-        'teilweise',
-        'reduziert',
-        'wear',
-        'elevated',
-        'threshold',
-        'reduced',
-        'partial',
+        "verschleiß",
+        "erhöht",
+        "grenzwert",
+        "nachlässt",
+        "beeinträchtigt",
+        "kleinere",
+        "teilweise",
+        "reduziert",
+        "wear",
+        "elevated",
+        "threshold",
+        "reduced",
+        "partial",
       ],
     },
     {
-      level: 'low' as const,
-      name_de: 'NIEDRIG',
-      name_en: 'LOW',
-      response_time: 'bei nächster planmäßiger Wartung',
-      vehicle_status: 'voll einsatzbereit (FMC - Fully Mission Capable)',
-      escalation: 'keine, nur Dokumentation',
-      color: '#32CD32',
+      level: "low" as const,
+      name_de: "NIEDRIG",
+      name_en: "LOW",
+      response_time: "bei nächster planmäßiger Wartung",
+      vehicle_status: "voll einsatzbereit (FMC - Fully Mission Capable)",
+      escalation: "keine, nur Dokumentation",
+      color: "#32CD32",
       keywords: [
-        'leicht',
-        'minimal',
-        'kosmetisch',
-        'oberflächlich',
-        'geringfügig',
-        'unerheblich',
-        'minor',
-        'slight',
-        'cosmetic',
-        'superficial',
+        "leicht",
+        "minimal",
+        "kosmetisch",
+        "oberflächlich",
+        "geringfügig",
+        "unerheblich",
+        "minor",
+        "slight",
+        "cosmetic",
+        "superficial",
       ],
     },
     {
-      level: 'info' as const,
-      name_de: 'INFO',
-      name_en: 'INFO',
-      response_time: 'Kenntnisnahme',
-      vehicle_status: 'voll einsatzbereit (FMC - Fully Mission Capable)',
-      escalation: 'keine',
-      color: '#1E90FF',
+      level: "info" as const,
+      name_de: "INFO",
+      name_en: "INFO",
+      response_time: "Kenntnisnahme",
+      vehicle_status: "voll einsatzbereit (FMC - Fully Mission Capable)",
+      escalation: "keine",
+      color: "#1E90FF",
       keywords: [
-        'hinweis',
-        'information',
-        'beobachtung',
-        'notiz',
-        'vorschlag',
-        'note',
-        'observation',
-        'suggestion',
+        "hinweis",
+        "information",
+        "beobachtung",
+        "notiz",
+        "vorschlag",
+        "note",
+        "observation",
+        "suggestion",
       ],
     },
   ],
   categories: [
     {
-      id: 'mechanical',
-      name: 'Mechanisch',
-      subcategories: ['verschleiß', 'bruch', 'verformung', 'blockade', 'lockerung', 'korrosion'],
+      id: "mechanical",
+      name: "Mechanisch",
+      subcategories: [
+        "verschleiß",
+        "bruch",
+        "verformung",
+        "blockade",
+        "lockerung",
+        "korrosion",
+      ],
     },
     {
-      id: 'hydraulic',
-      name: 'Hydraulik',
-      subcategories: ['leckage', 'druckverlust', 'verschmutzung', 'schlauch_defekt', 'ventil_defekt'],
+      id: "hydraulic",
+      name: "Hydraulik",
+      subcategories: [
+        "leckage",
+        "druckverlust",
+        "verschmutzung",
+        "schlauch_defekt",
+        "ventil_defekt",
+      ],
     },
     {
-      id: 'electrical',
-      name: 'Elektrik',
-      subcategories: ['kabelbruch', 'kurzschluss', 'spannungsabfall', 'kontaktprobleme', 'sicherung_defekt'],
+      id: "electrical",
+      name: "Elektrik",
+      subcategories: [
+        "kabelbruch",
+        "kurzschluss",
+        "spannungsabfall",
+        "kontaktprobleme",
+        "sicherung_defekt",
+      ],
     },
     {
-      id: 'electronic',
-      name: 'Elektronik',
-      subcategories: ['sensor_ausfall', 'steuergerät_fehler', 'software_fehler', 'kommunikation_gestört', 'anzeige_defekt'],
+      id: "electronic",
+      name: "Elektronik",
+      subcategories: [
+        "sensor_ausfall",
+        "steuergerät_fehler",
+        "software_fehler",
+        "kommunikation_gestört",
+        "anzeige_defekt",
+      ],
     },
     {
-      id: 'structural',
-      name: 'Strukturell',
-      subcategories: ['riss', 'delle', 'schweißnaht_defekt', 'materialermüdung', 'perforation'],
+      id: "structural",
+      name: "Strukturell",
+      subcategories: [
+        "riss",
+        "delle",
+        "schweißnaht_defekt",
+        "materialermüdung",
+        "perforation",
+      ],
     },
   ],
 };
 
 function classifyByKeywords(description: string): {
-  priority: 'critical' | 'high' | 'medium' | 'low' | 'info';
+  priority: "critical" | "high" | "medium" | "low" | "info";
   matchedKeywords: string[];
   confidence: number;
 } {
@@ -176,7 +208,7 @@ function classifyByKeywords(description: string): {
   }
 
   return {
-    priority: 'low',
+    priority: "low",
     matchedKeywords: [],
     confidence: 0.1,
   };
@@ -191,7 +223,11 @@ function identifyCategory(description: string): {
 
   for (const category of DEFECT_TAXONOMY.categories) {
     for (const subcategory of category.subcategories) {
-      if (normalizedDescription.includes(subcategory.toLowerCase().replace('_', ' '))) {
+      if (
+        normalizedDescription.includes(
+          subcategory.toLowerCase().replace("_", " "),
+        )
+      ) {
         return {
           category: category.id,
           categoryName: category.name,
@@ -215,7 +251,7 @@ function identifyCategory(description: string): {
  * Tool for automatic defect classification based on keyword matching.
  */
 export const classifyDefectTool = createTool({
-  id: 'classify-defect',
+  id: "classify-defect",
   description: `Automatically classify a defect description into a priority level.
 
 This tool analyzes defect descriptions and assigns:
@@ -239,18 +275,20 @@ Use this tool when:
   inputSchema: z.object({
     description: z
       .string()
-      .describe('The defect description to classify. Can be in German or English.'),
+      .describe(
+        "The defect description to classify. Can be in German or English.",
+      ),
     componentId: z
       .string()
       .optional()
-      .describe('Optional component ID where the defect was found'),
+      .describe("Optional component ID where the defect was found"),
     checkpointNumber: z
       .number()
       .optional()
-      .describe('Optional checkpoint number where the defect was found'),
+      .describe("Optional checkpoint number where the defect was found"),
   }),
   outputSchema: z.object({
-    priority: z.enum(['critical', 'high', 'medium', 'low', 'info']),
+    priority: z.enum(["critical", "high", "medium", "low", "info"]),
     priorityName: z.object({
       de: z.string(),
       en: z.string(),
@@ -284,35 +322,39 @@ Use this tool when:
     const recommendations: string[] = [];
 
     switch (classification.priority) {
-      case 'critical':
-        recommendations.push('Fahrzeug sofort stilllegen');
-        recommendations.push('Kommandant und Schirrmeister informieren');
-        recommendations.push('Kompaniechef innerhalb 1 Stunde informieren');
-        recommendations.push('Fahrzeug nicht bewegen bis Freigabe');
+      case "critical":
+        recommendations.push("Fahrzeug sofort stilllegen");
+        recommendations.push("Kommandant und Schirrmeister informieren");
+        recommendations.push("Kompaniechef innerhalb 1 Stunde informieren");
+        recommendations.push("Fahrzeug nicht bewegen bis Freigabe");
         if (componentId) {
-          recommendations.push(`Komponente ${componentId} auf Austausch prüfen`);
+          recommendations.push(
+            `Komponente ${componentId} auf Austausch prüfen`,
+          );
         }
         break;
-      case 'high':
-        recommendations.push('Fahrzeug vor nächster Ausfahrt instandsetzen');
-        recommendations.push('Schirrmeister am selben Tag informieren');
-        recommendations.push('Ersatzteile beschaffen falls nötig');
+      case "high":
+        recommendations.push("Fahrzeug vor nächster Ausfahrt instandsetzen");
+        recommendations.push("Schirrmeister am selben Tag informieren");
+        recommendations.push("Ersatzteile beschaffen falls nötig");
         if (checkpointNumber) {
-          recommendations.push(`Prüfpunkt ${checkpointNumber} nach Reparatur erneut prüfen`);
+          recommendations.push(
+            `Prüfpunkt ${checkpointNumber} nach Reparatur erneut prüfen`,
+          );
         }
         break;
-      case 'medium':
-        recommendations.push('In Mängelliste aufnehmen');
-        recommendations.push('Bei nächster L2-Wartung beheben');
-        recommendations.push('Entwicklung beobachten');
+      case "medium":
+        recommendations.push("In Mängelliste aufnehmen");
+        recommendations.push("Bei nächster L2-Wartung beheben");
+        recommendations.push("Entwicklung beobachten");
         break;
-      case 'low':
-        recommendations.push('Dokumentieren für nächste planmäßige Wartung');
-        recommendations.push('Keine sofortige Maßnahme erforderlich');
+      case "low":
+        recommendations.push("Dokumentieren für nächste planmäßige Wartung");
+        recommendations.push("Keine sofortige Maßnahme erforderlich");
         break;
-      case 'info':
-        recommendations.push('Zur Kenntnis genommen');
-        recommendations.push('Optional: In Fahrzeugakte vermerken');
+      case "info":
+        recommendations.push("Zur Kenntnis genommen");
+        recommendations.push("Optional: In Fahrzeugakte vermerken");
         break;
     }
 

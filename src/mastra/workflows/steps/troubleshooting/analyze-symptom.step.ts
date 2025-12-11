@@ -1,5 +1,5 @@
-import { createStep } from '@mastra/core/workflows';
-import { z } from 'zod';
+import { createStep } from "@mastra/core/workflows";
+import { z } from "zod";
 
 /**
  * Step 1: Analyze the symptom description to extract keywords and identify affected systems.
@@ -10,8 +10,9 @@ import { z } from 'zod';
  * - Prepares data for parallel knowledge base queries
  */
 export const analyzeSymptomStep = createStep({
-  id: 'analyze-symptom',
-  description: 'Analyzes symptom description to extract keywords and identify affected systems',
+  id: "analyze-symptom",
+  description:
+    "Analyzes symptom description to extract keywords and identify affected systems",
   inputSchema: z.object({
     symptomDescription: z.string(),
     vehicleId: z.string(),
@@ -28,20 +29,86 @@ export const analyzeSymptomStep = createStep({
     searchQueries: z.array(z.string()),
   }),
   execute: async ({ inputData }) => {
-    const { symptomDescription, vehicleId, componentHint, requireApproval } = inputData;
+    const { symptomDescription, vehicleId, componentHint, requireApproval } =
+      inputData;
 
     // System keyword mappings for identification
     const systemKeywords: Record<string, string[]> = {
-      engine: ['motor', 'engine', 'antrieb', 'diesel', 'mtu', 'leistung', 'power', 'drehzahl', 'rpm'],
-      transmission: ['getriebe', 'transmission', 'renk', 'gang', 'gear', 'kupplung', 'clutch'],
-      hydraulic: ['hydraulik', 'hydraulic', 'druck', 'pressure', 'öl', 'oil', 'leck', 'leak'],
-      electrical: ['elektrik', 'electrical', 'strom', 'batterie', 'battery', 'spannung', 'voltage'],
-      turret: ['turm', 'turret', 'drehkranz', 'rotation', 'richtung', 'elevation'],
-      tracks: ['kette', 'track', 'fahrwerk', 'suspension', 'laufwerk', 'rolle', 'wheel'],
-      cooling: ['kühlung', 'cooling', 'temperatur', 'temperature', 'überhitzung', 'overheating'],
-      fuel: ['kraftstoff', 'fuel', 'diesel', 'tank', 'filter', 'pumpe', 'pump'],
-      brakes: ['bremse', 'brake', 'stopp', 'stop', 'blockiert', 'blocked'],
-      electronics: ['elektronik', 'electronic', 'sensor', 'steuerung', 'control', 'fehler', 'error'],
+      engine: [
+        "motor",
+        "engine",
+        "antrieb",
+        "diesel",
+        "mtu",
+        "leistung",
+        "power",
+        "drehzahl",
+        "rpm",
+      ],
+      transmission: [
+        "getriebe",
+        "transmission",
+        "renk",
+        "gang",
+        "gear",
+        "kupplung",
+        "clutch",
+      ],
+      hydraulic: [
+        "hydraulik",
+        "hydraulic",
+        "druck",
+        "pressure",
+        "öl",
+        "oil",
+        "leck",
+        "leak",
+      ],
+      electrical: [
+        "elektrik",
+        "electrical",
+        "strom",
+        "batterie",
+        "battery",
+        "spannung",
+        "voltage",
+      ],
+      turret: [
+        "turm",
+        "turret",
+        "drehkranz",
+        "rotation",
+        "richtung",
+        "elevation",
+      ],
+      tracks: [
+        "kette",
+        "track",
+        "fahrwerk",
+        "suspension",
+        "laufwerk",
+        "rolle",
+        "wheel",
+      ],
+      cooling: [
+        "kühlung",
+        "cooling",
+        "temperatur",
+        "temperature",
+        "überhitzung",
+        "overheating",
+      ],
+      fuel: ["kraftstoff", "fuel", "diesel", "tank", "filter", "pumpe", "pump"],
+      brakes: ["bremse", "brake", "stopp", "stop", "blockiert", "blocked"],
+      electronics: [
+        "elektronik",
+        "electronic",
+        "sensor",
+        "steuerung",
+        "control",
+        "fehler",
+        "error",
+      ],
     };
 
     const normalizedSymptom = symptomDescription.toLowerCase();
@@ -66,13 +133,38 @@ export const analyzeSymptomStep = createStep({
 
     // Default to general if no systems identified
     if (affectedSystems.length === 0) {
-      affectedSystems.push('general');
+      affectedSystems.push("general");
     }
 
     // Extract significant keywords from the symptom
     const stopWords = new Set([
-      'der', 'die', 'das', 'ein', 'eine', 'und', 'oder', 'aber', 'wenn', 'ist', 'sind', 'hat', 'haben',
-      'the', 'a', 'an', 'and', 'or', 'but', 'if', 'is', 'are', 'has', 'have', 'when', 'what', 'how',
+      "der",
+      "die",
+      "das",
+      "ein",
+      "eine",
+      "und",
+      "oder",
+      "aber",
+      "wenn",
+      "ist",
+      "sind",
+      "hat",
+      "haben",
+      "the",
+      "a",
+      "an",
+      "and",
+      "or",
+      "but",
+      "if",
+      "is",
+      "are",
+      "has",
+      "have",
+      "when",
+      "what",
+      "how",
     ]);
 
     const keywords = normalizedSymptom

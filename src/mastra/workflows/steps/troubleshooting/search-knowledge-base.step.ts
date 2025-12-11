@@ -1,6 +1,6 @@
-import { createStep } from '@mastra/core/workflows';
-import { z } from 'zod';
-import { queryInspectionTool } from '../../../tools/query-inspection.tool';
+import { createStep } from "@mastra/core/workflows";
+import { z } from "zod";
+import { queryInspectionTool } from "../../../tools/query-inspection.tool";
 
 /**
  * Step 2a: Search the knowledge base for related issues.
@@ -11,8 +11,9 @@ import { queryInspectionTool } from '../../../tools/query-inspection.tool';
  * - Historical defect information
  */
 export const searchKnowledgeBaseStep = createStep({
-  id: 'search-knowledge-base',
-  description: 'Searches the inspection database for related issues and symptoms',
+  id: "search-knowledge-base",
+  description:
+    "Searches the inspection database for related issues and symptoms",
   inputSchema: z.object({
     symptomDescription: z.string(),
     vehicleId: z.string(),
@@ -43,13 +44,15 @@ export const searchKnowledgeBaseStep = createStep({
         {
           query: symptomDescription,
           topK: 5,
+          minScore: 0.5,
+          useReranking: false,
         },
         { requestContext: requestContext ?? undefined },
       );
 
       // Check for validation error
-      if ('issues' in mainResult) {
-        console.error('Main search validation error:', mainResult);
+      if ("issues" in mainResult) {
+        console.error("Main search validation error:", mainResult);
         return { relatedIssues: [], searchCompleted: false };
       }
 
@@ -58,28 +61,30 @@ export const searchKnowledgeBaseStep = createStep({
         affectedSystems.slice(0, 3).map(async (system) => {
           const result = await queryInspectionTool.execute(
             {
-              query: `${system} problem diagnosis ${symptomDescription.split(' ').slice(0, 5).join(' ')}`,
+              query: `${system} problem diagnosis ${symptomDescription.split(" ").slice(0, 5).join(" ")}`,
               topK: 3,
+              minScore: 0.5,
+              useReranking: false,
             },
             { requestContext: requestContext ?? undefined },
           );
           // Return empty if validation error
-          if ('issues' in result) return { results: [], totalFound: 0 };
+          if ("issues" in result) return { results: [], totalFound: 0 };
           return result;
         }),
       );
 
       // Combine and deduplicate results
-      const mainResults = 'results' in mainResult ? mainResult.results : [];
+      const mainResults = "results" in mainResult ? mainResult.results : [];
       const allResults = [
         ...mainResults,
-        ...systemResults.flatMap((r) => ('results' in r ? r.results : [])),
+        ...systemResults.flatMap((r) => ("results" in r ? r.results : [])),
       ];
 
       // Deduplicate by content similarity (simple approach: by sectionId + checkpointNumber)
       const seen = new Set<string>();
       const dedupedResults = allResults.filter((result) => {
-        const key = `${result.sectionId}-${result.checkpointNumber || 'n/a'}`;
+        const key = `${result.sectionId}-${result.checkpointNumber || "n/a"}`;
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
@@ -102,7 +107,7 @@ export const searchKnowledgeBaseStep = createStep({
         searchCompleted: true,
       };
     } catch (error) {
-      console.error('Knowledge base search failed:', error);
+      console.error("Knowledge base search failed:", error);
       return {
         relatedIssues: [],
         searchCompleted: false,

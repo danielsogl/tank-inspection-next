@@ -1,18 +1,18 @@
-import { createWorkflow } from '@mastra/core/workflows';
+import { createWorkflow } from "@mastra/core/workflows";
 import {
-  troubleshootingInputSchema,
   diagnosticReportSchema,
-} from './schemas/diagnostic-report.schema';
+  troubleshootingInputSchema,
+} from "./schemas/diagnostic-report.schema";
 import {
   analyzeSymptomStep,
-  searchKnowledgeBaseStep,
-  queryComponentsStep,
-  getFailureModesStep,
-  generateHypothesisStep,
-  diagnosticLoopStep,
   approvalGateStep,
+  diagnosticLoopStep,
+  generateHypothesisStep,
   generateResolutionStep,
-} from './steps/troubleshooting';
+  getFailureModesStep,
+  queryComponentsStep,
+  searchKnowledgeBaseStep,
+} from "./steps/troubleshooting";
 
 /**
  * Troubleshooting Diagnostic Workflow
@@ -35,7 +35,7 @@ import {
  * - Suspend/Resume - Interactive diagnosis and approval gates
  */
 export const troubleshootingWorkflow = createWorkflow({
-  id: 'troubleshooting-diagnostic',
+  id: "troubleshooting-diagnostic",
   description: `Troubleshooting diagnostic workflow for vehicle symptoms.
 Use this workflow when users report unusual sounds, smells, behaviors,
 performance issues like overheating, power loss, or vibrations,

@@ -1,6 +1,9 @@
-import { createStep } from '@mastra/core/workflows';
-import { z } from 'zod';
-import { hypothesisSchema, diagnosticStepSchema } from '../../schemas/diagnostic-report.schema';
+import { createStep } from "@mastra/core/workflows";
+import { z } from "zod";
+import {
+  diagnosticStepSchema,
+  hypothesisSchema,
+} from "../../schemas/diagnostic-report.schema";
 
 /**
  * Step 5: Approval gate (pass-through).
@@ -12,8 +15,8 @@ import { hypothesisSchema, diagnosticStepSchema } from '../../schemas/diagnostic
  * can be modified to use suspend/resume for human confirmation.
  */
 export const approvalGateStep = createStep({
-  id: 'approval-gate',
-  description: 'Passes diagnosis results to resolution step (auto-approved)',
+  id: "approval-gate",
+  description: "Passes diagnosis results to resolution step (auto-approved)",
   inputSchema: z.object({
     confirmedHypothesis: hypothesisSchema.optional(),
     diagnosticSteps: z.array(diagnosticStepSchema),
@@ -42,7 +45,7 @@ export const approvalGateStep = createStep({
       confirmedHypothesis,
       diagnosticSteps,
       rootCauseConfidence,
-      evidenceTrail: [...evidenceTrail, 'Auto-approved for resolution'],
+      evidenceTrail: [...evidenceTrail, "Auto-approved for resolution"],
       approved: true,
       approverNotes: undefined,
     };

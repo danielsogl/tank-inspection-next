@@ -1,12 +1,20 @@
-import { createTool } from '@mastra/core/tools';
-import { z } from 'zod';
+import { ModelRouterLanguageModel } from "@mastra/core/llm";
+import { createTool } from "@mastra/core/tools";
+import { MastraAgentRelevanceScorer, rerankWithScorer } from "@mastra/rag";
+import { z } from "zod";
+import { getCachedEmbedding, ragQueryCache } from "../lib/cache";
+import { AGENT_MODEL_MINI } from "../lib/models";
 import {
   getVectorStore,
   INSPECTION_INDEX_CONFIG,
   type InspectionChunkMetadata,
-} from '../lib/vector';
-import { ragQueryCache, getCachedEmbedding } from '../lib/cache';
-import { mapToRagVehicleType } from '../lib/vehicle-mapping';
+} from "../lib/vector";
+import { mapToRagVehicleType } from "../lib/vehicle-mapping";
+
+/**
+ * Default minimum similarity score for filtering low-quality results.
+ */
+const DEFAULT_MIN_SCORE = 0.5;
 
 /**
  * Tool for querying the inspection vector database.
@@ -15,7 +23,7 @@ import { mapToRagVehicleType } from '../lib/vehicle-mapping';
  * based on semantic similarity to the query, with advanced filtering options.
  */
 export const queryInspectionTool = createTool({
-  id: 'query-inspection',
+  id: "query-inspection",
   description: `Search the inspection database for relevant checkpoint information with advanced filtering.
 Use this tool to find specific inspection procedures, specifications, thresholds,
 and maintenance instructions for vehicle checkpoints.
@@ -32,32 +40,63 @@ The tool supports additional filtering by:
 
 The tool returns the most relevant information based on semantic similarity and filters.`,
   inputSchema: z.object({
-    query: z.string().describe('The search query to find relevant inspection information'),
+    query: z
+      .string()
+      .describe("The search query to find relevant inspection information"),
     vehicleVariant: z
-      .enum(['A4', 'A5', 'A6', 'A6M', 'A7', 'A7V'])
+      .enum(["A4", "A5", "A6", "A6M", "A7", "A7V"])
       .optional()
-      .describe('Filter results by Leopard 2 variant (e.g., A6, A7V)'),
+      .describe("Filter results by Leopard 2 variant (e.g., A6, A7V)"),
     crewRole: z
-      .enum(['driver', 'commander', 'gunner', 'loader'])
+      .enum(["driver", "commander", "gunner", "loader"])
       .optional()
-      .describe('Filter results by crew role responsible for the checkpoint'),
+      .describe("Filter results by crew role responsible for the checkpoint"),
     maintenanceLevel: z
-      .enum(['L1', 'L2', 'L3', 'L4'])
+      .enum(["L1", "L2", "L3", "L4"])
       .optional()
-      .describe('Filter results by NATO maintenance level (L1=crew, L2=unit, L3=depot, L4=manufacturer)'),
+      .describe(
+        "Filter results by NATO maintenance level (L1=crew, L2=unit, L3=depot, L4=manufacturer)",
+      ),
     priority: z
-      .enum(['critical', 'high', 'medium', 'low', 'info'])
+      .enum(["critical", "high", "medium", "low", "info"])
       .optional()
-      .describe('Filter results by defect priority level'),
+      .describe("Filter results by defect priority level"),
     componentId: z
       .string()
       .optional()
-      .describe('Filter results by specific component ID (e.g., mtu_mb873 for engine)'),
+      .describe(
+        "Filter results by specific component ID (e.g., mtu_mb873 for engine)",
+      ),
     dataType: z
-      .enum(['vehicle', 'checkpoint', 'component', 'defect', 'interval', 'legacy'])
+      .enum([
+        "vehicle",
+        "checkpoint",
+        "component",
+        "defect",
+        "interval",
+        "legacy",
+      ])
       .optional()
-      .describe('Filter results by data type'),
-    topK: z.number().optional().default(5).describe('Number of results to return (default: 5)'),
+      .describe("Filter results by data type"),
+    topK: z
+      .number()
+      .optional()
+      .default(5)
+      .describe("Number of results to return (default: 5)"),
+    minScore: z
+      .number()
+      .optional()
+      .default(DEFAULT_MIN_SCORE)
+      .describe(
+        "Minimum similarity score threshold (0-1). Results below this score are filtered out.",
+      ),
+    useReranking: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe(
+        "Enable re-ranking for improved result relevance. Uses semantic analysis to reorder results.",
+      ),
   }),
   outputSchema: z.object({
     results: z.array(
@@ -90,37 +129,33 @@ The tool returns the most relevant information based on semantic similarity and 
       componentId,
       dataType,
       topK,
+      minScore,
+      useReranking,
     } = inputData;
 
     // Get vehicleId from context and map to RAG vehicle type
-    const vehicleId = (context?.requestContext?.get('vehicleId') as string) || 'leopard2';
+    const vehicleId =
+      (context?.requestContext?.get("vehicleId") as string) || "leopard2";
     const vehicleType = mapToRagVehicleType(vehicleId);
 
-    // Build filter object - always filter by vehicle type from context
-    const filter: Record<string, unknown> = {
+    // Build filter object using spread operator for clean conditionals
+    const filter = {
       vehicleType,
+      ...(vehicleVariant && { vehicleVariant }),
+      ...(crewRole && { crewRole }),
+      ...(maintenanceLevel && { maintenanceLevel }),
+      ...(priority && { priority }),
+      ...(componentId && { componentId }),
+      ...(dataType && { dataType }),
     };
-    if (vehicleVariant) {
-      filter.vehicleVariant = vehicleVariant;
-    }
-    if (crewRole) {
-      filter.crewRole = crewRole;
-    }
-    if (maintenanceLevel) {
-      filter.maintenanceLevel = maintenanceLevel;
-    }
-    if (priority) {
-      filter.priority = priority;
-    }
-    if (componentId) {
-      filter.componentId = componentId;
-    }
-    if (dataType) {
-      filter.dataType = dataType;
-    }
 
-    // Check cache first
-    const cacheKey = ragQueryCache.generateKey(query, { ...filter, topK });
+    // Check cache first (include all parameters in cache key)
+    const cacheKey = ragQueryCache.generateKey(query, {
+      ...filter,
+      topK,
+      minScore,
+      useReranking,
+    });
     const cachedResult = ragQueryCache.get(cacheKey);
     if (cachedResult) {
       return cachedResult as {
@@ -150,17 +185,57 @@ The tool returns the most relevant information based on semantic similarity and 
     // Get singleton vector store (connection pooled)
     const vectorStore = getVectorStore();
 
-    // Query the vector store
+    // Query the vector store with increased topK when re-ranking is enabled
+    // (we fetch more results initially to have a better pool for re-ranking)
+    const fetchTopK = useReranking ? Math.max(topK * 3, 15) : topK;
+
     const queryResults = await vectorStore.query({
       indexName: INSPECTION_INDEX_CONFIG.indexName,
       queryVector: queryEmbedding,
-      topK,
-      filter: Object.keys(filter).length > 0 ? (filter as Record<string, string | number | boolean>) : undefined,
+      topK: fetchTopK,
+      filter:
+        Object.keys(filter).length > 0
+          ? (filter as Record<string, string | number | boolean>)
+          : undefined,
       includeVector: false,
     });
 
+    // Filter results by minimum score threshold
+    let filteredResults = queryResults.filter(
+      (result) => (result.score ?? 0) >= minScore,
+    );
+
+    // Apply re-ranking if enabled
+    if (useReranking && filteredResults.length > 0) {
+      const rerankModel = new ModelRouterLanguageModel(AGENT_MODEL_MINI);
+      const scorer = new MastraAgentRelevanceScorer(
+        "inspection-reranker",
+        rerankModel,
+      );
+
+      const rerankedResults = await rerankWithScorer({
+        results: filteredResults,
+        query,
+        scorer,
+        options: {
+          weights: {
+            semantic: 0.5,
+            vector: 0.3,
+            position: 0.2,
+          },
+          topK,
+        },
+      });
+
+      // Extract the original results from re-ranked output
+      filteredResults = rerankedResults.map((r) => r.result);
+    } else {
+      // Limit to topK if not re-ranking
+      filteredResults = filteredResults.slice(0, topK);
+    }
+
     // Transform results
-    const results = queryResults.map((result) => {
+    const results = filteredResults.map((result) => {
       const metadata = result.metadata as InspectionChunkMetadata;
       return {
         checkpointNumber: metadata.checkpointNumber,
@@ -197,14 +272,14 @@ The tool returns the most relevant information based on semantic similarity and 
  * Vehicle type is automatically determined from the current inspection context.
  */
 export const getCheckpointTool = createTool({
-  id: 'get-checkpoint',
+  id: "get-checkpoint",
   description: `Get detailed information about a specific checkpoint by its number.
 Use this when you know the exact checkpoint number. The vehicle type is automatically
 determined from the current inspection context.`,
   inputSchema: z.object({
     checkpointNumber: z
       .number()
-      .describe('The checkpoint number (1-34 for Leopard 2, 1-34 for M1A2)'),
+      .describe("The checkpoint number (1-34 for Leopard 2, 1-34 for M1A2)"),
   }),
   outputSchema: z.object({
     found: z.boolean(),
@@ -224,7 +299,8 @@ determined from the current inspection context.`,
     const { checkpointNumber } = inputData;
 
     // Get vehicleId from context and map to RAG vehicle type
-    const vehicleId = (context?.requestContext?.get('vehicleId') as string) || 'leopard2';
+    const vehicleId =
+      (context?.requestContext?.get("vehicleId") as string) || "leopard2";
     const vehicleType = mapToRagVehicleType(vehicleId);
 
     const query = `checkpoint ${checkpointNumber} ${vehicleType}`;
@@ -249,7 +325,8 @@ determined from the current inspection context.`,
     const exactMatch = queryResults.find((result) => {
       const metadata = result.metadata as InspectionChunkMetadata;
       return (
-        metadata.checkpointNumber === checkpointNumber && metadata.vehicleType === vehicleType
+        metadata.checkpointNumber === checkpointNumber &&
+        metadata.vehicleType === vehicleType
       );
     });
 

@@ -1,6 +1,6 @@
-import { createStep } from '@mastra/core/workflows';
-import { z } from 'zod';
-import { queryInspectionTool } from '../../../tools/query-inspection.tool';
+import { createStep } from "@mastra/core/workflows";
+import { z } from "zod";
+import { queryInspectionTool } from "../../../tools/query-inspection.tool";
 
 /**
  * Step 2c: Get failure modes related to the symptoms.
@@ -11,8 +11,8 @@ import { queryInspectionTool } from '../../../tools/query-inspection.tool';
  * - Historical failure data
  */
 export const getFailureModesStep = createStep({
-  id: 'get-failure-modes',
-  description: 'Retrieves failure modes and patterns related to the symptoms',
+  id: "get-failure-modes",
+  description: "Retrieves failure modes and patterns related to the symptoms",
   inputSchema: z.object({
     symptomDescription: z.string(),
     vehicleId: z.string(),
@@ -42,15 +42,17 @@ export const getFailureModesStep = createStep({
       const defectSearch = await queryInspectionTool.execute(
         {
           query: `failure defect problem ${symptomDescription}`,
-          dataType: 'defect',
+          dataType: "defect",
           topK: 5,
+          minScore: 0.5,
+          useReranking: false,
         },
         { requestContext: requestContext ?? undefined },
       );
 
       // Check for validation error
-      if ('issues' in defectSearch) {
-        console.error('Defect search validation error:', defectSearch);
+      if ("issues" in defectSearch) {
+        console.error("Defect search validation error:", defectSearch);
         return { failureModes: [], searchCompleted: false };
       }
 
@@ -61,17 +63,20 @@ export const getFailureModesStep = createStep({
             {
               query: `${system} failure common problems symptoms`,
               topK: 3,
+              minScore: 0.5,
+              useReranking: false,
             },
             { requestContext: requestContext ?? undefined },
           );
           // Return empty if validation error
-          if ('issues' in result) return { results: [], totalFound: 0 };
+          if ("issues" in result) return { results: [], totalFound: 0 };
           return result;
         }),
       );
 
       // Combine results - use type narrowing for union types
-      const defectResults = 'results' in defectSearch ? defectSearch.results : [];
+      const defectResults =
+        "results" in defectSearch ? defectSearch.results : [];
       const allFailures = [
         ...defectResults.map((r) => ({
           description: r.content,
@@ -81,7 +86,7 @@ export const getFailureModesStep = createStep({
           score: r.score,
         })),
         ...componentFailures.flatMap((cf) => {
-          const cfResults = 'results' in cf ? cf.results : [];
+          const cfResults = "results" in cf ? cf.results : [];
           return cfResults.map((r) => ({
             description: r.content,
             priority: r.priority,
@@ -95,7 +100,7 @@ export const getFailureModesStep = createStep({
       // Deduplicate and sort
       const seen = new Set<string>();
       const dedupedFailures = allFailures.filter((f) => {
-        const key = `${f.sectionId}-${f.componentId || 'n/a'}`;
+        const key = `${f.sectionId}-${f.componentId || "n/a"}`;
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
@@ -110,7 +115,7 @@ export const getFailureModesStep = createStep({
         searchCompleted: true,
       };
     } catch (error) {
-      console.error('Failure mode search failed:', error);
+      console.error("Failure mode search failed:", error);
       return {
         failureModes: [],
         searchCompleted: false,

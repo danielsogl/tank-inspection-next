@@ -1,6 +1,6 @@
-import { createStep } from '@mastra/core/workflows';
-import { z } from 'zod';
-import { getComponentDetailsTool } from '../../../tools/component-details.tool';
+import { createStep } from "@mastra/core/workflows";
+import { z } from "zod";
+import { getComponentDetailsTool } from "../../../tools/component-details.tool";
 
 /**
  * Step 2b: Query component details for affected systems.
@@ -11,8 +11,8 @@ import { getComponentDetailsTool } from '../../../tools/component-details.tool';
  * - Common failures and symptoms
  */
 export const queryComponentsStep = createStep({
-  id: 'query-components',
-  description: 'Queries component details for affected systems',
+  id: "query-components",
+  description: "Queries component details for affected systems",
   inputSchema: z.object({
     symptomDescription: z.string(),
     vehicleId: z.string(),
@@ -28,34 +28,7 @@ export const queryComponentsStep = createStep({
         id: z.string(),
         name: z.string(),
         category: z.string(),
-        specs: z.record(z.unknown()).optional(),
-        monitoringPoints: z
-          .array(
-            z.object({
-              name: z.string(),
-              unit: z.string(),
-              normalRange: z.object({
-                min: z.number().optional(),
-                max: z.number().optional(),
-              }),
-              criticalThreshold: z.object({
-                min: z.number().optional(),
-                max: z.number().optional(),
-              }),
-            }),
-          )
-          .optional(),
-        commonFailures: z
-          .array(
-            z.object({
-              id: z.string(),
-              name: z.string(),
-              mtbfHours: z.number(),
-              symptoms: z.array(z.string()),
-              cause: z.string(),
-            }),
-          )
-          .optional(),
+        content: z.string().describe("Semantic text content from RAG chunks"),
       }),
     ),
     queriedComponents: z.array(z.string()),
@@ -65,11 +38,11 @@ export const queryComponentsStep = createStep({
 
     // Map affected systems to component IDs
     const systemToComponentMap: Record<string, string[]> = {
-      engine: ['mtu_mb873'],
-      transmission: ['renk_hswl354'],
-      turret: ['turmdrehkranz'],
-      hydraulic: ['renk_hswl354'], // Transmission has hydraulic components
-      cooling: ['mtu_mb873'], // Engine has cooling system
+      engine: ["mtu_mb873"],
+      transmission: ["renk_hswl354"],
+      turret: ["turmdrehkranz"],
+      hydraulic: ["renk_hswl354"], // Transmission has hydraulic components
+      cooling: ["mtu_mb873"], // Engine has cooling system
     };
 
     // Determine which components to query
@@ -85,20 +58,32 @@ export const queryComponentsStep = createStep({
     // Add component hint if provided
     if (componentHint) {
       const normalizedHint = componentHint.toLowerCase();
-      if (normalizedHint.includes('mtu') || normalizedHint.includes('motor') || normalizedHint.includes('engine')) {
-        componentsToQuery.add('mtu_mb873');
+      if (
+        normalizedHint.includes("mtu") ||
+        normalizedHint.includes("motor") ||
+        normalizedHint.includes("engine")
+      ) {
+        componentsToQuery.add("mtu_mb873");
       }
-      if (normalizedHint.includes('renk') || normalizedHint.includes('getriebe') || normalizedHint.includes('transmission')) {
-        componentsToQuery.add('renk_hswl354');
+      if (
+        normalizedHint.includes("renk") ||
+        normalizedHint.includes("getriebe") ||
+        normalizedHint.includes("transmission")
+      ) {
+        componentsToQuery.add("renk_hswl354");
       }
-      if (normalizedHint.includes('turm') || normalizedHint.includes('turret') || normalizedHint.includes('drehkranz')) {
-        componentsToQuery.add('turmdrehkranz');
+      if (
+        normalizedHint.includes("turm") ||
+        normalizedHint.includes("turret") ||
+        normalizedHint.includes("drehkranz")
+      ) {
+        componentsToQuery.add("turmdrehkranz");
       }
     }
 
     // Default to engine if nothing else matched
     if (componentsToQuery.size === 0) {
-      componentsToQuery.add('mtu_mb873');
+      componentsToQuery.add("mtu_mb873");
     }
 
     // Query all components in parallel for faster execution
@@ -107,9 +92,7 @@ export const queryComponentsStep = createStep({
         try {
           const result = await getComponentDetailsTool.execute({
             componentId,
-            includeMaintenanceSchedule: false,
-            includeMonitoringPoints: true,
-            includeCommonFailures: true,
+            topK: 10,
           });
           return { componentId, result, error: null };
         } catch (error) {
@@ -120,26 +103,14 @@ export const queryComponentsStep = createStep({
     );
 
     // Build component details from parallel results
+    // The component tool now returns semantic text chunks instead of structured data
     const componentDetails: Record<
       string,
       {
         id: string;
         name: string;
         category: string;
-        specs?: Record<string, unknown>;
-        monitoringPoints?: Array<{
-          name: string;
-          unit: string;
-          normalRange: { min?: number; max?: number };
-          criticalThreshold: { min?: number; max?: number };
-        }>;
-        commonFailures?: Array<{
-          id: string;
-          name: string;
-          mtbfHours: number;
-          symptoms: string[];
-          cause: string;
-        }>;
+        content: string;
       }
     > = {};
 
@@ -147,20 +118,23 @@ export const queryComponentsStep = createStep({
       if (!result) continue;
 
       // Check for validation error - use 'found' property to narrow type
-      if (!('found' in result) || !result.found || !result.component) {
-        if ('issues' in result) {
+      if (!("found" in result) || !result.found) {
+        if ("issues" in result) {
           console.error(`Component ${componentId} validation error:`, result);
         }
         continue;
       }
 
+      // Combine all semantic chunks into a single content string
+      const combinedContent = result.chunks
+        .map((chunk) => chunk.content)
+        .join("\n\n---\n\n");
+
       componentDetails[componentId] = {
-        id: result.component.id,
-        name: result.component.name,
-        category: result.component.category,
-        specs: result.component.specs,
-        monitoringPoints: result.component.monitoringPoints,
-        commonFailures: result.component.commonFailures,
+        id: result.componentId,
+        name: componentId, // Use componentId as name since we now have semantic chunks
+        category: result.chunks[0]?.category ?? "unknown",
+        content: combinedContent,
       };
     }
 
