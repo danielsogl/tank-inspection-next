@@ -3,39 +3,94 @@
  *
  * This script:
  * 1. Reads structured JSON data from data/leopard2-rag/
- * 2. Parses data into structured chunks with metadata
- * 3. Generates embeddings using Mastra's ModelRouterEmbeddingModel
- * 4. Upserts the chunks into the Supabase pgvector database
+ * 2. Converts JSON to semantic German text for better embeddings
+ * 3. Chunks documents using Mastra's MDocument with recursive strategy
+ * 4. Generates embeddings using Mastra's ModelRouterEmbeddingModel
+ * 5. Upserts the chunks into the Supabase pgvector database
  *
  * Run with: npx tsx src/mastra/scripts/seed-inspection-data.ts
  */
 
 // Load environment variables from .env file
-import 'dotenv/config';
+import "dotenv/config";
 
-import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
-import { embedMany } from 'ai';
-import { getVectorStore, INSPECTION_INDEX_CONFIG } from '../lib/vector';
-import { getEmbeddingModel, EMBEDDING_MODEL_ID } from '../lib/models';
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { MDocument } from "@mastra/rag";
+import { embedMany } from "ai";
+import { EMBEDDING_MODEL_ID, getEmbeddingModel } from "../lib/models";
+import { getVectorStore, INSPECTION_INDEX_CONFIG } from "../lib/vector";
 import type {
-  VehicleData,
-  MaintenanceSection,
   Component,
   DefectTaxonomy,
-  MaintenanceInterval,
   InspectionChunkMetadata,
-} from '../types/rag-data.types';
+  MaintenanceInterval,
+  MaintenanceSection,
+  VehicleData,
+} from "../types/rag-data.types";
+import {
+  checkpointBaseToText,
+  checkpointDefectsToText,
+  checkpointTasksToText,
+  componentFailuresToText,
+  componentSpecsToText,
+  defectPriorityToText,
+  maintenanceIntervalToText,
+  monitoringPointsToText,
+  vehicleSpecsToText,
+} from "./converters";
+
+// ============================================================================
+// Chunking Configuration
+// ============================================================================
+
+/**
+ * Chunking parameters optimized for each data type.
+ * - maxSize: Target maximum chunk size in characters
+ * - overlap: Characters of overlap between chunks for context continuity
+ * - separators: Priority order for splitting (most preferred first)
+ */
+const CHUNK_CONFIG = {
+  vehicle: {
+    maxSize: 450,
+    overlap: 50,
+    separators: ["\n\n", "\n", ". "],
+  },
+  checkpoint: {
+    maxSize: 400,
+    overlap: 50,
+    separators: ["\n\n", "\n", ". ", ", "],
+  },
+  component: {
+    maxSize: 450,
+    overlap: 50,
+    separators: ["\n\n", "\n", ". "],
+  },
+  defect: {
+    maxSize: 350,
+    overlap: 30,
+    separators: ["\n", ". "],
+  },
+  interval: {
+    maxSize: 400,
+    overlap: 40,
+    separators: ["\n\n", "\n", ". "],
+  },
+};
+
+// ============================================================================
+// Data Loaders
+// ============================================================================
 
 /**
  * Load all vehicle data files.
  */
 function loadVehicleData(dataDir: string): VehicleData[] {
-  const vehiclesDir = join(dataDir, 'vehicles');
-  const files = readdirSync(vehiclesDir).filter((f) => f.endsWith('.json'));
+  const vehiclesDir = join(dataDir, "vehicles");
+  const files = readdirSync(vehiclesDir).filter((f) => f.endsWith(".json"));
 
   return files.map((file) => {
-    const content = readFileSync(join(vehiclesDir, file), 'utf-8');
+    const content = readFileSync(join(vehiclesDir, file), "utf-8");
     return JSON.parse(content) as VehicleData;
   });
 }
@@ -44,20 +99,20 @@ function loadVehicleData(dataDir: string): VehicleData[] {
  * Load all maintenance sections with checkpoints.
  */
 function loadMaintenanceSections(dataDir: string): MaintenanceSection[] {
-  const sectionsDir = join(dataDir, 'maintenance', 'sections');
-  const files = readdirSync(sectionsDir).filter((f) => f.endsWith('.json'));
+  const sectionsDir = join(dataDir, "maintenance", "sections");
+  const files = readdirSync(sectionsDir).filter((f) => f.endsWith(".json"));
 
   return files.map((file) => {
-    const content = readFileSync(join(sectionsDir, file), 'utf-8');
+    const content = readFileSync(join(sectionsDir, file), "utf-8");
     return JSON.parse(content) as MaintenanceSection;
   });
 }
 
 /**
- * Load all component data.
+ * Load all component data recursively.
  */
 function loadComponents(dataDir: string): Component[] {
-  const componentsDir = join(dataDir, 'components');
+  const componentsDir = join(dataDir, "components");
   const components: Component[] = [];
 
   function loadFromDir(dir: string) {
@@ -68,8 +123,8 @@ function loadComponents(dataDir: string): Component[] {
 
       if (stat.isDirectory()) {
         loadFromDir(fullPath);
-      } else if (entry.endsWith('.json')) {
-        const content = readFileSync(fullPath, 'utf-8');
+      } else if (entry.endsWith(".json")) {
+        const content = readFileSync(fullPath, "utf-8");
         components.push(JSON.parse(content) as Component);
       }
     }
@@ -84,7 +139,10 @@ function loadComponents(dataDir: string): Component[] {
  */
 function loadDefectTaxonomy(dataDir: string): DefectTaxonomy | null {
   try {
-    const content = readFileSync(join(dataDir, 'defects', 'taxonomy.json'), 'utf-8');
+    const content = readFileSync(
+      join(dataDir, "defects", "taxonomy.json"),
+      "utf-8",
+    );
     return JSON.parse(content) as DefectTaxonomy;
   } catch {
     return null;
@@ -94,321 +152,443 @@ function loadDefectTaxonomy(dataDir: string): DefectTaxonomy | null {
 /**
  * Load maintenance intervals.
  */
-function loadMaintenanceIntervals(dataDir: string): { intervals: MaintenanceInterval[] } | null {
+function loadMaintenanceIntervals(
+  dataDir: string,
+): { intervals: MaintenanceInterval[] } | null {
   try {
-    const content = readFileSync(join(dataDir, 'maintenance', 'intervals.json'), 'utf-8');
+    const content = readFileSync(
+      join(dataDir, "maintenance", "intervals.json"),
+      "utf-8",
+    );
     return JSON.parse(content);
   } catch {
     return null;
   }
 }
 
+// ============================================================================
+// Chunk Preparation Functions (using MDocument)
+// ============================================================================
+
 /**
- * Prepare vehicle data chunks for embedding.
+ * Prepare vehicle chunks using MDocument with recursive chunking.
+ * Converts vehicle specs to semantic German text before chunking.
  */
-function prepareVehicleChunks(
+async function prepareVehicleChunks(
   vehicles: VehicleData[],
-): { text: string; metadata: InspectionChunkMetadata }[] {
-  return vehicles.map((vehicle) => {
-    const text = `
-Fahrzeug: ${vehicle.name}
-Variante: ${vehicle.variant}
-Hersteller: ${vehicle.manufacturer}
-Baujahr: ${vehicle.in_service_since}
+): Promise<{ text: string; metadata: InspectionChunkMetadata }[]> {
+  const allChunks: { text: string; metadata: InspectionChunkMetadata }[] = [];
 
-Technische Daten:
-- Gewicht: ${vehicle.specs.weight_tons} Tonnen
-- Besatzung: ${vehicle.specs.crew} Personen
-- Motor: ${vehicle.specs.engine.model}, ${vehicle.specs.engine.power_hp} PS (${vehicle.specs.engine.power_kw} kW)
-- Getriebe: ${vehicle.specs.transmission.model}, ${vehicle.specs.transmission.gears_forward} Vorwärtsgänge
-- Hauptbewaffnung: ${vehicle.specs.armament.main_gun.model}, ${vehicle.specs.armament.main_gun.caliber_mm}mm
-- Höchstgeschwindigkeit: ${vehicle.specs.max_speed_kmh} km/h
-- Reichweite: ${vehicle.specs.range_km} km
+  for (const vehicle of vehicles) {
+    // Convert to semantic German text
+    const semanticText = vehicleSpecsToText(vehicle);
 
-${vehicle.notes || ''}
-`.trim();
+    // Create MDocument and chunk
+    const doc = MDocument.fromText(semanticText);
+    const chunks = await doc.chunk({
+      strategy: "recursive",
+      ...CHUNK_CONFIG.vehicle,
+    });
 
-    return {
-      text,
-      metadata: {
-        vehicleType: 'leopard2' as const,
-        vehicleVariant: vehicle.variant,
-        sectionId: 'VEHICLE',
-        sectionName: `${vehicle.name} Spezifikationen`,
-        text,
-        source: `data/leopard2-rag/vehicles/${vehicle.id}.json`,
-        dataType: 'vehicle' as const,
-      },
-    };
-  });
-}
-
-/**
- * Prepare checkpoint chunks for embedding.
- */
-function prepareCheckpointChunks(
-  sections: MaintenanceSection[],
-): { text: string; metadata: InspectionChunkMetadata }[] {
-  const chunks: { text: string; metadata: InspectionChunkMetadata }[] = [];
-
-  for (const section of sections) {
-    for (const checkpoint of section.subsystems) {
-      let text = `
-Sektion ${section.id}: ${section.name}
-Checkpoint ${checkpoint.number}: ${checkpoint.name}
-
-Beschreibung: ${checkpoint.description}
-Typ: ${checkpoint.type}
-Erwarteter Wert: ${typeof checkpoint.expected_value === 'string' ? checkpoint.expected_value : checkpoint.expected_value.description}
-Werkzeuge: ${checkpoint.tools_required.join(', ') || 'Keine'}
-Geschätzte Zeit: ${checkpoint.estimated_time_min} Minuten
-Foto erforderlich: ${checkpoint.photo_required ? 'Ja' : 'Nein'}
-Verantwortlich: ${checkpoint.responsible_role}
-Varianten: ${checkpoint.vehicle_variants.join(', ')}
-`.trim();
-
-      if (checkpoint.tasks && checkpoint.tasks.length > 0) {
-        text += '\n\nSchritte:\n';
-        checkpoint.tasks.forEach((task) => {
-          text += `${task.step}. ${task.description}\n`;
-          if (task.details) text += `   ${task.details}\n`;
-        });
-      }
-
-      if (checkpoint.common_defects && checkpoint.common_defects.length > 0) {
-        text += '\n\nHäufige Mängel:\n';
-        checkpoint.common_defects.forEach((defect) => {
-          text += `- ${defect.description} (${defect.priority}): ${defect.action}\n`;
-        });
-      }
-
-      chunks.push({
-        text,
+    // Create metadata for each chunk
+    for (const chunk of chunks) {
+      allChunks.push({
+        text: chunk.text,
         metadata: {
-          vehicleType: 'leopard2' as const,
-          sectionId: section.id,
-          sectionName: section.name,
-          checkpointNumber: checkpoint.number,
-          checkpointName: checkpoint.name,
-          crewRole: checkpoint.responsible_role,
-          estimatedTimeMin: checkpoint.estimated_time_min,
-          vehicleVariant:
-            checkpoint.vehicle_variants.length === 6 ? undefined : checkpoint.vehicle_variants[0],
-          text,
-          source: `data/leopard2-rag/maintenance/sections/${section.id.toLowerCase()}.json`,
-          dataType: 'checkpoint' as const,
+          vehicleType: "leopard2" as const,
+          vehicleVariant: vehicle.variant,
+          sectionId: "VEHICLE",
+          sectionName: `${vehicle.name} Spezifikationen`,
+          text: chunk.text,
+          source: `data/leopard2-rag/vehicles/${vehicle.id}.json`,
+          dataType: "vehicle" as const,
         },
       });
     }
   }
 
-  return chunks;
+  return allChunks;
+}
+
+/** Chunk result type for internal use */
+type ChunkResult = { text: string; metadata: InspectionChunkMetadata };
+
+/** Build base metadata for a checkpoint */
+function buildCheckpointMetadata(
+  section: MaintenanceSection,
+  checkpoint: MaintenanceSection["subsystems"][0],
+): Partial<InspectionChunkMetadata> {
+  return {
+    vehicleType: "leopard2" as const,
+    sectionId: section.id,
+    sectionName: section.name,
+    checkpointNumber: checkpoint.number,
+    checkpointName: checkpoint.name,
+    crewRole: checkpoint.responsible_role,
+    estimatedTimeMin: checkpoint.estimated_time_min,
+    vehicleVariant:
+      checkpoint.vehicle_variants.length === 6
+        ? undefined
+        : checkpoint.vehicle_variants[0],
+    source: `data/leopard2-rag/maintenance/sections/${section.id.toLowerCase()}.json`,
+  };
+}
+
+/** Create base info chunks for a checkpoint */
+async function createBaseChunks(
+  section: MaintenanceSection,
+  checkpoint: MaintenanceSection["subsystems"][0],
+  baseMetadata: Partial<InspectionChunkMetadata>,
+): Promise<ChunkResult[]> {
+  const baseText = checkpointBaseToText(section, checkpoint);
+  const baseDoc = MDocument.fromText(baseText);
+  const chunks = await baseDoc.chunk({
+    strategy: "recursive",
+    ...CHUNK_CONFIG.checkpoint,
+  });
+
+  return chunks.map((chunk) => ({
+    text: chunk.text,
+    metadata: {
+      ...baseMetadata,
+      text: chunk.text,
+      dataType: "checkpoint" as const,
+    } as InspectionChunkMetadata,
+  }));
+}
+
+/** Create task chunks for a checkpoint (when complex enough) */
+async function createTaskChunks(
+  section: MaintenanceSection,
+  checkpoint: MaintenanceSection["subsystems"][0],
+  baseMetadata: Partial<InspectionChunkMetadata>,
+): Promise<ChunkResult[]> {
+  const tasksText = checkpointTasksToText(section, checkpoint);
+  if (!tasksText || tasksText.length <= 200) {
+    return [];
+  }
+
+  const tasksDoc = MDocument.fromText(tasksText);
+  const chunks = await tasksDoc.chunk({
+    strategy: "recursive",
+    ...CHUNK_CONFIG.checkpoint,
+  });
+
+  return chunks.map((chunk) => ({
+    text: chunk.text,
+    metadata: {
+      ...baseMetadata,
+      text: chunk.text,
+      dataType: "checkpoint" as const,
+    } as InspectionChunkMetadata,
+  }));
+}
+
+/** Create defect chunks for a checkpoint */
+function createDefectChunks(
+  section: MaintenanceSection,
+  checkpoint: MaintenanceSection["subsystems"][0],
+  baseMetadata: Partial<InspectionChunkMetadata>,
+): ChunkResult[] {
+  const defectTexts = checkpointDefectsToText(section, checkpoint);
+  return defectTexts.map((defectText) => ({
+    text: defectText,
+    metadata: {
+      ...baseMetadata,
+      text: defectText,
+      dataType: "defect" as const,
+    } as InspectionChunkMetadata,
+  }));
 }
 
 /**
- * Prepare component chunks for embedding.
+ * Prepare checkpoint chunks using MDocument with hierarchical splitting.
+ * Creates separate chunks for:
+ * - Base checkpoint info
+ * - Tasks (when complex)
+ * - Each defect indicator
  */
-function prepareComponentChunks(
+async function prepareCheckpointChunks(
+  sections: MaintenanceSection[],
+): Promise<ChunkResult[]> {
+  const allChunks: ChunkResult[] = [];
+
+  for (const section of sections) {
+    for (const checkpoint of section.subsystems) {
+      const baseMetadata = buildCheckpointMetadata(section, checkpoint);
+
+      const baseChunks = await createBaseChunks(
+        section,
+        checkpoint,
+        baseMetadata,
+      );
+      const taskChunks = await createTaskChunks(
+        section,
+        checkpoint,
+        baseMetadata,
+      );
+      const defectChunks = createDefectChunks(
+        section,
+        checkpoint,
+        baseMetadata,
+      );
+
+      allChunks.push(...baseChunks, ...taskChunks, ...defectChunks);
+    }
+  }
+
+  return allChunks;
+}
+
+/**
+ * Prepare component chunks using MDocument with hierarchical splitting.
+ * Creates separate chunks for:
+ * - Component specs (semantic text, not JSON)
+ * - Each monitoring point
+ * - Each failure mode
+ */
+async function prepareComponentChunks(
   components: Component[],
-): { text: string; metadata: InspectionChunkMetadata }[] {
-  return components.map((component) => {
-    let text = `
-Komponente: ${component.name}
-ID: ${component.id}
-Kategorie: ${component.category}
+): Promise<{ text: string; metadata: InspectionChunkMetadata }[]> {
+  const allChunks: { text: string; metadata: InspectionChunkMetadata }[] = [];
 
-Spezifikationen:
-${JSON.stringify(component.specs, null, 2)}
-`.trim();
-
-    if (component.monitoring_points && component.monitoring_points.length > 0) {
-      text += '\n\nÜberwachungsparameter:\n';
-      component.monitoring_points.forEach((point) => {
-        text += `- ${point.name}: ${point.normal_range.min || '-'} bis ${point.normal_range.max || '-'} ${point.unit}\n`;
-        if (point.critical_threshold) {
-          text += `  Kritischer Grenzwert: ${point.critical_threshold.min || '-'} / ${point.critical_threshold.max || '-'} ${point.unit}\n`;
-        }
-      });
-    }
-
-    if (component.common_failures && component.common_failures.length > 0) {
-      text += '\n\nHäufige Ausfälle:\n';
-      component.common_failures.forEach((failure) => {
-        text += `- ${failure.name} (MTBF: ${failure.mtbf_hours || 'unbekannt'}h)\n`;
-        text += `  Symptome: ${failure.symptoms.join(', ')}\n`;
-      });
-    }
-
-    return {
-      text,
-      metadata: {
-        vehicleType: 'leopard2' as const,
-        sectionId: component.category.toUpperCase(),
-        sectionName: component.name,
-        componentId: component.id,
-        text,
-        source: `data/leopard2-rag/components/${component.id}.json`,
-        dataType: 'component' as const,
-      },
+  for (const component of components) {
+    // Base metadata shared by all chunks for this component
+    const baseMetadata: Partial<InspectionChunkMetadata> = {
+      vehicleType: "leopard2" as const,
+      sectionId: component.category.toUpperCase(),
+      sectionName: component.name,
+      componentId: component.id,
+      source: `data/leopard2-rag/components/${component.category}/${component.id}.json`,
     };
-  });
+
+    // 1. Component specs as semantic text (not JSON.stringify)
+    const specsText = componentSpecsToText(component);
+    const specsDoc = MDocument.fromText(specsText);
+    const specsChunks = await specsDoc.chunk({
+      strategy: "recursive",
+      ...CHUNK_CONFIG.component,
+    });
+
+    for (const chunk of specsChunks) {
+      allChunks.push({
+        text: chunk.text,
+        metadata: {
+          ...baseMetadata,
+          text: chunk.text,
+          dataType: "component" as const,
+        } as InspectionChunkMetadata,
+      });
+    }
+
+    // 2. Monitoring points as separate chunks
+    const monitoringTexts = monitoringPointsToText(component);
+    for (const text of monitoringTexts) {
+      allChunks.push({
+        text,
+        metadata: {
+          ...baseMetadata,
+          text,
+          dataType: "component" as const,
+        } as InspectionChunkMetadata,
+      });
+    }
+
+    // 3. Failures as separate chunks
+    const failureTexts = componentFailuresToText(component);
+    for (const text of failureTexts) {
+      allChunks.push({
+        text,
+        metadata: {
+          ...baseMetadata,
+          text,
+          dataType: "component" as const,
+        } as InspectionChunkMetadata,
+      });
+    }
+  }
+
+  return allChunks;
 }
 
 /**
- * Prepare defect taxonomy chunks for embedding.
+ * Prepare defect taxonomy chunks using MDocument.
+ * Each priority level becomes a separate chunk.
  */
-function prepareDefectChunks(
+async function prepareDefectChunks(
   taxonomy: DefectTaxonomy | null,
-): { text: string; metadata: InspectionChunkMetadata }[] {
+): Promise<{ text: string; metadata: InspectionChunkMetadata }[]> {
   if (!taxonomy) return [];
-
-  return taxonomy.priorities.map((priority) => {
-    const text = `
-Mangelpriorität: ${priority.name_de} (${priority.name_en})
-Level: ${priority.level}
-
-Reaktionszeit: ${priority.response_time}
-Fahrzeugstatus: ${priority.vehicle_status}
-Eskalation: ${priority.escalation}
-
-Beispiele:
-${priority.examples.map((ex) => `- ${ex}`).join('\n')}
-
-Keywords: ${priority.keywords.join(', ')}
-`.trim();
-
-    return {
-      text,
-      metadata: {
-        vehicleType: 'leopard2' as const,
-        sectionId: 'DEFECT',
-        sectionName: `Mangelpriorität ${priority.level}`,
-        priority: priority.level,
-        text,
-        source: 'data/leopard2-rag/defects/taxonomy.json',
-        dataType: 'defect' as const,
-      },
-    };
-  });
-}
-
-/**
- * Prepare maintenance interval chunks for embedding.
- */
-function prepareIntervalChunks(
-  data: { intervals: MaintenanceInterval[] } | null,
-): { text: string; metadata: InspectionChunkMetadata }[] {
-  if (!data) return [];
-
-  return data.intervals.map((interval) => {
-    const text = `
-Wartungsintervall: ${interval.name}
-Level: ${interval.level}
-Ausführung: ${interval.executor}
-Dauer: ${interval.duration}
-
-Trigger: ${interval.trigger.type} = ${interval.trigger.value} ${interval.trigger.unit || ''}
-
-Aufgaben:
-${interval.tasks.map((task) => `- ${task}`).join('\n')}
-
-${interval.notes || ''}
-`.trim();
-
-    return {
-      text,
-      metadata: {
-        vehicleType: 'leopard2' as const,
-        sectionId: 'MAINTENANCE',
-        sectionName: interval.name,
-        maintenanceLevel: interval.level,
-        text,
-        source: 'data/leopard2-rag/maintenance/intervals.json',
-        dataType: 'interval' as const,
-      },
-    };
-  });
-}
-
-/**
- * Main seeding function.
- */
-async function seedInspectionData() {
-  console.log('Starting inspection data seeding...\n');
 
   const allChunks: { text: string; metadata: InspectionChunkMetadata }[] = [];
 
-  const dataDir = join(process.cwd(), 'data', 'leopard2-rag');
+  for (const priority of taxonomy.priorities) {
+    const text = defectPriorityToText(priority);
+
+    // Defect priorities are typically small, so we keep them as single chunks
+    allChunks.push({
+      text,
+      metadata: {
+        vehicleType: "leopard2" as const,
+        sectionId: "DEFECT",
+        sectionName: `Mangelpriorität ${priority.level}`,
+        priority: priority.level,
+        text,
+        source: "data/leopard2-rag/defects/taxonomy.json",
+        dataType: "defect" as const,
+      },
+    });
+  }
+
+  return allChunks;
+}
+
+/**
+ * Prepare maintenance interval chunks using MDocument.
+ */
+async function prepareIntervalChunks(
+  data: { intervals: MaintenanceInterval[] } | null,
+): Promise<{ text: string; metadata: InspectionChunkMetadata }[]> {
+  if (!data) return [];
+
+  const allChunks: { text: string; metadata: InspectionChunkMetadata }[] = [];
+
+  for (const interval of data.intervals) {
+    const semanticText = maintenanceIntervalToText(interval);
+
+    // Create MDocument and chunk
+    const doc = MDocument.fromText(semanticText);
+    const chunks = await doc.chunk({
+      strategy: "recursive",
+      ...CHUNK_CONFIG.interval,
+    });
+
+    for (const chunk of chunks) {
+      allChunks.push({
+        text: chunk.text,
+        metadata: {
+          vehicleType: "leopard2" as const,
+          sectionId: "MAINTENANCE",
+          sectionName: interval.name,
+          maintenanceLevel: interval.level,
+          text: chunk.text,
+          source: "data/leopard2-rag/maintenance/intervals.json",
+          dataType: "interval" as const,
+        },
+      });
+    }
+  }
+
+  return allChunks;
+}
+
+// ============================================================================
+// Main Seeding Function
+// ============================================================================
+
+/**
+ * Main seeding function.
+ * Loads data, converts to semantic text, chunks with MDocument, and upserts to vector store.
+ */
+async function seedInspectionData() {
+  console.log("Starting inspection data seeding with MDocument chunking...\n");
+
+  const allChunks: { text: string; metadata: InspectionChunkMetadata }[] = [];
+
+  const dataDir = join(process.cwd(), "data", "leopard2-rag");
   console.log(`Loading structured JSON data from: ${dataDir}\n`);
 
-  // Load vehicles
-  console.log('Loading vehicle data...');
+  // Load and chunk vehicles
+  console.log("Processing vehicle data with semantic conversion...");
   try {
     const vehicles = loadVehicleData(dataDir);
-    const vehicleChunks = prepareVehicleChunks(vehicles);
+    const vehicleChunks = await prepareVehicleChunks(vehicles);
     allChunks.push(...vehicleChunks);
-    console.log(`  Loaded ${vehicles.length} vehicles (${vehicleChunks.length} chunks)`);
+    console.log(
+      `  ${vehicles.length} vehicles -> ${vehicleChunks.length} chunks`,
+    );
   } catch (error) {
     console.warn(`  No vehicle data found: ${error}`);
   }
 
-  // Load maintenance sections & checkpoints
-  console.log('Loading maintenance checkpoints...');
+  // Load and chunk checkpoints (with hierarchical splitting)
+  console.log("Processing checkpoints with hierarchical chunking...");
   try {
     const sections = loadMaintenanceSections(dataDir);
-    const checkpointChunks = prepareCheckpointChunks(sections);
+    const checkpointChunks = await prepareCheckpointChunks(sections);
     allChunks.push(...checkpointChunks);
-    const totalCheckpoints = sections.reduce((sum, s) => sum + s.subsystems.length, 0);
+    const totalCheckpoints = sections.reduce(
+      (sum, s) => sum + s.subsystems.length,
+      0,
+    );
     console.log(
-      `  Loaded ${sections.length} sections with ${totalCheckpoints} checkpoints (${checkpointChunks.length} chunks)`,
+      `  ${sections.length} sections with ${totalCheckpoints} checkpoints -> ${checkpointChunks.length} chunks`,
     );
   } catch (error) {
     console.warn(`  No checkpoint data found: ${error}`);
   }
 
-  // Load components
-  console.log('Loading component data...');
+  // Load and chunk components (with semantic conversion)
+  console.log("Processing components with semantic conversion...");
   try {
     const components = loadComponents(dataDir);
-    const componentChunks = prepareComponentChunks(components);
+    const componentChunks = await prepareComponentChunks(components);
     allChunks.push(...componentChunks);
-    console.log(`  Loaded ${components.length} components (${componentChunks.length} chunks)`);
+    console.log(
+      `  ${components.length} components -> ${componentChunks.length} chunks`,
+    );
   } catch (error) {
     console.warn(`  No component data found: ${error}`);
   }
 
-  // Load defect taxonomy
-  console.log('Loading defect taxonomy...');
+  // Load and chunk defect taxonomy
+  console.log("Processing defect taxonomy...");
   try {
     const taxonomy = loadDefectTaxonomy(dataDir);
-    const defectChunks = prepareDefectChunks(taxonomy);
+    const defectChunks = await prepareDefectChunks(taxonomy);
     allChunks.push(...defectChunks);
-    console.log(`  Loaded defect taxonomy (${defectChunks.length} chunks)`);
+    console.log(`  Loaded defect taxonomy -> ${defectChunks.length} chunks`);
   } catch (error) {
     console.warn(`  No defect data found: ${error}`);
   }
 
-  // Load maintenance intervals
-  console.log('Loading maintenance intervals...');
+  // Load and chunk maintenance intervals
+  console.log("Processing maintenance intervals...");
   try {
     const intervals = loadMaintenanceIntervals(dataDir);
-    const intervalChunks = prepareIntervalChunks(intervals);
+    const intervalChunks = await prepareIntervalChunks(intervals);
     allChunks.push(...intervalChunks);
-    console.log(`  Loaded maintenance intervals (${intervalChunks.length} chunks)`);
+    console.log(
+      `  Loaded maintenance intervals -> ${intervalChunks.length} chunks`,
+    );
   } catch (error) {
     console.warn(`  No interval data found: ${error}`);
   }
 
+  // Chunk size statistics
+  const chunkSizes = allChunks.map((c) => c.text.length);
+  const sizeStats = {
+    min: Math.min(...chunkSizes),
+    max: Math.max(...chunkSizes),
+    avg: Math.round(
+      chunkSizes.reduce((sum, s) => sum + s, 0) / chunkSizes.length,
+    ),
+  };
+  console.log(`\nChunk size statistics:`);
+  console.log(`  Min: ${sizeStats.min} chars`);
+  console.log(`  Max: ${sizeStats.max} chars`);
+  console.log(`  Avg: ${sizeStats.avg} chars`);
+
   console.log(`\nTotal structured data chunks: ${allChunks.length}\n`);
 
   if (allChunks.length === 0) {
-    console.error('No data found to seed. Please add JSON data files.');
+    console.error("No data found to seed. Please add JSON data files.");
     process.exit(1);
   }
 
   // Generate embeddings using Mastra's ModelRouterEmbeddingModel
   console.log(`Generating embeddings with ${EMBEDDING_MODEL_ID}...`);
-  console.log('  This may take a moment...\n');
+  console.log("  This may take a moment...\n");
 
   try {
     const { embeddings } = await embedMany({
@@ -418,7 +598,7 @@ async function seedInspectionData() {
     console.log(`  Generated ${embeddings.length} embeddings\n`);
 
     // Initialize vector store and create index
-    console.log('Initializing vector store...');
+    console.log("Initializing vector store...");
     const vectorStore = getVectorStore();
 
     console.log(`  Creating index: ${INSPECTION_INDEX_CONFIG.indexName}`);
@@ -427,10 +607,16 @@ async function seedInspectionData() {
       dimension: INSPECTION_INDEX_CONFIG.dimension,
       metric: INSPECTION_INDEX_CONFIG.metric,
     });
-    console.log('  Index ready\n');
+
+    // Clear existing data before inserting new embeddings
+    console.log("  Clearing existing embeddings...");
+    await vectorStore.truncateIndex({
+      indexName: INSPECTION_INDEX_CONFIG.indexName,
+    });
+    console.log("  Index ready (cleared)\n");
 
     // Upsert embeddings
-    console.log('Upserting embeddings to vector store...');
+    console.log("Upserting embeddings to vector store...");
     await vectorStore.upsert({
       indexName: INSPECTION_INDEX_CONFIG.indexName,
       vectors: embeddings,
@@ -441,8 +627,8 @@ async function seedInspectionData() {
     // Cleanup and summary
     await vectorStore.disconnect?.();
 
-    console.log('Seeding complete!\n');
-    console.log('Summary:');
+    console.log("Seeding complete!\n");
+    console.log("Summary:");
 
     // Count by data type
     const byType = allChunks.reduce(
@@ -459,10 +645,18 @@ async function seedInspectionData() {
 
     console.log(`\n  Total: ${allChunks.length} chunks indexed`);
   } catch (error) {
-    console.error('Failed to generate embeddings or upsert:', error);
+    console.error("Failed to generate embeddings or upsert:", error);
     process.exit(1);
   }
 }
 
-// Run the seeding script
-seedInspectionData().catch(console.error);
+// Run the seeding script (async IIFE required - tsx doesn't support top-level await)
+// NOSONAR: S7785 - top-level await not supported by tsx bundler
+(async () => {
+  try {
+    await seedInspectionData();
+  } catch (error) {
+    console.error("Seed script failed:", error);
+    process.exit(1);
+  }
+})();
