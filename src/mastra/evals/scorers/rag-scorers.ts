@@ -3,11 +3,91 @@
  *
  * These scorers evaluate how well the RAG system retrieves
  * relevant information for German language queries.
+ *
+ * Includes both custom domain-specific scorers and Mastra built-in
+ * RAG scorers following best practices.
  */
 
 import { createScorer } from "@mastra/core/evals";
+import {
+  createContextPrecisionScorer,
+  createContextRelevanceScorerLLM,
+  createFaithfulnessScorer,
+  createHallucinationScorer,
+} from "@mastra/evals/scorers/prebuilt";
 import { z } from "zod";
 import { AGENT_MODEL_MINI } from "../../lib/models";
+
+// ============================================================================
+// MASTRA BUILT-IN RAG SCORERS
+// ============================================================================
+
+/**
+ * Helper to extract context from retrieval results.
+ */
+const extractContext = (_input: unknown, output: unknown): string[] => {
+  const results = output as { results?: Array<{ content: string }> };
+  return results?.results?.map((r) => r.content) ?? [];
+};
+
+/**
+ * Context Precision Scorer - evaluates retrieval ranking using Mean Average Precision.
+ * Rewards systems that place relevant context earlier in the sequence.
+ */
+export const contextPrecisionScorer = createContextPrecisionScorer({
+  model: AGENT_MODEL_MINI,
+  options: {
+    contextExtractor: extractContext,
+  },
+});
+
+/**
+ * Context Relevance Scorer - evaluates how relevant retrieved context is
+ * using weighted relevance levels with penalties for unused/missing context.
+ */
+export const contextRelevanceScorer = createContextRelevanceScorerLLM({
+  model: AGENT_MODEL_MINI,
+  options: {
+    contextExtractor: extractContext,
+    penalties: {
+      unusedHighRelevanceContext: 0.1,
+      missingContextPerItem: 0.15,
+      maxMissingContextPenalty: 0.5,
+    },
+  },
+});
+
+/**
+ * Faithfulness Scorer - verifies claims in agent responses against retrieved context.
+ * Essential for measuring RAG pipeline response reliability.
+ *
+ * Note: Context must be provided dynamically via options.context when creating the scorer.
+ */
+export const createRAGFaithfulnessScorer = (context: string[]) =>
+  createFaithfulnessScorer({
+    model: AGENT_MODEL_MINI,
+    options: {
+      context,
+    },
+  });
+
+/**
+ * Hallucination Scorer - detects factual contradictions and unsupported claims.
+ * Identifies when the LLM generates information not present in the context.
+ *
+ * Note: Context must be provided dynamically via options.context when creating the scorer.
+ */
+export const createRAGHallucinationScorer = (context: string[]) =>
+  createHallucinationScorer({
+    model: AGENT_MODEL_MINI,
+    options: {
+      context,
+    },
+  });
+
+// ============================================================================
+// CUSTOM DOMAIN-SPECIFIC SCORERS
+// ============================================================================
 
 /**
  * Scorer that checks if results contain the expected data type.

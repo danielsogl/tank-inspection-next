@@ -1,7 +1,10 @@
 #!/usr/bin/env npx tsx
 
 /**
- * CLI script for running RAG retrieval evaluations.
+ * CLI script for running RAG retrieval evaluations using Mastra scorers.
+ *
+ * Since we're evaluating a tool (not an agent), we run scorers directly
+ * using their .run() method instead of runEvals which is designed for agents.
  *
  * Usage:
  *   npm run evals:retrieval
@@ -19,133 +22,155 @@ import {
   edgeCaseTestCases,
   retrievalTestCases,
 } from "./datasets/retrieval-test-cases";
+import {
+  dataTypeAccuracyScorer,
+  componentMatchScorer,
+  similarityScoreScorer,
+  resultFoundScorer,
+} from "./scorers/rag-scorers";
+
+// Result type for query execution
+interface QueryResult {
+  results: Array<{
+    dataType: string;
+    sectionId: string;
+    componentId?: string;
+    content: string;
+    score: number;
+  }>;
+  totalFound: number;
+}
+
+// Type for successful query result
+type SuccessResult = {
+  results: Array<{
+    dataType: string;
+    sectionId: string;
+    vehicleType: string;
+    content: string;
+    score: number;
+    componentId?: string;
+  }>;
+  totalFound: number;
+};
+
+/**
+ * Execute the query tool and return formatted results.
+ */
+async function executeQuery(query: string): Promise<QueryResult> {
+  const ctx = new RequestContext();
+  ctx.set("vehicleId", "leopard2");
+
+  const rawResult = await queryInspectionTool.execute(
+    {
+      query,
+      topK: 5,
+      minScore: 0.3,
+      useReranking: false,
+    },
+    { requestContext: ctx },
+  );
+
+  // Handle validation errors
+  if ("issues" in rawResult) {
+    return { results: [], totalFound: 0 };
+  }
+
+  const result = rawResult as SuccessResult;
+  return {
+    results: result.results,
+    totalFound: result.totalFound,
+  };
+}
+
+// Define scorers to use
+const scorers = [
+  { id: "results-found", scorer: resultFoundScorer },
+  { id: "similarity-score", scorer: similarityScoreScorer },
+  { id: "data-type-accuracy", scorer: dataTypeAccuracyScorer },
+  { id: "component-match", scorer: componentMatchScorer },
+];
 
 interface EvalResult {
   query: string;
   description: string;
-  resultsFound: number;
-  avgScore: number;
-  dataTypeMatch: boolean | null;
-  componentMatch: boolean | null;
-  topResult: string;
+  scores: Record<string, number>;
+  totalFound: number;
 }
 
 async function runRetrievalEvals() {
   console.log("=".repeat(60));
-  console.log("RAG Retrieval Evaluation");
+  console.log("RAG Retrieval Evaluation (Mastra Scorers)");
   console.log("=".repeat(60));
   console.log();
 
-  const results: EvalResult[] = [];
   const startTime = Date.now();
+  const allTestCases = [...retrievalTestCases, ...edgeCaseTestCases];
 
-  // Run evaluations for each test case
-  console.log("Running test cases...\n");
+  console.log(`Running ${allTestCases.length} test cases with Mastra scorers...\n`);
 
-  for (const testCase of [...retrievalTestCases, ...edgeCaseTestCases]) {
+  const results: EvalResult[] = [];
+  const aggregateScores: Record<string, number[]> = {};
+
+  // Initialize aggregate score arrays
+  for (const { id } of scorers) {
+    aggregateScores[id] = [];
+  }
+
+  for (const testCase of allTestCases) {
     process.stdout.write(
       `  Testing: ${testCase.description.slice(0, 40).padEnd(42)}... `,
     );
 
     try {
-      const ctx = new RequestContext();
-      ctx.set("vehicleId", "leopard2");
+      // Execute the query
+      const output = await executeQuery(testCase.query);
 
-      const rawResult = await queryInspectionTool.execute(
-        {
-          query: testCase.query,
-          topK: 5,
-          minScore: 0.3,
-          useReranking: false,
-        },
-        { requestContext: ctx },
-      );
-
-      // Handle validation errors
-      if ("issues" in rawResult) {
-        console.log("VALIDATION ERROR");
-        results.push({
-          query: testCase.query,
-          description: testCase.description,
-          resultsFound: 0,
-          avgScore: 0,
-          dataTypeMatch: null,
-          componentMatch: null,
-          topResult: "Validation error",
-        });
-        continue;
-      }
-
-      // Type assertion after narrowing to extract the success result
-      const searchResult = rawResult as {
-        results: Array<{
-          dataType: string;
-          componentId?: string;
-          content: string;
-          score: number;
-        }>;
-        totalFound: number;
+      // Prepare ground truth for scorers
+      const groundTruth = {
+        expectedDataType: testCase.expectedDataType,
+        expectedComponentId: testCase.expectedComponentId,
+        expectedSectionId: testCase.expectedSectionId,
+        expectedCrewRole: testCase.expectedCrewRole,
+        expectedPriority: testCase.expectedPriority,
       };
 
-      const avgScore =
-        searchResult.results.length > 0
-          ? searchResult.results.reduce(
-              (sum: number, r: { score: number }) => sum + r.score,
-              0,
-            ) / searchResult.results.length
-          : 0;
+      // Run each scorer
+      const itemScores: Record<string, number> = {};
 
-      // Check data type match
-      let dataTypeMatch: boolean | null = null;
-      if (testCase.expectedDataType) {
-        dataTypeMatch = searchResult.results.some(
-          (r: { dataType: string }) => r.dataType === testCase.expectedDataType,
-        );
+      for (const { id, scorer } of scorers) {
+        const result = await scorer.run({
+          input: { query: testCase.query },
+          output,
+          groundTruth,
+        });
+        itemScores[id] = result.score;
+        aggregateScores[id].push(result.score);
       }
-
-      // Check component match
-      let componentMatch: boolean | null = null;
-      if (testCase.expectedComponentId) {
-        componentMatch = searchResult.results.some(
-          (r: { componentId?: string }) =>
-            r.componentId === testCase.expectedComponentId,
-        );
-      }
-
-      const topResult =
-        searchResult.results[0]?.content.slice(0, 50) || "No results";
 
       results.push({
         query: testCase.query,
         description: testCase.description,
-        resultsFound: searchResult.totalFound,
-        avgScore,
-        dataTypeMatch,
-        componentMatch,
-        topResult,
+        scores: itemScores,
+        totalFound: output.totalFound,
       });
 
-      // Print result status
-      const status =
-        searchResult.totalFound > 0
-          ? dataTypeMatch === false || componentMatch === false
-            ? "PARTIAL"
-            : "OK"
-          : "NO RESULTS";
+      // Print status
+      const status = output.totalFound > 0 ? "OK" : "NO RESULTS";
+      const avgScore =
+        Object.values(itemScores).length > 0
+          ? Object.values(itemScores).reduce((a, b) => a + b, 0) /
+            Object.values(itemScores).length
+          : 0;
 
-      console.log(
-        `${status} (${searchResult.totalFound} results, avg: ${avgScore.toFixed(3)})`,
-      );
-    } catch (error) {
+      console.log(`${status} (avg: ${avgScore.toFixed(3)})`);
+    } catch {
       console.log("ERROR");
       results.push({
         query: testCase.query,
         description: testCase.description,
-        resultsFound: 0,
-        avgScore: 0,
-        dataTypeMatch: null,
-        componentMatch: null,
-        topResult: `Error: ${error instanceof Error ? error.message : "Unknown"}`,
+        scores: {},
+        totalFound: 0,
       });
     }
   }
@@ -153,79 +178,65 @@ async function runRetrievalEvals() {
   const endTime = Date.now();
   const duration = (endTime - startTime) / 1000;
 
-  // Calculate summary statistics
+  // Calculate final aggregate scores
+  const finalScores: Record<string, number> = {};
+  for (const [id, scores] of Object.entries(aggregateScores)) {
+    finalScores[id] =
+      scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+  }
+
+  // Print summary
   console.log(`\n${"=".repeat(60)}`);
-  console.log("Summary");
+  console.log("Summary (Aggregate Scores)");
   console.log("=".repeat(60));
 
-  const withResults = results.filter((r) => r.resultsFound > 0);
-  const dataTypeCases = results.filter((r) => r.dataTypeMatch !== null);
-  const componentCases = results.filter((r) => r.componentMatch !== null);
+  console.log(`\nTotal test cases: ${allTestCases.length}`);
+  console.log(`Duration: ${duration.toFixed(2)}s\n`);
 
-  const stats = {
-    totalCases: results.length,
-    casesWithResults: withResults.length,
-    resultRate: (withResults.length / results.length) * 100,
-    avgSimilarityScore:
-      withResults.length > 0
-        ? withResults.reduce((sum, r) => sum + r.avgScore, 0) /
-          withResults.length
-        : 0,
-    dataTypeAccuracy:
-      dataTypeCases.length > 0
-        ? (dataTypeCases.filter((r) => r.dataTypeMatch).length /
-            dataTypeCases.length) *
-          100
-        : 0,
-    componentAccuracy:
-      componentCases.length > 0
-        ? (componentCases.filter((r) => r.componentMatch).length /
-            componentCases.length) *
-          100
-        : 0,
-  };
-
-  console.log(`
-Total test cases:        ${stats.totalCases}
-Cases with results:      ${stats.casesWithResults} (${stats.resultRate.toFixed(1)}%)
-Average similarity:      ${stats.avgSimilarityScore.toFixed(3)}
-Data type accuracy:      ${stats.dataTypeAccuracy.toFixed(1)}% (${dataTypeCases.filter((r) => r.dataTypeMatch).length}/${dataTypeCases.length})
-Component accuracy:      ${stats.componentAccuracy.toFixed(1)}% (${componentCases.filter((r) => r.componentMatch).length}/${componentCases.length})
-Duration:                ${duration.toFixed(2)}s
-`);
+  console.log("Scorer Results:");
+  for (const [scorerId, score] of Object.entries(finalScores)) {
+    const percentage = (score * 100).toFixed(1);
+    console.log(`  ${scorerId.padEnd(25)} ${percentage}%`);
+  }
 
   // Print detailed results table
-  console.log("=".repeat(60));
+  console.log(`\n${"=".repeat(60)}`);
   console.log("Detailed Results");
   console.log("=".repeat(60));
 
-  console.log("\n| Description | Results | Avg Score | Type | Component |");
-  console.log("|-------------|---------|-----------|------|-----------|");
+  console.log(
+    "\n| Description                             | Found | ResultsFound | DataType | Component |",
+  );
+  console.log(
+    "|----------------------------------------|-------|--------------|----------|-----------|",
+  );
 
   for (const r of results) {
-    const typeStatus =
-      r.dataTypeMatch === null ? "-" : r.dataTypeMatch ? "OK" : "MISS";
-    const compStatus =
-      r.componentMatch === null ? "-" : r.componentMatch ? "OK" : "MISS";
+    const resultsFound = r.scores["results-found"]?.toFixed(1) ?? "-";
+    const dataType = r.scores["data-type-accuracy"]?.toFixed(1) ?? "-";
+    const component = r.scores["component-match"]?.toFixed(1) ?? "-";
 
     console.log(
-      `| ${r.description.slice(0, 35).padEnd(35)} | ${String(r.resultsFound).padStart(7)} | ${r.avgScore.toFixed(3).padStart(9)} | ${typeStatus.padStart(4)} | ${compStatus.padStart(9)} |`,
+      `| ${r.description.slice(0, 38).padEnd(38)} | ${String(r.totalFound).padStart(5)} | ${resultsFound.padStart(12)} | ${dataType.padStart(8)} | ${component.padStart(9)} |`,
     );
   }
 
   console.log();
 
-  // Return exit code based on quality thresholds
-  const passed = stats.resultRate >= 50 && stats.avgSimilarityScore >= 0.3;
+  // Calculate pass/fail based on aggregate scores
+  const resultsFoundScore = finalScores["results-found"] ?? 0;
+  const avgSimilarity = finalScores["similarity-score"] ?? 0;
+
+  const passed = resultsFoundScore >= 0.5 && avgSimilarity >= 0.3;
 
   if (passed) {
     console.log("EVALUATION PASSED - Quality thresholds met");
     process.exit(0);
   } else {
     console.log("EVALUATION FAILED - Quality thresholds not met");
-    console.log(`  Required: result rate >= 50%, avg similarity >= 0.3`);
+    console.log(`  Required: results-found >= 50%, similarity-score >= 0.3`);
     console.log(
-      `  Actual: result rate = ${stats.resultRate.toFixed(1)}%, avg similarity = ${stats.avgSimilarityScore.toFixed(3)}`,
+      `  Actual: results-found = ${(resultsFoundScore * 100).toFixed(1)}%, similarity-score = ${avgSimilarity.toFixed(3)}`,
     );
     process.exit(1);
   }

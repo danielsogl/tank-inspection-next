@@ -3,6 +3,10 @@
  *
  * These tests evaluate the quality of semantic retrieval
  * from the inspection knowledge base using Mastra's eval framework.
+ *
+ * Note: Since we're evaluating a tool (not an agent), we run scorers
+ * directly using their .run() method instead of runEvals which is
+ * designed for agents/workflows.
  */
 
 import { RequestContext } from "@mastra/core/request-context";
@@ -12,6 +16,12 @@ import {
   edgeCaseTestCases,
   retrievalTestCases,
 } from "./datasets/retrieval-test-cases";
+import {
+  dataTypeAccuracyScorer,
+  componentMatchScorer,
+  similarityScoreScorer,
+  resultFoundScorer,
+} from "./scorers/rag-scorers";
 
 // Create a shared request context for evals
 function createEvalContext() {
@@ -126,6 +136,48 @@ describe("RAG Retrieval Quality", () => {
     });
   });
 
+  describe("Mastra Scorer Integration", () => {
+    it("should evaluate retrieval quality using custom scorers", async () => {
+      const testCase = retrievalTestCases[0];
+      const output = await executeQuery(testCase.query);
+
+      const groundTruth = {
+        expectedDataType: testCase.expectedDataType,
+        expectedComponentId: testCase.expectedComponentId,
+      };
+
+      // Run scorers directly
+      const resultsFoundResult = await resultFoundScorer.run({
+        input: { query: testCase.query },
+        output,
+        groundTruth,
+      });
+
+      const similarityResult = await similarityScoreScorer.run({
+        input: { query: testCase.query },
+        output,
+        groundTruth,
+      });
+
+      const dataTypeResult = await dataTypeAccuracyScorer.run({
+        input: { query: testCase.query },
+        output,
+        groundTruth,
+      });
+
+      // Verify we got scores
+      expect(resultsFoundResult.score).toBeDefined();
+      expect(similarityResult.score).toBeDefined();
+      expect(dataTypeResult.score).toBeDefined();
+
+      console.log("Scorer Results:", {
+        "results-found": resultsFoundResult.score,
+        "similarity-score": similarityResult.score,
+        "data-type-accuracy": dataTypeResult.score,
+      });
+    });
+  });
+
   describe("Data Type Accuracy", () => {
     it.each(
       retrievalTestCases
@@ -184,79 +236,72 @@ describe("RAG Retrieval Quality", () => {
     });
   });
 
-  describe("Quality Metrics Summary", () => {
+  describe("Quality Metrics Summary (Using Mastra Scorers)", () => {
     it("should calculate aggregate metrics across all test cases", async () => {
-      const metrics = {
-        totalCases: retrievalTestCases.length,
-        casesWithResults: 0,
-        dataTypeMatches: 0,
-        componentMatches: 0,
-        avgSimilarityScore: 0,
-        allScores: [] as number[],
+      const allTestCases = [...retrievalTestCases, ...edgeCaseTestCases];
+
+      const aggregateScores: Record<string, number[]> = {
+        "results-found": [],
+        "similarity-score": [],
+        "data-type-accuracy": [],
+        "component-match": [],
       };
 
-      for (const testCase of retrievalTestCases) {
-        const result = await executeQuery(testCase.query);
+      for (const testCase of allTestCases) {
+        const output = await executeQuery(testCase.query);
+        const groundTruth = {
+          expectedDataType: testCase.expectedDataType,
+          expectedComponentId: testCase.expectedComponentId,
+        };
 
-        if (result.results.length > 0) {
-          metrics.casesWithResults++;
+        // Run all scorers
+        const resultsFoundResult = await resultFoundScorer.run({
+          input: { query: testCase.query },
+          output,
+          groundTruth,
+        });
+        aggregateScores["results-found"].push(resultsFoundResult.score);
 
-          // Calculate avg score for this query
-          const avgScore =
-            result.results.reduce((sum, r) => sum + r.score, 0) /
-            result.results.length;
-          metrics.allScores.push(avgScore);
+        const similarityResult = await similarityScoreScorer.run({
+          input: { query: testCase.query },
+          output,
+          groundTruth,
+        });
+        aggregateScores["similarity-score"].push(similarityResult.score);
 
-          // Check data type match
-          if (testCase.expectedDataType) {
-            const hasMatch = result.results.some(
-              (r) => r.dataType === testCase.expectedDataType,
-            );
-            if (hasMatch) metrics.dataTypeMatches++;
-          }
+        const dataTypeResult = await dataTypeAccuracyScorer.run({
+          input: { query: testCase.query },
+          output,
+          groundTruth,
+        });
+        aggregateScores["data-type-accuracy"].push(dataTypeResult.score);
 
-          // Check component match
-          if (testCase.expectedComponentId) {
-            const hasMatch = result.results.some(
-              (r) => r.componentId === testCase.expectedComponentId,
-            );
-            if (hasMatch) metrics.componentMatches++;
-          }
-        }
+        const componentResult = await componentMatchScorer.run({
+          input: { query: testCase.query },
+          output,
+          groundTruth,
+        });
+        aggregateScores["component-match"].push(componentResult.score);
       }
 
-      // Calculate final metrics
-      metrics.avgSimilarityScore =
-        metrics.allScores.length > 0
-          ? metrics.allScores.reduce((a, b) => a + b, 0) /
-            metrics.allScores.length
-          : 0;
+      // Calculate averages
+      const finalScores: Record<string, number> = {};
+      for (const [id, scores] of Object.entries(aggregateScores)) {
+        finalScores[id] =
+          scores.length > 0
+            ? scores.reduce((a, b) => a + b, 0) / scores.length
+            : 0;
+      }
 
-      const resultRate = metrics.casesWithResults / metrics.totalCases;
-      const dataTypeCases = retrievalTestCases.filter(
-        (tc) => tc.expectedDataType,
-      ).length;
-      const componentCases = retrievalTestCases.filter(
-        (tc) => tc.expectedComponentId,
-      ).length;
+      console.log("\n=== Retrieval Eval Summary (Mastra Scorers) ===");
+      console.log(`Total test cases: ${allTestCases.length}`);
 
-      console.log("\n=== Retrieval Eval Summary ===");
-      console.log(`Total test cases: ${metrics.totalCases}`);
-      console.log(
-        `Cases with results: ${metrics.casesWithResults} (${(resultRate * 100).toFixed(1)}%)`,
-      );
-      console.log(
-        `Data type accuracy: ${metrics.dataTypeMatches}/${dataTypeCases}`,
-      );
-      console.log(
-        `Component accuracy: ${metrics.componentMatches}/${componentCases}`,
-      );
-      console.log(
-        `Average similarity score: ${metrics.avgSimilarityScore.toFixed(3)}`,
-      );
+      for (const [scorerId, score] of Object.entries(finalScores)) {
+        console.log(`${scorerId}: ${(score * 100).toFixed(1)}%`);
+      }
 
       // Assertions for minimum quality
-      expect(resultRate).toBeGreaterThan(0.5); // At least 50% of queries return results
+      expect(finalScores["results-found"]).toBeGreaterThan(0.5); // At least 50% of queries return results
     });
   });
 });
