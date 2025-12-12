@@ -49,9 +49,11 @@ export const queryComponentsStep = createStep({
     const componentsToQuery = new Set<string>();
 
     for (const system of affectedSystems) {
-      const mappedComponents = systemToComponentMap[system];
+      const mappedComponents: string[] | undefined = systemToComponentMap[system];
       if (mappedComponents) {
-        mappedComponents.forEach((c) => componentsToQuery.add(c));
+        for (const c of mappedComponents) {
+          componentsToQuery.add(c);
+        }
       }
     }
 
