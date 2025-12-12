@@ -77,7 +77,11 @@
         {
           "id": "E04-D01",
           "description": "Interkom defekt",
-          "indicators": ["eine Station nicht erreichbar", "starkes Rauschen", "nur einseitig"],
+          "indicators": [
+            "eine Station nicht erreichbar",
+            "starkes Rauschen",
+            "nur einseitig"
+          ],
           "priority": "high",
           "action": "Kopfhörer und Stecker prüfen. Kabelverbindungen testen."
         }
@@ -112,7 +116,11 @@
         {
           "id": "E06-D01",
           "description": "Periskop defekt",
-          "indicators": ["unscharfes Bild", "Drehung blockiert", "Optik beschlagen"],
+          "indicators": [
+            "unscharfes Bild",
+            "Drehung blockiert",
+            "Optik beschlagen"
+          ],
           "priority": "high",
           "action": "Optik reinigen. Bei mechanischem Defekt: Wartung erforderlich."
         }
@@ -148,4 +156,3 @@
     }
   ]
 }
-

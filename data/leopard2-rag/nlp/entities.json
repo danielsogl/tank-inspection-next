@@ -18,7 +18,13 @@
         },
         {
           "value": "A6M",
-          "synonyms": ["A6M", "Leopard 2 A6M", "Leo 2 A6M", "2A6M", "Minenschutz"]
+          "synonyms": [
+            "A6M",
+            "Leopard 2 A6M",
+            "Leo 2 A6M",
+            "2A6M",
+            "Minenschutz"
+          ]
         },
         {
           "value": "A7",
@@ -26,7 +32,13 @@
         },
         {
           "value": "A7V",
-          "synonyms": ["A7V", "Leopard 2 A7V", "Leo 2 A7V", "2A7V", "neueste Version"]
+          "synonyms": [
+            "A7V",
+            "Leopard 2 A7V",
+            "Leo 2 A7V",
+            "2A7V",
+            "neueste Version"
+          ]
         }
       ]
     },
@@ -58,27 +70,64 @@
       "values": [
         {
           "value": "A",
-          "synonyms": ["Sektion A", "Section A", "Motor", "Antrieb", "Motor und Antrieb"]
+          "synonyms": [
+            "Sektion A",
+            "Section A",
+            "Motor",
+            "Antrieb",
+            "Motor und Antrieb"
+          ]
         },
         {
           "value": "B",
-          "synonyms": ["Sektion B", "Section B", "Fahrwerk", "Laufwerk", "Fahrwerk und Laufwerk"]
+          "synonyms": [
+            "Sektion B",
+            "Section B",
+            "Fahrwerk",
+            "Laufwerk",
+            "Fahrwerk und Laufwerk"
+          ]
         },
         {
           "value": "C",
-          "synonyms": ["Sektion C", "Section C", "Turm", "Waffe", "Waffensystem", "Turm und Waffensystem"]
+          "synonyms": [
+            "Sektion C",
+            "Section C",
+            "Turm",
+            "Waffe",
+            "Waffensystem",
+            "Turm und Waffensystem"
+          ]
         },
         {
           "value": "D",
-          "synonyms": ["Sektion D", "Section D", "Elektrik", "Elektronik", "Bordelektrik"]
+          "synonyms": [
+            "Sektion D",
+            "Section D",
+            "Elektrik",
+            "Elektronik",
+            "Bordelektrik"
+          ]
         },
         {
           "value": "E",
-          "synonyms": ["Sektion E", "Section E", "Kommunikation", "Funk", "Führung"]
+          "synonyms": [
+            "Sektion E",
+            "Section E",
+            "Kommunikation",
+            "Funk",
+            "Führung"
+          ]
         },
         {
           "value": "F",
-          "synonyms": ["Sektion F", "Section F", "Sicherheit", "Sicherheitssysteme", "Brandschutz"]
+          "synonyms": [
+            "Sektion F",
+            "Section F",
+            "Sicherheit",
+            "Sicherheitssysteme",
+            "Brandschutz"
+          ]
         }
       ]
     },
@@ -122,7 +171,14 @@
         },
         {
           "value": "hauptwaffe",
-          "synonyms": ["Hauptwaffe", "Main Gun", "Kanone", "120mm", "L44", "L55"]
+          "synonyms": [
+            "Hauptwaffe",
+            "Main Gun",
+            "Kanone",
+            "120mm",
+            "L44",
+            "L55"
+          ]
         },
         {
           "value": "turm",
@@ -134,7 +190,13 @@
         },
         {
           "value": "feuerleitanlage",
-          "synonyms": ["Feuerleitanlage", "Fire Control", "EMES", "ATTICA", "Zielgerät"]
+          "synonyms": [
+            "Feuerleitanlage",
+            "Fire Control",
+            "EMES",
+            "ATTICA",
+            "Zielgerät"
+          ]
         },
         {
           "value": "hydraulik",
@@ -156,18 +218,37 @@
         },
         {
           "value": "L2",
-          "synonyms": ["L2", "Level 2", "Einheit", "Unit", "Intermediate", "Techniker"]
+          "synonyms": [
+            "L2",
+            "Level 2",
+            "Einheit",
+            "Unit",
+            "Intermediate",
+            "Techniker"
+          ]
         },
         {
           "value": "L3",
-          "synonyms": ["L3", "Level 3", "Feldwerft", "Field Depot", "Mobile Werkstatt"]
+          "synonyms": [
+            "L3",
+            "Level 3",
+            "Feldwerft",
+            "Field Depot",
+            "Mobile Werkstatt"
+          ]
         },
         {
           "value": "L4",
-          "synonyms": ["L4", "Level 4", "HIL", "Depot", "Base Depot", "Hersteller"]
+          "synonyms": [
+            "L4",
+            "Level 4",
+            "HIL",
+            "Depot",
+            "Base Depot",
+            "Hersteller"
+          ]
         }
       ]
     }
   ]
 }
-

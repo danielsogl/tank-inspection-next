@@ -2,15 +2,15 @@
 
 import {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useMemo,
   useState,
-  type ReactNode,
 } from "react";
 import {
-  VEHICLES,
   getDefaultVehicle,
+  VEHICLES,
   type VehicleConfig,
 } from "@/lib/vehicles";
 
@@ -29,7 +29,7 @@ interface VehicleProviderProps {
 export function VehicleProvider({ children }: VehicleProviderProps) {
   const vehicles = VEHICLES;
   const [selectedVehicle, setSelectedVehicleState] = useState<VehicleConfig>(
-    () => getDefaultVehicle()
+    () => getDefaultVehicle(),
   );
 
   const setSelectedVehicle = useCallback((vehicle: VehicleConfig) => {
@@ -42,7 +42,7 @@ export function VehicleProvider({ children }: VehicleProviderProps) {
       vehicles,
       setSelectedVehicle,
     }),
-    [selectedVehicle, vehicles, setSelectedVehicle]
+    [selectedVehicle, vehicles, setSelectedVehicle],
   );
 
   return (

@@ -6,8 +6,11 @@
  * @see https://mastra.ai/docs/v1/agents/overview
  */
 
-import { ModelRouterEmbeddingModel } from '@mastra/core/llm';
-import type { EmbeddingModelId, ModelRouterModelId } from '@mastra/core/llm/model';
+import { ModelRouterEmbeddingModel } from "@mastra/core/llm";
+import type {
+  EmbeddingModelId,
+  ModelRouterModelId,
+} from "@mastra/core/llm/model";
 
 // ============================================================================
 // AGENT / LANGUAGE MODELS
@@ -17,19 +20,19 @@ import type { EmbeddingModelId, ModelRouterModelId } from '@mastra/core/llm/mode
  * Primary language model for agents.
  * GPT-5 is OpenAI's latest model offering improved reasoning and capabilities.
  */
-export const AGENT_MODEL: ModelRouterModelId = 'openai/gpt-5-mini';
+export const AGENT_MODEL: ModelRouterModelId = "openai/gpt-5-mini";
 
 /**
  * Mini variant for cost-effective operations.
  * Use for less complex tasks or high-volume operations.
  */
-export const AGENT_MODEL_MINI: ModelRouterModelId = 'openai/gpt-5-nano';
+export const AGENT_MODEL_MINI: ModelRouterModelId = "openai/gpt-5-nano";
 
 /**
  * Security model for processors (guardrails, moderation, PII detection).
  * Uses a fast, cost-effective model for security checks.
  */
-export const SECURITY_MODEL: ModelRouterModelId = 'openai/gpt-4.1-mini';
+export const SECURITY_MODEL: ModelRouterModelId = "openai/gpt-4.1-mini";
 
 /**
  * All available agent models for type safety.
@@ -51,7 +54,7 @@ export type AgentModel = (typeof AGENT_MODELS)[keyof typeof AGENT_MODELS];
  * OpenAI Realtime model for voice interactions.
  * Used by the OpenAI Agents Realtime SDK.
  */
-export const VOICE_MODEL = 'gpt-realtime' as const;
+export const VOICE_MODEL = "gpt-realtime" as const;
 
 /**
  * All available voice models for type safety.
@@ -71,12 +74,13 @@ export type VoiceModel = (typeof VOICE_MODELS)[keyof typeof VOICE_MODELS];
  * Embedding model ID for vector embeddings using Mastra's model router format.
  * OpenAI text-embedding-3-small outputs 1536 dimensions.
  */
-export const EMBEDDING_MODEL_ID: EmbeddingModelId = 'openai/text-embedding-3-small';
+export const EMBEDDING_MODEL_ID: EmbeddingModelId =
+  "openai/text-embedding-3-small";
 
 /**
  * Embedding model name (without provider prefix) for reference.
  */
-export const EMBEDDING_MODEL_NAME = 'text-embedding-3-small' as const;
+export const EMBEDDING_MODEL_NAME = "text-embedding-3-small" as const;
 
 /**
  * Embedding model dimensions (required for vector store configuration).
@@ -111,7 +115,8 @@ export const EMBEDDING_MODELS = {
   TEXT_EMBEDDING_3_SMALL: EMBEDDING_MODEL_ID,
 } as const;
 
-export type EmbeddingModel = (typeof EMBEDDING_MODELS)[keyof typeof EMBEDDING_MODELS];
+export type EmbeddingModel =
+  (typeof EMBEDDING_MODELS)[keyof typeof EMBEDDING_MODELS];
 
 // ============================================================================
 // DEFAULT EXPORTS FOR CONVENIENCE

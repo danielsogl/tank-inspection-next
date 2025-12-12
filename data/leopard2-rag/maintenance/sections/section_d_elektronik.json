@@ -117,7 +117,11 @@
         {
           "id": "D06-D01",
           "description": "Kabelschaden",
-          "indicators": ["freiliegende Adern", "angeschmolzte Isolierung", "Kurzschluss"],
+          "indicators": [
+            "freiliegende Adern",
+            "angeschmolzte Isolierung",
+            "Kurzschluss"
+          ],
           "priority": "high",
           "action": "Kabel isolieren oder austauschen. Brandgefahr!"
         }
@@ -188,4 +192,3 @@
     }
   ]
 }
-

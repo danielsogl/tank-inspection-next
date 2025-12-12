@@ -1,5 +1,5 @@
-import { PgVector } from '@mastra/pg';
-import { EMBEDDING_DIMENSIONS } from './models';
+import { PgVector } from "@mastra/pg";
+import { EMBEDDING_DIMENSIONS } from "./models";
 
 /**
  * Vector store configuration for Supabase (pgvector).
@@ -28,12 +28,12 @@ export function getVectorStore(): PgVector {
 
   if (!connectionString) {
     throw new Error(
-      'SUPABASE_DB_URL environment variable is required for vector store initialization',
+      "SUPABASE_DB_URL environment variable is required for vector store initialization",
     );
   }
 
   vectorStoreInstance = new PgVector({
-    id: 'inspection-vectors',
+    id: "inspection-vectors",
     connectionString,
   });
 
@@ -45,10 +45,10 @@ export function getVectorStore(): PgVector {
  * Dimension is derived from the centralized embedding model configuration.
  */
 export const INSPECTION_INDEX_CONFIG = {
-  indexName: 'inspection_documents',
+  indexName: "inspection_documents",
   dimension: EMBEDDING_DIMENSIONS,
-  metric: 'cosine' as const,
+  metric: "cosine" as const,
 } as const;
 
 // Re-export the metadata type for convenience
-export type { InspectionChunkMetadata } from '../types/rag-data.types';
+export type { InspectionChunkMetadata } from "../types/rag-data.types";

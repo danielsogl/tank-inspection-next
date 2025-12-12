@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
 import type { AbstractMesh, Scene } from "@babylonjs/core";
 import { Color3 } from "@babylonjs/core";
+import { useCallback, useRef, useState } from "react";
 
 // Highlight colors matching the Angular implementation
 const AGENT_HIGHLIGHT_COLOR = Color3.FromHexString("#FF594F"); // Coral red for agent
@@ -28,7 +28,7 @@ export interface UseModelInteractionReturn {
 }
 
 export function useModelInteraction(
-  options: UseModelInteractionOptions = {}
+  options: UseModelInteractionOptions = {},
 ): UseModelInteractionReturn {
   const { onMeshClick } = options;
 
@@ -50,7 +50,7 @@ export function useModelInteraction(
 
       setHoveredMesh(mesh.name);
     },
-    []
+    [],
   );
 
   const handleMeshPointerOut = useCallback(
@@ -68,7 +68,7 @@ export function useModelInteraction(
 
       setHoveredMesh(null);
     },
-    []
+    [],
   );
 
   const handleMeshClick = useCallback(
@@ -78,7 +78,7 @@ export function useModelInteraction(
       setSelectedMesh(mesh.name);
       onMeshClick?.(mesh.name);
     },
-    [onMeshClick]
+    [onMeshClick],
   );
 
   const setAgentHighlights = useCallback(
@@ -107,7 +107,7 @@ export function useModelInteraction(
 
       forceUpdate({});
     },
-    []
+    [],
   );
 
   const clearAgentHighlights = useCallback((scene: Scene | null) => {

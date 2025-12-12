@@ -75,7 +75,7 @@ export interface VehicleData {
   systems?: string[];
   notes?: string;
   source?: string;
-  source_type?: 'official' | 'public' | 'estimated';
+  source_type?: "official" | "public" | "estimated";
   last_verified?: string;
 }
 
@@ -97,10 +97,10 @@ export interface CrewRole {
 // ============================================================================
 
 export type CheckpointType =
-  | 'visual_check'
-  | 'inspection_action'
-  | 'measurement'
-  | 'functional_test';
+  | "visual_check"
+  | "inspection_action"
+  | "measurement"
+  | "functional_test";
 
 export interface ExpectedValue {
   description: string;
@@ -212,7 +212,7 @@ export interface Component {
 // Defect Classification Types
 // ============================================================================
 
-export type DefectPriority = 'critical' | 'high' | 'medium' | 'low' | 'info';
+export type DefectPriority = "critical" | "high" | "medium" | "low" | "info";
 
 export interface DefectPriorityDefinition {
   level: DefectPriority;
@@ -251,12 +251,12 @@ export interface DefectRecommendation {
 // Maintenance Interval Types
 // ============================================================================
 
-export type MaintenanceLevel = 'L1' | 'L2' | 'L3' | 'L4';
+export type MaintenanceLevel = "L1" | "L2" | "L3" | "L4";
 
 export interface MaintenanceTrigger {
-  type: 'operating_hours' | 'calendar' | 'event';
+  type: "operating_hours" | "calendar" | "event";
   value: number | string;
-  unit?: 'hours' | 'days' | 'months';
+  unit?: "hours" | "days" | "months";
 }
 
 export interface MaintenanceInterval {
@@ -302,11 +302,17 @@ export interface ResponseTemplate {
 // Vector Store Metadata Types
 // ============================================================================
 
-export type DataType = 'vehicle' | 'checkpoint' | 'component' | 'defect' | 'interval' | 'legacy';
+export type DataType =
+  | "vehicle"
+  | "checkpoint"
+  | "component"
+  | "defect"
+  | "interval"
+  | "legacy";
 
 export interface InspectionChunkMetadata {
   /** The vehicle type this chunk belongs to */
-  vehicleType: 'leopard2' | 'm1a2';
+  vehicleType: "leopard2" | "m1a2";
   /** The section ID (A-F) */
   sectionId: string;
   /** The human-readable section name */

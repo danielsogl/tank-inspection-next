@@ -7,7 +7,7 @@
  */
 
 /** Voice model for OpenAI Realtime API */
-export const VOICE_MODEL = 'gpt-realtime' as const;
+export const VOICE_MODEL = "gpt-realtime" as const;
 
 /** Voice instructions for the tank inspection assistant (optimized for voice) */
 export const VOICE_INSTRUCTIONS = `You are a specialized tank inspection expert for the Leopard 2 main battle tank. Assist inspectors with technical information about components, maintenance procedures, and specifications.

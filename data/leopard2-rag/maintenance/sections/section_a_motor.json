@@ -34,7 +34,10 @@
         {
           "id": "A02-D01",
           "description": "Metallpartikel im Öl",
-          "indicators": ["silbrige oder goldene Partikel sichtbar", "magnetische Späne"],
+          "indicators": [
+            "silbrige oder goldene Partikel sichtbar",
+            "magnetische Späne"
+          ],
           "priority": "high",
           "action": "Motor nicht starten. Sofortige Meldung an Schirrmeister. Ölanalyse durchführen lassen."
         },
@@ -64,7 +67,10 @@
         {
           "id": "A03-D01",
           "description": "Wasser im Filter",
-          "indicators": ["Wasser sichtbar im Sichtglas", "Wasserstand über Markierung"],
+          "indicators": [
+            "Wasser sichtbar im Sichtglas",
+            "Wasserstand über Markierung"
+          ],
           "priority": "high",
           "action": "Wasser ablassen über Ablassschraube. Bei >100ml Meldung an Wartung."
         }
@@ -120,7 +126,11 @@
         {
           "id": "A05-D01",
           "description": "Kühlmittelverlust",
-          "indicators": ["Füllstand unter MIN", "wiederkehrender Bedarf", "Pfützen unter Fahrzeug"],
+          "indicators": [
+            "Füllstand unter MIN",
+            "wiederkehrender Bedarf",
+            "Pfützen unter Fahrzeug"
+          ],
           "priority": "high",
           "action": "Leckage lokalisieren. Schläuche und Verbindungen prüfen. Vor Ausfahrt beheben."
         }
@@ -208,7 +218,11 @@
         {
           "id": "A09-D01",
           "description": "Abgasleckage",
-          "indicators": ["Rußspuren", "Pfeifgeräusche", "Abgase im Fahrzeuginneren"],
+          "indicators": [
+            "Rußspuren",
+            "Pfeifgeräusche",
+            "Abgase im Fahrzeuginneren"
+          ],
           "priority": "high",
           "action": "Leckage abdichten. Bei Abgasen im Innenraum: sofort abstellen, Gesundheitsgefahr!"
         }
@@ -252,7 +266,11 @@
         {
           "id": "A11-D01",
           "description": "Getriebeöl-Leckage",
-          "indicators": ["Öltropfen", "feuchte Gehäusestellen", "Ölflecken unter Fahrzeug"],
+          "indicators": [
+            "Öltropfen",
+            "feuchte Gehäusestellen",
+            "Ölflecken unter Fahrzeug"
+          ],
           "priority": "high",
           "action": "Dichtungen ersetzen. Bei starkem Verlust (>0,5l/Tag): nicht einsatzbereit."
         }
@@ -287,7 +305,11 @@
         {
           "id": "A13-D01",
           "description": "Lüfterflügel gebrochen",
-          "indicators": ["fehlende Flügelteile", "Vibrationen", "lautes Geräusch"],
+          "indicators": [
+            "fehlende Flügelteile",
+            "Vibrationen",
+            "lautes Geräusch"
+          ],
           "priority": "high",
           "action": "Lüfter austauschen. Überhitzungsgefahr bei Betrieb."
         }
@@ -327,7 +349,11 @@
         {
           "id": "A14-D01",
           "description": "Niedrige Spannung",
-          "indicators": ["Spannung <24V", "schwacher Motorstart", "Elektronikfehler"],
+          "indicators": [
+            "Spannung <24V",
+            "schwacher Motorstart",
+            "Elektronikfehler"
+          ],
           "priority": "medium",
           "action": "Batterie laden oder austauschen. Lichtmaschine prüfen."
         }
@@ -371,7 +397,11 @@
         {
           "id": "A15-D01",
           "description": "Motor startet nicht",
-          "indicators": ["kein Zünden", "Anlasser dreht durch", "nur einzelne Zündungen"],
+          "indicators": [
+            "kein Zünden",
+            "Anlasser dreht durch",
+            "nur einzelne Zündungen"
+          ],
           "priority": "critical",
           "action": "Kraftstoffversorgung prüfen. Vorglühanlage testen. Bei Fehler: nicht einsatzbereit."
         },
@@ -393,4 +423,3 @@
     }
   ]
 }
-

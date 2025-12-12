@@ -55,7 +55,11 @@
         {
           "id": "C02-D01",
           "description": "Rohrschaden",
-          "indicators": ["Risse im Rohr", "Ausbrüche an Mündung", "verformte Züge"],
+          "indicators": [
+            "Risse im Rohr",
+            "Ausbrüche an Mündung",
+            "verformte Züge"
+          ],
           "priority": "critical",
           "action": "Waffe außer Betrieb nehmen. Rohr austauschen. Nicht schießen!"
         }
@@ -77,7 +81,11 @@
         {
           "id": "C03-D01",
           "description": "Verschluss schwergängig",
-          "indicators": ["erhöhter Kraftaufwand", "Klemmen", "unvollständiges Schließen"],
+          "indicators": [
+            "erhöhter Kraftaufwand",
+            "Klemmen",
+            "unvollständiges Schließen"
+          ],
           "priority": "high",
           "action": "Verschluss reinigen und schmieren. Bei anhaltenden Problemen: Mechanik prüfen lassen."
         }
@@ -126,7 +134,11 @@
         {
           "id": "C06-D01",
           "description": "Hydrauliköl-Leckage",
-          "indicators": ["Öl an Zylinder", "ungleichmäßiger Rücklauf", "hartes Anschlagen"],
+          "indicators": [
+            "Öl an Zylinder",
+            "ungleichmäßiger Rücklauf",
+            "hartes Anschlagen"
+          ],
           "priority": "high",
           "action": "Dichtungen ersetzen. Bei Totalausfall: Schießen nicht möglich."
         }
@@ -148,7 +160,11 @@
         {
           "id": "C07-D01",
           "description": "Turmantrieb defekt",
-          "indicators": ["Motor läuft nicht", "nur eine Richtung", "stark verzögerte Reaktion"],
+          "indicators": [
+            "Motor läuft nicht",
+            "nur eine Richtung",
+            "stark verzögerte Reaktion"
+          ],
           "priority": "critical",
           "action": "Fahrzeug nur bedingt einsatzbereit. Hydraulischer Notantrieb nutzen."
         }
@@ -175,7 +191,11 @@
         {
           "id": "C08-D01",
           "description": "Hydraulikdruck zu niedrig",
-          "indicators": ["Druck <180 bar", "langsame Drehung", "Pumpengeräusche"],
+          "indicators": [
+            "Druck <180 bar",
+            "langsame Drehung",
+            "Pumpengeräusche"
+          ],
           "priority": "high",
           "action": "Hydraulikflüssigkeit nachfüllen. Leckage suchen. Pumpe prüfen."
         }
@@ -188,7 +208,12 @@
       "description": "Drehkranz reinigen, schmieren und testen",
       "type": "inspection_action",
       "expected_value": "gleichmäßige Drehung, kein Knirschen, alle Schmierstellen gefüllt",
-      "tools_required": ["Schmierpresse", "Reinigungstuch", "Taschenlampe", "Fett TL 9150-0027"],
+      "tools_required": [
+        "Schmierpresse",
+        "Reinigungstuch",
+        "Taschenlampe",
+        "Fett TL 9150-0027"
+      ],
       "estimated_time_min": 25,
       "photo_required": true,
       "photo_points": ["Schmierstellen Übersicht", "Dichtungsringe"],
@@ -207,7 +232,20 @@
             "type": "TL 9150-0027",
             "quantity": "2-3 Hübe pro Punkt",
             "points": 12,
-            "positions": ["0°", "30°", "60°", "90°", "120°", "150°", "180°", "210°", "240°", "270°", "300°", "330°"]
+            "positions": [
+              "0°",
+              "30°",
+              "60°",
+              "90°",
+              "120°",
+              "150°",
+              "180°",
+              "210°",
+              "240°",
+              "270°",
+              "300°",
+              "330°"
+            ]
           }
         },
         {
@@ -227,14 +265,21 @@
         {
           "id": "C09-D01",
           "description": "Dichtungsring gerissen",
-          "indicators": ["sichtbare Risse", "Fettaustritt außerhalb Schmierstelle"],
+          "indicators": [
+            "sichtbare Risse",
+            "Fettaustritt außerhalb Schmierstelle"
+          ],
           "priority": "high",
           "action": "Dichtung vor nächster Ausfahrt austauschen. Verschmutzung des Lagers möglich."
         },
         {
           "id": "C09-D02",
           "description": "Knirschen beim Drehen",
-          "indicators": ["metallisches Geräusch", "ruckartiger Lauf", "Widerstand"],
+          "indicators": [
+            "metallisches Geräusch",
+            "ruckartiger Lauf",
+            "Widerstand"
+          ],
           "priority": "medium",
           "action": "Intensivschmierung durchführen. Bei Persistenz: Lagerschaden möglich."
         }
@@ -256,7 +301,11 @@
         {
           "id": "C10-D01",
           "description": "Stabilisierung defekt",
-          "indicators": ["Zielverlust bei Fahrt", "Waffe pendelt", "Fehlermeldung im System"],
+          "indicators": [
+            "Zielverlust bei Fahrt",
+            "Waffe pendelt",
+            "Fehlermeldung im System"
+          ],
           "priority": "high",
           "action": "Gyroskope kalibrieren lassen. Fahrtfeuer nicht möglich."
         }
@@ -411,7 +460,11 @@
         {
           "id": "C18-D01",
           "description": "Nebelwerfer defekt",
-          "indicators": ["Werfer löst nicht aus", "elektrischer Fehler", "Werfer fehlt"],
+          "indicators": [
+            "Werfer löst nicht aus",
+            "elektrischer Fehler",
+            "Werfer fehlt"
+          ],
           "priority": "medium",
           "action": "Werfer austauschen. Selbstschutzmittel reduziert."
         }
@@ -446,4 +499,3 @@
     }
   ]
 }
-

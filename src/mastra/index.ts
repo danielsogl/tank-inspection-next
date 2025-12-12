@@ -1,17 +1,17 @@
-import { Mastra } from '@mastra/core/mastra';
-import { PinoLogger } from '@mastra/loggers';
-import { LibSQLStore } from '@mastra/libsql';
-import { Observability } from '@mastra/observability';
-import { PgVector } from '@mastra/pg';
-import { vehicleInspectionAgent } from './agents/vehicle-inspection-agent';
-import { INSPECTION_INDEX_CONFIG } from './lib/vector';
-import { troubleshootingWorkflow } from './workflows';
+import { Mastra } from "@mastra/core/mastra";
+import { LibSQLStore } from "@mastra/libsql";
+import { PinoLogger } from "@mastra/loggers";
+import { Observability } from "@mastra/observability";
+import { PgVector } from "@mastra/pg";
+import { vehicleInspectionAgent } from "./agents/vehicle-inspection-agent";
+import { INSPECTION_INDEX_CONFIG } from "./lib/vector";
+import { troubleshootingWorkflow } from "./workflows";
 
 // Only create vector store if SUPABASE_DB_URL is configured
 const vectors = process.env.SUPABASE_DB_URL
   ? {
       inspectionVectors: new PgVector({
-        id: 'inspection-vectors',
+        id: "inspection-vectors",
         connectionString: process.env.SUPABASE_DB_URL,
       }),
     }
@@ -21,14 +21,14 @@ export const mastra = new Mastra({
   agents: { vehicleInspectionAgent },
   workflows: { troubleshootingWorkflow },
   storage: new LibSQLStore({
-    id: 'mastra-storage',
+    id: "mastra-storage",
     // stores observability, scores, ... into memory storage, if it needs to persist, change to file:../mastra.db
-    url: ':memory:',
+    url: ":memory:",
   }),
   vectors,
   logger: new PinoLogger({
-    name: 'Mastra',
-    level: 'info',
+    name: "Mastra",
+    level: "info",
   }),
   observability: new Observability({
     // Enables DefaultExporter and CloudExporter for tracing

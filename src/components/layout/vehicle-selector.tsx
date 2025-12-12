@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useVehicle } from "@/contexts/vehicle-context";
 import {
   Select,
   SelectContent,
@@ -9,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useVehicle } from "@/contexts/vehicle-context";
 
 export function VehicleSelector() {
   const { selectedVehicle, vehicles, setSelectedVehicle } = useVehicle();

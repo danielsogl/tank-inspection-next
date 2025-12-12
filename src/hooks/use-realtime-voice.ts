@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
 import { RealtimeAgent, RealtimeSession } from "@openai/agents-realtime";
-import { VOICE_MODEL, VOICE_INSTRUCTIONS } from "@/mastra/lib/voice-config";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { VOICE_INSTRUCTIONS, VOICE_MODEL } from "@/mastra/lib/voice-config";
 
 export type VoiceState =
   | "idle"
@@ -45,7 +45,7 @@ interface UseRealtimeVoiceReturn {
  * - Audio encoding/decoding
  */
 export function useRealtimeVoice(
-  options: UseRealtimeVoiceOptions = {}
+  options: UseRealtimeVoiceOptions = {},
 ): UseRealtimeVoiceReturn {
   const { onMessage, onError, onStateChange } = options;
 
@@ -60,7 +60,7 @@ export function useRealtimeVoice(
       setState(newState);
       onStateChange?.(newState);
     },
-    [onStateChange]
+    [onStateChange],
   );
 
   // Start or resume voice session
@@ -152,13 +152,14 @@ export function useRealtimeVoice(
             }
             break;
 
-          case "error":
+          case "error": {
             const errorMessage =
               (event.error as { message?: string })?.message ||
               "An error occurred";
             setError(errorMessage);
             onError?.(errorMessage);
             break;
+          }
         }
       });
 

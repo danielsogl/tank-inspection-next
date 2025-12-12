@@ -1,7 +1,7 @@
 import {
-  VEHICLES,
-  getVehicleById,
   getDefaultVehicle,
+  getVehicleById,
+  VEHICLES,
   type VehicleConfig,
 } from "@/lib/vehicles";
 

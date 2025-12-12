@@ -15,7 +15,7 @@
       "1st": 4.11,
       "2nd": 2.42,
       "3rd": 1.48,
-      "4th": 1.00,
+      "4th": 1.0,
       "reverse_1": 2.85,
       "reverse_2": 4.66
     }
@@ -139,4 +139,3 @@
   },
   "notes": "The RENK HSWL 354 is a robust automatic transmission with hydrodynamic torque converter. It allows the Leopard 2 to change gears without interrupting power delivery. The lock-up clutch in 4th gear provides fuel efficiency at cruising speed."
 }
-

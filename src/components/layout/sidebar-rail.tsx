@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Home, LogOut, Menu, User } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Menu, Home, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SidebarRailProps {
@@ -29,7 +29,7 @@ export function SidebarRail({
           "flex flex-col items-center justify-between",
           "bg-card border-2 border-border rounded-lg",
           "p-2 w-[60px] h-full",
-          className
+          className,
         )}
       >
         {/* Top section - Menu button */}

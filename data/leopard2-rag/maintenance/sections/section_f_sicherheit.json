@@ -41,7 +41,11 @@
         {
           "id": "F02-D01",
           "description": "Feuerlöscher defekt",
-          "indicators": ["Druckzeiger im roten Bereich", "TÜV abgelaufen", "Beschädigung"],
+          "indicators": [
+            "Druckzeiger im roten Bereich",
+            "TÜV abgelaufen",
+            "Beschädigung"
+          ],
           "priority": "high",
           "action": "Feuerlöscher vor Ausfahrt austauschen. Sicherheitsrisiko."
         }
@@ -98,7 +102,11 @@
         {
           "id": "F05-D01",
           "description": "Luke klemmt",
-          "indicators": ["schwergängig", "schließt nicht vollständig", "Verriegelung defekt"],
+          "indicators": [
+            "schwergängig",
+            "schließt nicht vollständig",
+            "Verriegelung defekt"
+          ],
           "priority": "medium",
           "action": "Scharniere schmieren. Verriegelung justieren. Notausstieg sicherstellen."
         }
@@ -182,7 +190,11 @@
         {
           "id": "F10-D01",
           "description": "APS defekt",
-          "indicators": ["System offline", "Radararme bewegen sich nicht", "Fehlermeldung"],
+          "indicators": [
+            "System offline",
+            "Radararme bewegen sich nicht",
+            "Fehlermeldung"
+          ],
           "priority": "high",
           "action": "System neu starten. Bei Persistenz: Spezialwartung erforderlich."
         }
@@ -190,4 +202,3 @@
     }
   ]
 }
-

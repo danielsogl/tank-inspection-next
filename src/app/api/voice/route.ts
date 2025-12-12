@@ -14,32 +14,35 @@ export async function POST() {
   if (!apiKey) {
     return NextResponse.json(
       { error: "OpenAI API key not configured" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
   try {
     // Create an ephemeral client secret for the browser to connect via WebRTC
-    const response = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        session: {
-          type: "realtime",
-          model: VOICE_MODEL,
+    const response = await fetch(
+      "https://api.openai.com/v1/realtime/client_secrets",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
         },
-      }),
-    });
+        body: JSON.stringify({
+          session: {
+            type: "realtime",
+            model: VOICE_MODEL,
+          },
+        }),
+      },
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error("OpenAI client secret error:", errorText);
       return NextResponse.json(
         { error: "Failed to create voice session" },
-        { status: response.status }
+        { status: response.status },
       );
     }
 
@@ -54,7 +57,7 @@ export async function POST() {
     console.error("Voice session error:", error);
     return NextResponse.json(
       { error: "Failed to initialize voice session" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

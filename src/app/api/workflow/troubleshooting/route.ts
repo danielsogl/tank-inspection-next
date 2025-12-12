@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { mastra } from '@/mastra';
+import { type NextRequest, NextResponse } from "next/server";
+import { mastra } from "@/mastra";
 
 /**
  * POST /api/workflow/troubleshooting
@@ -22,18 +22,22 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { symptomDescription, vehicleId, componentHint, requireApproval } = body;
+    const { symptomDescription, vehicleId, componentHint, requireApproval } =
+      body;
 
-    if (!symptomDescription || typeof symptomDescription !== 'string') {
+    if (!symptomDescription || typeof symptomDescription !== "string") {
       return NextResponse.json(
-        { error: 'symptomDescription is required and must be a string' },
+        { error: "symptomDescription is required and must be a string" },
         { status: 400 },
       );
     }
 
-    const workflow = mastra.getWorkflow('troubleshootingWorkflow');
+    const workflow = mastra.getWorkflow("troubleshootingWorkflow");
     if (!workflow) {
-      return NextResponse.json({ error: 'Workflow not found' }, { status: 500 });
+      return NextResponse.json(
+        { error: "Workflow not found" },
+        { status: 500 },
+      );
     }
 
     const run = await workflow.createRun();
@@ -41,44 +45,51 @@ export async function POST(request: NextRequest) {
     const result = await run.start({
       inputData: {
         symptomDescription,
-        vehicleId: vehicleId || 'leopard2',
+        vehicleId: vehicleId || "leopard2",
         componentHint,
         requireApproval: requireApproval ?? false,
       },
     });
 
-    if (result.status === 'suspended') {
+    if (result.status === "suspended") {
       // Workflow is waiting for user input
       const suspendedSteps = result.suspended || [];
       const suspendedStep = suspendedSteps[0];
-      const stepId = Array.isArray(suspendedStep) ? suspendedStep[suspendedStep.length - 1] : suspendedStep;
-      const stepResult = stepId ? result.steps[stepId as keyof typeof result.steps] : null;
+      const stepId = Array.isArray(suspendedStep)
+        ? suspendedStep[suspendedStep.length - 1]
+        : suspendedStep;
+      const stepResult = stepId
+        ? result.steps[stepId as keyof typeof result.steps]
+        : null;
 
       return NextResponse.json({
-        status: 'suspended',
+        status: "suspended",
         runId: run.runId,
         step: stepId,
-        suspendPayload: stepResult && 'suspendPayload' in stepResult ? stepResult.suspendPayload : null,
-        message: 'Workflow suspended - awaiting user input',
+        suspendPayload:
+          stepResult && "suspendPayload" in stepResult
+            ? stepResult.suspendPayload
+            : null,
+        message: "Workflow suspended - awaiting user input",
       });
     }
 
-    if (result.status === 'failed') {
+    if (result.status === "failed") {
       return NextResponse.json(
         {
-          status: 'failed',
-          error: 'Workflow execution failed',
+          status: "failed",
+          error: "Workflow execution failed",
           details: result,
         },
         { status: 500 },
       );
     }
 
-    if (result.status === 'tripwire') {
+    if (result.status === "tripwire") {
       return NextResponse.json(
         {
-          status: 'tripwire',
-          error: 'Workflow aborted by guardrail',
+          status: "tripwire",
+          error: "Workflow aborted by guardrail",
           tripwire: result.tripwire,
         },
         { status: 400 },
@@ -87,16 +98,16 @@ export async function POST(request: NextRequest) {
 
     // Workflow completed successfully (this is the only remaining case)
     return NextResponse.json({
-      status: 'success',
+      status: "success",
       runId: run.runId,
       result: result.result,
     });
   } catch (error) {
-    console.error('Troubleshooting workflow error:', error);
+    console.error("Troubleshooting workflow error:", error);
     return NextResponse.json(
       {
-        error: 'Failed to execute troubleshooting workflow',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: "Failed to execute troubleshooting workflow",
+        message: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },
     );
@@ -111,25 +122,31 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const runId = searchParams.get('runId');
+    const runId = searchParams.get("runId");
 
     if (!runId) {
-      return NextResponse.json({ error: 'runId is required' }, { status: 400 });
+      return NextResponse.json({ error: "runId is required" }, { status: 400 });
     }
 
     // Get the current snapshot/state
     const storage = mastra.getStorage();
     if (!storage) {
-      return NextResponse.json({ error: 'Storage not configured' }, { status: 500 });
+      return NextResponse.json(
+        { error: "Storage not configured" },
+        { status: 500 },
+      );
     }
 
     const snapshot = await storage.loadWorkflowSnapshot({
       runId,
-      workflowName: 'troubleshooting-diagnostic',
+      workflowName: "troubleshooting-diagnostic",
     });
 
     if (!snapshot) {
-      return NextResponse.json({ error: 'Workflow run not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: "Workflow run not found" },
+        { status: 404 },
+      );
     }
 
     return NextResponse.json({
@@ -139,11 +156,11 @@ export async function GET(request: NextRequest) {
       context: snapshot.context,
     });
   } catch (error) {
-    console.error('Get workflow status error:', error);
+    console.error("Get workflow status error:", error);
     return NextResponse.json(
       {
-        error: 'Failed to get workflow status',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: "Failed to get workflow status",
+        message: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },
     );
@@ -170,14 +187,17 @@ export async function PATCH(request: NextRequest) {
 
     if (!runId || !step || !resumeData) {
       return NextResponse.json(
-        { error: 'runId, step, and resumeData are required' },
+        { error: "runId, step, and resumeData are required" },
         { status: 400 },
       );
     }
 
-    const workflow = mastra.getWorkflow('troubleshootingWorkflow');
+    const workflow = mastra.getWorkflow("troubleshootingWorkflow");
     if (!workflow) {
-      return NextResponse.json({ error: 'Workflow not found' }, { status: 500 });
+      return NextResponse.json(
+        { error: "Workflow not found" },
+        { status: 500 },
+      );
     }
 
     // Create run instance with existing runId
@@ -189,38 +209,45 @@ export async function PATCH(request: NextRequest) {
       resumeData,
     });
 
-    if (result.status === 'suspended') {
+    if (result.status === "suspended") {
       // Workflow suspended again (e.g., next diagnostic step)
       const suspendedSteps = result.suspended || [];
       const suspendedStep = suspendedSteps[0];
-      const stepId = Array.isArray(suspendedStep) ? suspendedStep[suspendedStep.length - 1] : suspendedStep;
-      const stepResult = stepId ? result.steps[stepId as keyof typeof result.steps] : null;
+      const stepId = Array.isArray(suspendedStep)
+        ? suspendedStep[suspendedStep.length - 1]
+        : suspendedStep;
+      const stepResult = stepId
+        ? result.steps[stepId as keyof typeof result.steps]
+        : null;
 
       return NextResponse.json({
-        status: 'suspended',
+        status: "suspended",
         runId,
         step: stepId,
-        suspendPayload: stepResult && 'suspendPayload' in stepResult ? stepResult.suspendPayload : null,
-        message: 'Workflow suspended - awaiting next input',
+        suspendPayload:
+          stepResult && "suspendPayload" in stepResult
+            ? stepResult.suspendPayload
+            : null,
+        message: "Workflow suspended - awaiting next input",
       });
     }
 
-    if (result.status === 'failed') {
+    if (result.status === "failed") {
       return NextResponse.json(
         {
-          status: 'failed',
-          error: 'Workflow resume failed',
+          status: "failed",
+          error: "Workflow resume failed",
           details: result,
         },
         { status: 500 },
       );
     }
 
-    if (result.status === 'tripwire') {
+    if (result.status === "tripwire") {
       return NextResponse.json(
         {
-          status: 'tripwire',
-          error: 'Workflow aborted by guardrail',
+          status: "tripwire",
+          error: "Workflow aborted by guardrail",
           tripwire: result.tripwire,
         },
         { status: 400 },
@@ -229,16 +256,16 @@ export async function PATCH(request: NextRequest) {
 
     // Workflow completed (this is the only remaining case)
     return NextResponse.json({
-      status: 'success',
+      status: "success",
       runId,
       result: result.result,
     });
   } catch (error) {
-    console.error('Resume workflow error:', error);
+    console.error("Resume workflow error:", error);
     return NextResponse.json(
       {
-        error: 'Failed to resume workflow',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        error: "Failed to resume workflow",
+        message: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },
     );

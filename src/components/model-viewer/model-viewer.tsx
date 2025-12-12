@@ -1,24 +1,34 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { Engine, Scene, Model, useScene, type ILoadedModel } from "react-babylonjs";
 import {
-  Vector3,
-  Color4,
+  type AbstractMesh,
   ActionManager,
+  type Scene as BabylonScene,
+  Color4,
   ExecuteCodeAction,
   TransformNode,
-  type Scene as BabylonScene,
-  type AbstractMesh,
+  Vector3,
 } from "@babylonjs/core";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import {
+  Engine,
+  type ILoadedModel,
+  Model,
+  Scene,
+  useScene,
+} from "react-babylonjs";
 import "@babylonjs/loaders/OBJ";
 import { Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useVehicle } from "@/contexts/vehicle-context";
-import { getVehicleModel, getDefaultVehicleModel, type VehicleModelView } from "./model-registry";
+import { cn } from "@/lib/utils";
 import {
-  useModelInteraction,
+  getDefaultVehicleModel,
+  getVehicleModel,
+  type VehicleModelView,
+} from "./model-registry";
+import {
   type UseModelInteractionOptions,
+  useModelInteraction,
 } from "./use-model-interaction";
 
 interface ModelViewerProps {
@@ -79,21 +89,21 @@ function TankModel({
         mesh.actionManager.registerAction(
           new ExecuteCodeAction(ActionManager.OnPointerOverTrigger, () => {
             onMeshPointerOver(mesh, scene);
-          })
+          }),
         );
 
         // Hover leave
         mesh.actionManager.registerAction(
           new ExecuteCodeAction(ActionManager.OnPointerOutTrigger, () => {
             onMeshPointerOut(mesh, scene);
-          })
+          }),
         );
 
         // Click
         mesh.actionManager.registerAction(
           new ExecuteCodeAction(ActionManager.OnPickTrigger, () => {
             onMeshClick(mesh, scene);
-          })
+          }),
         );
       });
 
@@ -103,7 +113,7 @@ function TankModel({
 
       onModelLoaded?.(loadedModel);
     },
-    [scene, onMeshPointerOver, onMeshPointerOut, onMeshClick, onModelLoaded]
+    [scene, onMeshPointerOver, onMeshPointerOut, onMeshClick, onModelLoaded],
   );
 
   return (
@@ -132,11 +142,8 @@ function SceneContent({
   const scene = useScene();
   const [isModelLoaded, setIsModelLoaded] = useState(false);
 
-  const {
-    handleMeshPointerOver,
-    handleMeshPointerOut,
-    handleMeshClick,
-  } = useModelInteraction(interactionOptions);
+  const { handleMeshPointerOver, handleMeshPointerOut, handleMeshClick } =
+    useModelInteraction(interactionOptions);
 
   useEffect(() => {
     if (scene && onSceneReady) {
@@ -236,12 +243,12 @@ export function ModelViewer({
         (e) => {
           e.preventDefault();
         },
-        { passive: false }
+        { passive: false },
       );
 
       setIsLoading(false);
     },
-    []
+    [],
   );
 
   // Handle container resize

@@ -1,5 +1,5 @@
-import { embed } from 'ai';
-import { getEmbeddingModel } from './models';
+import { embed } from "ai";
+import { getEmbeddingModel } from "./models";
 
 /**
  * Simple in-memory cache for RAG query results and embeddings.
@@ -27,8 +27,13 @@ export function createQueryCache<T>(ttlMs = 15 * 60 * 1000) {
   /**
    * Generate a cache key from query and filter parameters.
    */
-  function generateKey(query: string, filters?: Record<string, unknown>): string {
-    const filterStr = filters ? JSON.stringify(filters, Object.keys(filters).sort()) : '';
+  function generateKey(
+    query: string,
+    filters?: Record<string, unknown>,
+  ): string {
+    const filterStr = filters
+      ? JSON.stringify(filters, Object.keys(filters).sort())
+      : "";
     return `${query}|${filterStr}`;
   }
 

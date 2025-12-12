@@ -25,7 +25,14 @@
         "Checkpoint {checkpoint_number}"
       ],
       "response_template": "Checkpoint {checkpoint_number} - {checkpoint_name}: {description}. Erwarteter Wert: {expected_value}. Benötigte Werkzeuge: {tools}. Geschätzte Zeit: {time} Minuten.",
-      "parameters": ["checkpoint_number", "checkpoint_name", "description", "expected_value", "tools", "time"]
+      "parameters": [
+        "checkpoint_number",
+        "checkpoint_name",
+        "description",
+        "expected_value",
+        "tools",
+        "time"
+      ]
     },
     {
       "id": "report_defect",
@@ -38,7 +45,13 @@
         "Schaden an {component}"
       ],
       "response_template": "Mangel an {component} wurde erfasst. Priorität: {priority}. Empfohlene Maßnahme: {action}. Status: {vehicle_status}",
-      "parameters": ["component", "description", "priority", "action", "vehicle_status"]
+      "parameters": [
+        "component",
+        "description",
+        "priority",
+        "action",
+        "vehicle_status"
+      ]
     },
     {
       "id": "query_maintenance_interval",
@@ -51,7 +64,13 @@
         "Übersicht Wartungstermine"
       ],
       "response_template": "Nächste Wartung: {interval_name} bei {trigger_value} {trigger_unit}. Dauer: {duration}. Ausführung durch: {executor}.",
-      "parameters": ["interval_name", "trigger_value", "trigger_unit", "duration", "executor"]
+      "parameters": [
+        "interval_name",
+        "trigger_value",
+        "trigger_unit",
+        "duration",
+        "executor"
+      ]
     },
     {
       "id": "query_crew_role",
@@ -87,7 +106,13 @@
         "Ich möchte {section} prüfen"
       ],
       "response_template": "Inspektion Sektion {section_id} - {section_name} gestartet. {checkpoint_count} Prüfpunkte. Geschätzte Dauer: {total_time} Minuten. Erster Checkpoint: {first_checkpoint}",
-      "parameters": ["section_id", "section_name", "checkpoint_count", "total_time", "first_checkpoint"]
+      "parameters": [
+        "section_id",
+        "section_name",
+        "checkpoint_count",
+        "total_time",
+        "first_checkpoint"
+      ]
     },
     {
       "id": "query_component_spec",
@@ -99,7 +124,12 @@
         "Monitoring-Parameter {component}"
       ],
       "response_template": "Komponente {component_name}: {specs}. Normale Betriebsparameter: {normal_range}. Kritische Grenzwerte: {critical_threshold}.",
-      "parameters": ["component_name", "specs", "normal_range", "critical_threshold"]
+      "parameters": [
+        "component_name",
+        "specs",
+        "normal_range",
+        "critical_threshold"
+      ]
     },
     {
       "id": "classify_defect",
@@ -111,8 +141,13 @@
         "Einstufung für {defect_description}"
       ],
       "response_template": "Mangel '{defect_description}' wird als {priority} eingestuft. Reaktionszeit: {response_time}. Fahrzeugstatus: {vehicle_status}. Eskalation: {escalation}",
-      "parameters": ["defect_description", "priority", "response_time", "vehicle_status", "escalation"]
+      "parameters": [
+        "defect_description",
+        "priority",
+        "response_time",
+        "vehicle_status",
+        "escalation"
+      ]
     }
   ]
 }
-

@@ -23,10 +23,10 @@ import {
   retrievalTestCases,
 } from "./datasets/retrieval-test-cases";
 import {
-  dataTypeAccuracyScorer,
   componentMatchScorer,
-  similarityScoreScorer,
+  dataTypeAccuracyScorer,
   resultFoundScorer,
+  similarityScoreScorer,
 } from "./scorers/rag-scorers";
 
 // Result type for query execution
@@ -107,7 +107,9 @@ async function runRetrievalEvals() {
   const startTime = Date.now();
   const allTestCases = [...retrievalTestCases, ...edgeCaseTestCases];
 
-  console.log(`Running ${allTestCases.length} test cases with Mastra scorers...\n`);
+  console.log(
+    `Running ${allTestCases.length} test cases with Mastra scorers...\n`,
+  );
 
   const results: EvalResult[] = [];
   const aggregateScores: Record<string, number[]> = {};

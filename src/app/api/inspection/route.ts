@@ -1,9 +1,9 @@
-import { mastra } from "@/mastra";
-import { NextResponse, type NextRequest } from "next/server";
 import { toAISdkStream } from "@mastra/ai-sdk";
 import { convertMessages } from "@mastra/core/agent";
 import { RequestContext } from "@mastra/core/request-context";
 import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
+import { type NextRequest, NextResponse } from "next/server";
+import { mastra } from "@/mastra";
 
 // Get the vehicle inspection agent
 const vehicleInspectionAgent = mastra.getAgent("vehicleInspectionAgent");

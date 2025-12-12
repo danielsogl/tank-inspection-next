@@ -1,16 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useMemo } from "react";
-import { DefaultChatTransport } from "ai";
 import { useChat } from "@ai-sdk/react";
-import { MessageCircle, Trash2, Loader2, Mic, MicOff, Volume2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { DefaultChatTransport } from "ai";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Loader2,
+  MessageCircle,
+  Mic,
+  MicOff,
+  Trash2,
+  Volume2,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import {
   Conversation,
   ConversationContent,
@@ -23,23 +24,33 @@ import {
   MessageResponse,
 } from "@/components/ai-elements/message";
 import {
+  PromptInput,
+  PromptInputBody,
+  PromptInputFooter,
+  PromptInputSubmit,
+  PromptInputTextarea,
+} from "@/components/ai-elements/prompt-input";
+import {
   Tool,
-  ToolHeader,
   ToolContent,
+  ToolHeader,
   ToolInput,
   ToolOutput,
 } from "@/components/ai-elements/tool";
+import { Button } from "@/components/ui/button";
 import {
-  PromptInput,
-  PromptInputBody,
-  PromptInputTextarea,
-  PromptInputFooter,
-  PromptInputSubmit,
-} from "@/components/ai-elements/prompt-input";
-import { cn } from "@/lib/utils";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useVehicle } from "@/contexts/vehicle-context";
-import { useRealtimeVoice, type VoiceMessage, type VoiceState } from "@/hooks/use-realtime-voice";
-import { toast } from "sonner";
+import {
+  useRealtimeVoice,
+  type VoiceMessage,
+  type VoiceState,
+} from "@/hooks/use-realtime-voice";
+import { cn } from "@/lib/utils";
 
 interface ChatPanelProps {
   className?: string;
@@ -134,7 +145,9 @@ export function ChatPanel({
   // When a part is selected, pre-fill the input with a question about it
   useEffect(() => {
     if (selectedPart) {
-      setInput(`Tell me about the "${selectedPart}" part of the ${selectedVehicle.name}.`);
+      setInput(
+        `Tell me about the "${selectedPart}" part of the ${selectedVehicle.name}.`,
+      );
       onPartHandled?.();
     }
   }, [selectedPart, onPartHandled, selectedVehicle.name]);
@@ -208,7 +221,7 @@ export function ChatPanel({
 
     // Combine and sort by timestamp
     return [...textMessages, ...voiceDisplayMessages].sort(
-      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
     );
   }, [messages, voiceMessages]);
 
@@ -219,7 +232,7 @@ export function ChatPanel({
       className={cn(
         "flex flex-col h-full",
         "bg-secondary rounded-lg border-2 border-border overflow-hidden",
-        className
+        className,
       )}
     >
       {/* Header */}
@@ -278,7 +291,10 @@ export function ChatPanel({
                       );
                     }
                     // Handle tool parts (type starts with "tool-" or is "dynamic-tool")
-                    if (part.type?.startsWith("tool-") || part.type === "dynamic-tool") {
+                    if (
+                      part.type?.startsWith("tool-") ||
+                      part.type === "dynamic-tool"
+                    ) {
                       return (
                         <Tool key={`${message.id}-${i}`} className="my-2">
                           <ToolHeader
@@ -301,12 +317,17 @@ export function ChatPanel({
                 </div>
               ))}
               {/* Thinking indicator - shows while agent is processing */}
-              {(status === "submitted" || (status === "streaming" && (() => {
-                const lastMessage = messages[messages.length - 1];
-                const hasAssistantText = lastMessage?.role === "assistant" &&
-                  lastMessage?.parts?.some((p: any) => p.type === "text" && p.text?.length > 0);
-                return !hasAssistantText;
-              })())) && (
+              {(status === "submitted" ||
+                (status === "streaming" &&
+                  (() => {
+                    const lastMessage = messages[messages.length - 1];
+                    const hasAssistantText =
+                      lastMessage?.role === "assistant" &&
+                      lastMessage?.parts?.some(
+                        (p: any) => p.type === "text" && p.text?.length > 0,
+                      );
+                    return !hasAssistantText;
+                  })())) && (
                 <Message from="assistant">
                   <MessageContent>
                     <div className="flex items-center gap-2 text-muted-foreground">
@@ -384,16 +405,20 @@ export function ChatPanel({
                   <TooltipTrigger asChild>
                     <Button
                       type="button"
-                      variant={isVoiceActive || isVoicePaused ? "default" : "outline"}
+                      variant={
+                        isVoiceActive || isVoicePaused ? "default" : "outline"
+                      }
                       size="icon"
                       disabled={isVoiceConnecting}
                       onClick={handleVoiceClick}
                       className={cn(
                         "h-9 w-9 rounded-full transition-all",
                         isVoiceActive && "bg-primary hover:bg-primary/90",
-                        isVoicePaused && "bg-muted-foreground/50 hover:bg-muted-foreground/70",
+                        isVoicePaused &&
+                          "bg-muted-foreground/50 hover:bg-muted-foreground/70",
                         voiceState === "listening" && "animate-pulse",
-                        voiceState === "responding" && "bg-green-600 hover:bg-green-700"
+                        voiceState === "responding" &&
+                          "bg-green-600 hover:bg-green-700",
                       )}
                     >
                       {(() => {
@@ -403,7 +428,10 @@ export function ChatPanel({
                           <Icon
                             className={cn(
                               "h-4 w-4",
-                              config.animate && (voiceState === "connecting" || voiceState === "thinking") && "animate-spin"
+                              config.animate &&
+                                (voiceState === "connecting" ||
+                                  voiceState === "thinking") &&
+                                "animate-spin",
                             )}
                           />
                         );
@@ -416,7 +444,9 @@ export function ChatPanel({
                 </Tooltip>
               </TooltipProvider>
               {/* Submit button */}
-              <PromptInputSubmit disabled={status !== "ready" || isVoiceActive} />
+              <PromptInputSubmit
+                disabled={status !== "ready" || isVoiceActive}
+              />
             </div>
           </PromptInputFooter>
         </PromptInput>

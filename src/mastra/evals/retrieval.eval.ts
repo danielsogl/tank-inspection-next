@@ -17,10 +17,10 @@ import {
   retrievalTestCases,
 } from "./datasets/retrieval-test-cases";
 import {
-  dataTypeAccuracyScorer,
   componentMatchScorer,
-  similarityScoreScorer,
+  dataTypeAccuracyScorer,
   resultFoundScorer,
+  similarityScoreScorer,
 } from "./scorers/rag-scorers";
 
 // Create a shared request context for evals

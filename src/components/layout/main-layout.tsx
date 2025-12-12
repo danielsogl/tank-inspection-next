@@ -1,9 +1,9 @@
 "use client";
 
 import { VehicleProvider } from "@/contexts/vehicle-context";
+import { cn } from "@/lib/utils";
 import { SidebarRail } from "./sidebar-rail";
 import { TopBar } from "./top-bar";
-import { cn } from "@/lib/utils";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -17,7 +17,7 @@ export function MainLayout({ children, className }: MainLayoutProps) {
         className={cn(
           "grid grid-cols-[auto_1fr] gap-6",
           "h-[calc(100dvh-2rem)] overflow-hidden p-4",
-          className
+          className,
         )}
       >
         {/* Sidebar Rail */}

@@ -5,12 +5,12 @@
  */
 
 // RAG vehicle types used in the vector store metadata
-export type RagVehicleType = 'leopard2' | 'm1a2';
+export type RagVehicleType = "leopard2" | "m1a2";
 
 // Map frontend vehicle IDs to RAG vehicleType values
 export const VEHICLE_TYPE_MAP: Record<string, RagVehicleType> = {
-  leopard2: 'leopard2',
-  'm1-abrams': 'm1a2',
+  leopard2: "leopard2",
+  "m1-abrams": "m1a2",
 };
 
 /**
@@ -21,5 +21,5 @@ export const VEHICLE_TYPE_MAP: Record<string, RagVehicleType> = {
  * @returns The RAG vehicle type (e.g., 'leopard2', 'm1a2')
  */
 export function mapToRagVehicleType(vehicleId: string): RagVehicleType {
-  return VEHICLE_TYPE_MAP[vehicleId] || 'leopard2';
+  return VEHICLE_TYPE_MAP[vehicleId] || "leopard2";
 }

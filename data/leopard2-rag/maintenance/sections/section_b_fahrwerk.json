@@ -18,7 +18,10 @@
       "tools_required": ["Maßband"],
       "estimated_time_min": 8,
       "photo_required": true,
-      "photo_points": ["Kettendurchhang linke Seite", "Kettendurchhang rechte Seite"],
+      "photo_points": [
+        "Kettendurchhang linke Seite",
+        "Kettendurchhang rechte Seite"
+      ],
       "vehicle_variants": ["A4", "A5", "A6", "A6M", "A7", "A7V"],
       "responsible_role": "driver",
       "common_defects": [
@@ -132,7 +135,11 @@
         {
           "id": "B05-D01",
           "description": "Stoßdämpfer defekt",
-          "indicators": ["Öl am Kolbenrohr", "Fahrzeug wippt nach", "ungleiche Einfederung"],
+          "indicators": [
+            "Öl am Kolbenrohr",
+            "Fahrzeug wippt nach",
+            "ungleiche Einfederung"
+          ],
           "priority": "medium",
           "action": "Dämpfer innerhalb 48h austauschen. Fahrkomfort und Zielgenauigkeit beeinträchtigt."
         }
@@ -190,7 +197,11 @@
         {
           "id": "B08-D01",
           "description": "Schürze lose oder fehlend",
-          "indicators": ["klappernde Geräusche", "Schürze hängt", "Befestigungsbolzen fehlt"],
+          "indicators": [
+            "klappernde Geräusche",
+            "Schürze hängt",
+            "Befestigungsbolzen fehlt"
+          ],
           "priority": "low",
           "action": "Schürze befestigen oder ersetzen. Verringerte Schutzwirkung."
         }
@@ -212,7 +223,11 @@
         {
           "id": "B09-D01",
           "description": "Hydraulikleckage",
-          "indicators": ["Öl an Schläuchen", "schwergängige Lenkung", "Druckverlust"],
+          "indicators": [
+            "Öl an Schläuchen",
+            "schwergängige Lenkung",
+            "Druckverlust"
+          ],
           "priority": "critical",
           "action": "Fahrzeug nicht einsatzbereit. Lenkung nicht voll funktionsfähig."
         }
@@ -252,7 +267,11 @@
         {
           "id": "B10-D01",
           "description": "Bremssystem defekt",
-          "indicators": ["schwammiges Pedal", "verlängerter Bremsweg", "Flüssigkeitsverlust"],
+          "indicators": [
+            "schwammiges Pedal",
+            "verlängerter Bremsweg",
+            "Flüssigkeitsverlust"
+          ],
           "priority": "critical",
           "action": "Motor nicht starten. Fahrzeug nicht einsatzbereit. Sofortige Reparatur."
         }
@@ -308,4 +327,3 @@
     }
   ]
 }
-

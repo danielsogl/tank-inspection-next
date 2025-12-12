@@ -10,7 +10,7 @@
     "weight_tons": 62.3,
     "dimensions": {
       "length_m": 10.97,
-      "width_m": 3.70,
+      "width_m": 3.7,
       "height_m": 2.79
     },
     "crew": 4,
@@ -76,4 +76,3 @@
   "source_type": "public",
   "last_verified": "2024-11-01"
 }
-

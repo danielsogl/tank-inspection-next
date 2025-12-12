@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { MessageCircle, X } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -9,14 +10,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { MessageCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChatPanel } from "./chat-panel";
 
 // Dynamic import for ModelViewer to disable SSR (Babylon.js requires browser APIs)
 const ModelViewer = dynamic(
   () => import("@/components/model-viewer").then((mod) => mod.ModelViewer),
-  { ssr: false }
+  { ssr: false },
 );
 
 interface InspectorProps {
@@ -34,24 +34,16 @@ export function Inspector({ className }: InspectorProps) {
   }, []);
 
   return (
-    <div
-      className={cn(
-        "relative h-full w-full overflow-hidden",
-        className
-      )}
-    >
+    <div className={cn("relative h-full w-full overflow-hidden", className)}>
       {/* Viewer Area - 3D Model Canvas - Always full size */}
       <div
         className={cn(
           "absolute inset-0",
-          "bg-secondary rounded-lg border-2 border-border overflow-hidden"
+          "bg-secondary rounded-lg border-2 border-border overflow-hidden",
         )}
       >
         {/* 3D Model Viewer */}
-        <ModelViewer
-          className="w-full h-full"
-          onMeshClick={handleMeshClick}
-        />
+        <ModelViewer className="w-full h-full" onMeshClick={handleMeshClick} />
 
         {/* Chat Toggle Button */}
         <TooltipProvider>
@@ -67,7 +59,7 @@ export function Inspector({ className }: InspectorProps) {
                   "h-12 w-12 rounded-full",
                   "border-2 border-border bg-card hover:bg-muted",
                   "shadow-lg transition-all duration-300",
-                  isChatOpen && "bg-primary hover:bg-primary/90 border-primary"
+                  isChatOpen && "bg-primary hover:bg-primary/90 border-primary",
                 )}
                 onClick={() => setIsChatOpen(!isChatOpen)}
                 aria-expanded={isChatOpen}
@@ -85,7 +77,6 @@ export function Inspector({ className }: InspectorProps) {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-
       </div>
 
       {/* Chat Sidebar - Overlay positioned */}
@@ -96,7 +87,7 @@ export function Inspector({ className }: InspectorProps) {
           "lg:w-[380px] w-full max-w-[380px]",
           isChatOpen
             ? "translate-x-0 opacity-100"
-            : "translate-x-full opacity-0 pointer-events-none"
+            : "translate-x-full opacity-0 pointer-events-none",
         )}
       >
         <ChatPanel

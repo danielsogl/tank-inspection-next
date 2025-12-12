@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Box } from "lucide-react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { VehicleSelector } from "./vehicle-selector";
 
@@ -10,7 +10,10 @@ interface TopBarProps {
   className?: string;
 }
 
-export function TopBar({ title = "Vehicle Inspection", className }: TopBarProps) {
+export function TopBar({
+  title = "Vehicle Inspection",
+  className,
+}: TopBarProps) {
   const [currentTime, setCurrentTime] = useState<string>("");
 
   useEffect(() => {
@@ -21,7 +24,7 @@ export function TopBar({ title = "Vehicle Inspection", className }: TopBarProps)
           hour: "2-digit",
           minute: "2-digit",
           hour12: false,
-        })
+        }),
       );
     };
 
@@ -36,7 +39,7 @@ export function TopBar({ title = "Vehicle Inspection", className }: TopBarProps)
         "flex items-center justify-between",
         "bg-card border-2 border-border rounded-lg",
         "px-4 py-3 mb-4 shrink-0",
-        className
+        className,
       )}
     >
       {/* Left side - Logo and Title */}
