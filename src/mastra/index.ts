@@ -1,9 +1,9 @@
 import { Mastra } from "@mastra/core/mastra";
 import { LibSQLStore } from "@mastra/libsql";
-import { PinoLogger } from "@mastra/loggers";
 import { Observability } from "@mastra/observability";
 import { PgVector } from "@mastra/pg";
 import { vehicleInspectionAgent } from "./agents/vehicle-inspection-agent";
+import { SecurityAwareLogger } from "./lib/security-logger";
 import { INSPECTION_INDEX_CONFIG } from "./lib/vector";
 import { troubleshootingWorkflow } from "./workflows";
 
@@ -26,7 +26,7 @@ export const mastra = new Mastra({
     url: ":memory:",
   }),
   vectors,
-  logger: new PinoLogger({
+  logger: new SecurityAwareLogger({
     name: "Mastra",
     level: "info",
   }),

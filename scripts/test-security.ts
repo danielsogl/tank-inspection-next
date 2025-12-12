@@ -3,7 +3,10 @@
  * Run with: npx tsx scripts/test-security.ts
  */
 
-import { vehicleInspectionAgent } from "../src/mastra/agents/vehicle-inspection-agent";
+// Import from mastra instance to ensure SecurityAwareLogger is initialized
+import { mastra } from "../src/mastra";
+
+const vehicleInspectionAgent = mastra.getAgent("vehicleInspectionAgent");
 
 const testCases = [
   {
