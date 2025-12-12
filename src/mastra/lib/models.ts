@@ -20,7 +20,7 @@ import type {
  * Primary language model for agents.
  * GPT-5 is OpenAI's latest model offering improved reasoning and capabilities.
  */
-export const AGENT_MODEL: ModelRouterModelId = "openai/gpt-5-mini";
+export const AGENT_MODEL: ModelRouterModelId = "openai/gpt-4.1-mini";
 
 /**
  * Mini variant for cost-effective operations.

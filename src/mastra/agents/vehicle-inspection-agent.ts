@@ -4,7 +4,7 @@ import { Memory } from "@mastra/memory";
 import { DEFAULT_VEHICLE_ID, getVehicleById } from "@/lib/vehicles";
 
 import { AGENT_MODEL } from "../lib/models";
-import { inputProcessors, outputProcessors } from "../lib/security-processors";
+import { inputProcessors } from "../lib/security-processors";
 import { inspectionInfoWorkflow } from "../workflows/inspection-info.workflow";
 import { troubleshootingWorkflow } from "../workflows/troubleshooting.workflow";
 
@@ -76,5 +76,4 @@ OUTPUT RULES:
   }),
   // Security processors for prompt injection protection and PII handling
   inputProcessors,
-  outputProcessors,
 });

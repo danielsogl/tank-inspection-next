@@ -1,5 +1,10 @@
 import { createStep } from "@mastra/core/workflows";
 import { z } from "zod";
+import {
+  addSystemFromHint,
+  extractKeywords,
+  identifyAffectedSystems,
+} from "../../../lib/system-mappings";
 
 /**
  * Step 1: Analyze the symptom description to extract keywords and identify affected systems.
@@ -32,145 +37,16 @@ export const analyzeSymptomStep = createStep({
     const { symptomDescription, vehicleId, componentHint, requireApproval } =
       inputData;
 
-    // System keyword mappings for identification
-    const systemKeywords: Record<string, string[]> = {
-      engine: [
-        "motor",
-        "engine",
-        "antrieb",
-        "diesel",
-        "mtu",
-        "leistung",
-        "power",
-        "drehzahl",
-        "rpm",
-      ],
-      transmission: [
-        "getriebe",
-        "transmission",
-        "renk",
-        "gang",
-        "gear",
-        "kupplung",
-        "clutch",
-      ],
-      hydraulic: [
-        "hydraulik",
-        "hydraulic",
-        "druck",
-        "pressure",
-        "öl",
-        "oil",
-        "leck",
-        "leak",
-      ],
-      electrical: [
-        "elektrik",
-        "electrical",
-        "strom",
-        "batterie",
-        "battery",
-        "spannung",
-        "voltage",
-      ],
-      turret: [
-        "turm",
-        "turret",
-        "drehkranz",
-        "rotation",
-        "richtung",
-        "elevation",
-      ],
-      tracks: [
-        "kette",
-        "track",
-        "fahrwerk",
-        "suspension",
-        "laufwerk",
-        "rolle",
-        "wheel",
-      ],
-      cooling: [
-        "kühlung",
-        "cooling",
-        "temperatur",
-        "temperature",
-        "überhitzung",
-        "overheating",
-      ],
-      fuel: ["kraftstoff", "fuel", "diesel", "tank", "filter", "pumpe", "pump"],
-      brakes: ["bremse", "brake", "stopp", "stop", "blockiert", "blocked"],
-      electronics: [
-        "elektronik",
-        "electronic",
-        "sensor",
-        "steuerung",
-        "control",
-        "fehler",
-        "error",
-      ],
-    };
+    // Identify affected systems from symptom description
+    let affectedSystems = identifyAffectedSystems(symptomDescription);
 
-    const normalizedSymptom = symptomDescription.toLowerCase();
-
-    // Identify affected systems
-    const affectedSystems: string[] = [];
-    for (const [system, keywords] of Object.entries(systemKeywords)) {
-      if (keywords.some((keyword) => normalizedSymptom.includes(keyword))) {
-        affectedSystems.push(system);
-      }
-    }
-
-    // If component hint is provided, add it as an affected system
+    // If component hint is provided, add its associated system
     if (componentHint) {
-      const hintSystem = Object.entries(systemKeywords).find(([, keywords]) =>
-        keywords.some((k) => componentHint.toLowerCase().includes(k)),
-      );
-      if (hintSystem && !affectedSystems.includes(hintSystem[0])) {
-        affectedSystems.push(hintSystem[0]);
-      }
-    }
-
-    // Default to general if no systems identified
-    if (affectedSystems.length === 0) {
-      affectedSystems.push("general");
+      affectedSystems = addSystemFromHint(affectedSystems, componentHint);
     }
 
     // Extract significant keywords from the symptom
-    const stopWords = new Set([
-      "der",
-      "die",
-      "das",
-      "ein",
-      "eine",
-      "und",
-      "oder",
-      "aber",
-      "wenn",
-      "ist",
-      "sind",
-      "hat",
-      "haben",
-      "the",
-      "a",
-      "an",
-      "and",
-      "or",
-      "but",
-      "if",
-      "is",
-      "are",
-      "has",
-      "have",
-      "when",
-      "what",
-      "how",
-    ]);
-
-    const keywords = normalizedSymptom
-      .split(/\s+/)
-      .filter((word) => word.length > 2 && !stopWords.has(word))
-      .slice(0, 10);
+    const keywords = extractKeywords(symptomDescription);
 
     // Generate search queries for the knowledge base
     const searchQueries = [

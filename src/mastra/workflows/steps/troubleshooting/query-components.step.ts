@@ -1,5 +1,11 @@
 import { createStep } from "@mastra/core/workflows";
 import { z } from "zod";
+import {
+  DEFAULT_COMPONENT_ID,
+  getComponentsForSystems,
+  resolveComponentFromHint,
+  type VehicleSystem,
+} from "../../../lib/system-mappings";
 import { getComponentDetailsTool } from "../../../tools/component-details.tool";
 
 /**
@@ -36,56 +42,22 @@ export const queryComponentsStep = createStep({
   execute: async ({ inputData }) => {
     const { affectedSystems, componentHint } = inputData;
 
-    // Map affected systems to component IDs
-    const systemToComponentMap: Record<string, string[]> = {
-      engine: ["mtu_mb873"],
-      transmission: ["renk_hswl354"],
-      turret: ["turmdrehkranz"],
-      hydraulic: ["renk_hswl354"], // Transmission has hydraulic components
-      cooling: ["mtu_mb873"], // Engine has cooling system
-    };
+    // Get components for affected systems using shared mapping
+    const componentsToQuery = getComponentsForSystems(
+      affectedSystems as VehicleSystem[],
+    );
 
-    // Determine which components to query
-    const componentsToQuery = new Set<string>();
-
-    for (const system of affectedSystems) {
-      const mappedComponents: string[] | undefined = systemToComponentMap[system];
-      if (mappedComponents) {
-        for (const c of mappedComponents) {
-          componentsToQuery.add(c);
-        }
-      }
-    }
-
-    // Add component hint if provided
+    // Add component from hint if provided
     if (componentHint) {
-      const normalizedHint = componentHint.toLowerCase();
-      if (
-        normalizedHint.includes("mtu") ||
-        normalizedHint.includes("motor") ||
-        normalizedHint.includes("engine")
-      ) {
-        componentsToQuery.add("mtu_mb873");
-      }
-      if (
-        normalizedHint.includes("renk") ||
-        normalizedHint.includes("getriebe") ||
-        normalizedHint.includes("transmission")
-      ) {
-        componentsToQuery.add("renk_hswl354");
-      }
-      if (
-        normalizedHint.includes("turm") ||
-        normalizedHint.includes("turret") ||
-        normalizedHint.includes("drehkranz")
-      ) {
-        componentsToQuery.add("turmdrehkranz");
+      const hintComponent = resolveComponentFromHint(componentHint);
+      if (hintComponent) {
+        componentsToQuery.add(hintComponent);
       }
     }
 
     // Default to engine if nothing else matched
     if (componentsToQuery.size === 0) {
-      componentsToQuery.add("mtu_mb873");
+      componentsToQuery.add(DEFAULT_COMPONENT_ID);
     }
 
     // Query all components in parallel for faster execution
@@ -105,7 +77,6 @@ export const queryComponentsStep = createStep({
     );
 
     // Build component details from parallel results
-    // The component tool now returns semantic text chunks instead of structured data
     const componentDetails: Record<
       string,
       {
@@ -134,7 +105,7 @@ export const queryComponentsStep = createStep({
 
       componentDetails[componentId] = {
         id: result.componentId,
-        name: componentId, // Use componentId as name since we now have semantic chunks
+        name: componentId,
         category: result.chunks[0]?.category ?? "unknown",
         content: combinedContent,
       };
