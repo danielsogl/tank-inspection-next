@@ -26,6 +26,12 @@ export const AGENT_MODEL: ModelRouterModelId = 'openai/gpt-5-mini';
 export const AGENT_MODEL_MINI: ModelRouterModelId = 'openai/gpt-5-nano';
 
 /**
+ * Security model for processors (guardrails, moderation, PII detection).
+ * Uses a fast, cost-effective model for security checks.
+ */
+export const SECURITY_MODEL: ModelRouterModelId = 'openai/gpt-4.1-mini';
+
+/**
  * All available agent models for type safety.
  */
 export const AGENT_MODELS = {

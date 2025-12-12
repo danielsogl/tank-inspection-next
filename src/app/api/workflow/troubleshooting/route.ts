@@ -74,7 +74,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Workflow completed successfully
+    if (result.status === 'tripwire') {
+      return NextResponse.json(
+        {
+          status: 'tripwire',
+          error: 'Workflow aborted by guardrail',
+          tripwire: result.tripwire,
+        },
+        { status: 400 },
+      );
+    }
+
+    // Workflow completed successfully (this is the only remaining case)
     return NextResponse.json({
       status: 'success',
       runId: run.runId,
@@ -205,7 +216,18 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    // Workflow completed
+    if (result.status === 'tripwire') {
+      return NextResponse.json(
+        {
+          status: 'tripwire',
+          error: 'Workflow aborted by guardrail',
+          tripwire: result.tripwire,
+        },
+        { status: 400 },
+      );
+    }
+
+    // Workflow completed (this is the only remaining case)
     return NextResponse.json({
       status: 'success',
       runId,

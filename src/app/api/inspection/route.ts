@@ -3,10 +3,14 @@ import { NextResponse, type NextRequest } from "next/server";
 import { toAISdkStream } from "@mastra/ai-sdk";
 import { convertMessages } from "@mastra/core/agent";
 import { RequestContext } from "@mastra/core/request-context";
-import { createUIMessageStreamResponse } from "ai";
+import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
 
 // Get the vehicle inspection agent
 const vehicleInspectionAgent = mastra.getAgent("vehicleInspectionAgent");
+
+/** Generic refusal message - don't reveal security detection details */
+const REFUSAL_MESSAGE =
+  "I'm sorry, but I can't help with that request. Please ask a question about vehicle inspection, maintenance, or specifications.";
 
 export async function POST(req: Request) {
   const { messages, vehicleId = "leopard2" } = await req.json();
@@ -27,9 +31,38 @@ export async function POST(req: Request) {
     requestContext,
   });
 
-  return createUIMessageStreamResponse({
-    stream: toAISdkStream(stream, { from: "agent" }),
+  // Use createUIMessageStream to intercept and sanitize security details
+  const uiMessageStream = createUIMessageStream({
+    execute: async ({ writer }) => {
+      const aiSdkStream = toAISdkStream(stream, { from: "agent" });
+      const reader = aiSdkStream.getReader();
+
+      try {
+        while (true) {
+          const { done, value: part } = await reader.read();
+          if (done) break;
+
+          // Check for tripwire (security block) - hide details from client
+          // Type is "data-tripwire" (template literal type `data-${string}`)
+          if (part.type === "data-tripwire") {
+            // Replace with generic refusal - don't expose security details
+            writer.write({
+              type: "text-delta",
+              delta: REFUSAL_MESSAGE,
+              id: "refusal",
+            });
+            break; // Stop processing
+          }
+
+          writer.write(part);
+        }
+      } finally {
+        reader.releaseLock();
+      }
+    },
   });
+
+  return createUIMessageStreamResponse({ stream: uiMessageStream });
 }
 
 export async function GET(req: NextRequest) {
